@@ -1,0 +1,87 @@
+[
+ {
+  "path": "/big.bin",
+  "size": 3145851,
+  "sha256": "4724e68119fe84d3d0c29eaaa90f61a10dfcb2123231a9c2816057a4d8fc51d6"
+ },
+ {
+  "path": "/docs/a very long file name that goes well past the old eight dot three limit.txt",
+  "size": 1000,
+  "sha256": "ecb7c44f738cca873b6df9a839281fb76e65130e816b61b98a1704543d191702"
+ },
+ {
+  "path": "/docs/notes.md",
+  "size": 6009,
+  "sha256": "1e776fbef079c53476f3634d91b9180c57a02c93ca249068b4239686e316dcc9"
+ },
+ {
+  "path": "/docs/report.txt",
+  "size": 79890,
+  "sha256": "d43c36e4eb07c2ea7e057c8320c26f89e55923e29e1c5d7a7ea59d7ccb0d92f5"
+ },
+ {
+  "path": "/docs/\u00dcn\u00efc\u00f6d\u00e9 na\u00efve r\u00e9sum\u00e9.txt",
+  "size": 4800,
+  "sha256": "e8e4b90ab436d875c046da14c132e4f71b271c4302de6e57ffeebe2828aceed6"
+ },
+ {
+  "path": "/filler.bin",
+  "size": 655360,
+  "sha256": "f303603a9bfd6bc4fda8334240235c384125532df6a1deba322a52a120ede34c"
+ },
+ {
+  "path": "/fragmented.bin",
+  "size": 655360,
+  "sha256": "825526ed5f7476d23fd7d8c2b4cd148352466deff2cbe1b95c7d2e38f567af84"
+ },
+ {
+  "path": "/photos/beach.jpg",
+  "size": 86991,
+  "sha256": "4e753f2856d0cae28ec599f5d35096df67dae8a54a9a1dd5b7b3eaf830594715"
+ },
+ {
+  "path": "/photos/diagram.png",
+  "size": 12075,
+  "sha256": "2f21746b96b2337b155eae1a6891e39852780065076a2f692516b6984bd580b2"
+ },
+ {
+  "path": "/photos/mountain.jpg",
+  "size": 58292,
+  "sha256": "b98864b78ebc42beca9517e17f83b92173c4eca3d84cd3c84c0ef3360730bfe2"
+ },
+ {
+  "path": "/photos/old.gif",
+  "size": 3709,
+  "sha256": "2582900124e6348961e26ddba95ec3c896e1c45400c789fdea1aa2f1799d232c"
+ },
+ {
+  "path": "/photos/scan.bmp",
+  "size": 180054,
+  "sha256": "373bb479b03fd4d5608c3f95848def95c8e75ac03307c4215ef3d6ce2fd3cc55"
+ },
+ {
+  "path": "/projects/archive.zip",
+  "size": 20261,
+  "sha256": "741bc9637a5cffded90c358d3630f2ce0e320216b6167bf553f176c4369d42e0"
+ },
+ {
+  "path": "/projects/contacts.db",
+  "size": 65536,
+  "sha256": "2000e62092b478acf64e5020ef3370ef7f5e522bee00fcd4dbd418e7d7ba1495"
+ },
+ {
+  "path": "/projects/src/deep/deeper/deepest.txt",
+  "size": 5000,
+  "sha256": "e7fa792a2ed6d0673cf6f75e2de40a6b3576e362e5437f92d0541597cfae0903"
+ },
+ {
+  "path": "/projects/src/main.go",
+  "size": 1450,
+  "sha256": "81d5f4e0abc365a080f5315196e0ea68caee239ed4afd6d8f441fccd6916fc37"
+ },
+ {
+  "path": "/tiny.txt",
+  "size": 44,
+  "sha256": "d9a125578239fb723424afed3a4ae9655e76928e8f99235b8fffd03a6ae45278"
+ }
+]

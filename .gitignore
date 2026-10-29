@@ -1,0 +1,9 @@
+/dist/
+/build/
+*.img
+*.dd
+*.keystore
+*.jks
+*.pfx
+/testdata/fixtures/
+/.claude/
