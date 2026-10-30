@@ -118,11 +118,15 @@ docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimage
 go test ./engine/...
 ```
 
-Releases are built by GitHub Actions when a release is published
-(`.github/workflows/release.yml`).
+Releases are built by GitHub Actions when a release is published. The
+workflow is written by `giode ci -f` from the `[ci]` section of
+`giode.toml`, so change it there rather than editing
+`.github/workflows/release.yml`. iOS builds are signed when the
+repository has the `IOS_CERT_BASE64`, `IOS_CERT_PASS` and
+`IOS_PROFILE_BASE64` secrets.
 
-The Android USB bridge (`ui/platform/androidusb/UsbBridge.java`) is
-built into `usbbridge_android.jar` by `build-jar.sh`.
+`giode build android` compiles the Android USB bridge
+(`ui/platform/androidusb/UsbBridge.java`) into the APK.
 
 ## Not yet
 

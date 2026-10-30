@@ -34,7 +34,7 @@ type Results struct {
 	checkAll  *giode.PressableElement
 	search    *input.Input
 	show      *segmented.Control
-	cats      []*giode.PressableElement
+	cats      []*components.FilterChip
 	catValues []model.Category
 
 	preview     *components.Preview
@@ -66,15 +66,13 @@ func NewResults(m *model.Model) *Results {
 	}).OnClick(func(giode.ClickEvent) { m.CheckAll() }).Label("Check every file listed")
 	r.search = giode.Input.Text("Search names", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
 		OnChange(func(t string) { f := m.Filter; f.Query = t; m.SetFilter(f) })
-	r.show = giode.Input.Segmented("Deleted", "All files").Styles(segmentStyles().With(giode.Styles{FontSize: 12.5})).
+	r.show = giode.Input.Segmented("Deleted", "All files").Styles(segmentStyles().With(giode.Styles{Width: 180, FontSize: 12.5})).
 		OnChange(func(i int) { f := m.Filter; f.Show = model.Show(i); m.SetFilter(f) })
 	r.catValues = []model.Category{model.CatPictures, model.CatVideo, model.CatAudio, model.CatDocuments, model.CatArchives}
 	catIcons := []string{"picture", "video", "music", "document", "archive"}
 	for i, c := range r.catValues {
 		c, icon := c, catIcons[i]
-		r.cats = append(r.cats, giode.Pressable(func(s giode.PressState) giode.Element {
-			return components.FilterChip(string(c), icon, m.Filter.Category == c, s)
-		}).OnClick(func(giode.ClickEvent) {
+		r.cats = append(r.cats, components.NewFilterChip(string(c), icon, func() {
 			f := m.Filter
 			if f.Category == c {
 				f.Category = model.CatAny
@@ -82,7 +80,7 @@ func NewResults(m *model.Model) *Results {
 				f.Category = c
 			}
 			m.SetFilter(f)
-		}).Label(string(c)))
+		}))
 	}
 	r.sheet = giode.Sheet(&r.previewOpen, func() giode.Element {
 		return giode.Box(giode.Styles{Width: -1, Height: 520}, r.preview.View(m.Dev, m.Preview))
@@ -180,7 +178,7 @@ func (r *Results) row(i int) giode.Element {
 	return p.Content(func(s giode.PressState) giode.Element {
 		return components.FileRow(e, r.m.IsChecked(e), r.m.Preview == e, compact, s)
 	}).OnClick(func(ev giode.ClickEvent) {
-		if giode.PxToDp(ev.Position.X) < components.CheckZone && ev.Source == giode.ClickPointer {
+		if ev.PositionDp.X < components.CheckZone && ev.Source == giode.ClickPointer {
 			r.m.Toggle(e)
 			return
 		}
@@ -200,7 +198,6 @@ func (r *Results) View() giode.Element {
 	r.syncTree()
 	files, size := r.m.Selection()
 	r.recover.Disabled(files == 0)
-	r.show.Styles(segmentStyles().With(giode.Styles{FontSize: 12.5}))
 	if files > 0 {
 		r.recover.Label(fmt.Sprintf("Recover %d", files))
 	} else {
@@ -218,13 +215,13 @@ func (r *Results) View() giode.Element {
 				r.preview.View(r.m.Dev, r.m.Preview)),
 		)
 	}
-	return giode.Box(giode.Styles{Width: -1, Height: -1, Position: giode.PositionRelative},
-		giode.Stack(giode.Styles{Width: -1, Height: -1},
-			r.summary(compact),
-			body,
-			r.bar(files, size, compact),
-		),
-		Overlay(r.sheet, r.dialog.View()),
+	// The sheet and dialog lay themselves over the window.
+	return giode.Stack(giode.Styles{Width: -1, Height: -1},
+		r.summary(compact),
+		body,
+		r.bar(files, size, compact),
+		r.sheet,
+		r.dialog.View(),
 	)
 }
 
@@ -276,14 +273,14 @@ func (r *Results) table(compact bool) giode.Element {
 	}
 	bar = append(bar, giode.Box(giode.Styles{FlexGrow: 1}, components.Breadcrumb(r.m.Folder, r.m.OpenFolder)))
 	if !compact {
-		bar = append(bar, giode.Box(giode.Styles{Width: 180}, r.show), giode.Box(giode.Styles{Width: 200}, r.search))
+		bar = append(bar, r.show, giode.Box(giode.Styles{Width: 200}, r.search))
 	}
 	var filters []giode.Element
 	if compact {
-		filters = append(filters, giode.Box(giode.Styles{Width: 180}, r.show))
+		filters = append(filters, r.show)
 	}
-	for _, c := range r.cats {
-		filters = append(filters, c)
+	for i, c := range r.cats {
+		filters = append(filters, c.View(r.m.Filter.Category == r.catValues[i]))
 	}
 	var head []giode.Element
 	head = append(head,

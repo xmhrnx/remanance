@@ -1,16 +1,18 @@
-# Builds the installers when a GitHub release is published, and attaches
-# them to it. Written by giode ci, then changed to run on releases only.
+# Written by giode ci from giode.toml; rerun giode ci -f after changing
+# [ci] there rather than editing this file.
+# Builds when a GitHub release is published and adds the files to it.
 name: release
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 env:
-  GIODE_VERSION: ${{ github.event.release.tag_name }}
+  GIODE_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
   GIODE_BUILD: ${{ github.run_number }}
 
 jobs:
@@ -20,11 +22,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-      - name: Build the test disk images
-        run: docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh
-      - run: go vet ./engine/... ./cmd/remanence-cli/... ./ui/platform/androidusb/...
-      - run: go test ./engine/... ./ui/platform/androidusb/...
+          go-version: stable
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
+      - name: Test (giode.toml ci.test)
+        run: |
+          docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/remanence-cli/... && go test ./engine/... ./ui/platform/...
 
   linux:
     needs: test
@@ -39,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: stable
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -54,12 +59,7 @@ jobs:
           if [ -n "$WINDOWS_CERT_BASE64" ]; then echo "$WINDOWS_CERT_BASE64" | base64 -d > codesign.pfx; fi
       - name: Build Linux packages
         run: giode build deb rpm
-      - name: Rebuild the Android USB bridge against the SDK
-        if: matrix.primary
-        run: |
-          export ANDROID_JAR="$(ls -d "$ANDROID_HOME"/platforms/android-* | sort -V | tail -1)/android.jar"
-          sh ui/platform/androidusb/build-jar.sh
-      - name: Build Windows and Android
+      - name: Build Windows Android
         if: matrix.primary
         env:
           GIODE_KEYSTORE_PASS: ${{ secrets.GIODE_KEYSTORE_PASS }}
@@ -88,12 +88,11 @@ jobs:
     runs-on: macos-latest
     env:
       MACOS_CERT_BASE64: ${{ secrets.MACOS_CERT_BASE64 }}
-      IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: stable
       - run: go install github.com/mehran9675/giode-cli/cmd/giode@latest
       - name: Signing certificate
         if: env.MACOS_CERT_BASE64 != ''
@@ -114,26 +113,53 @@ jobs:
           release=""
           if [ -n "$MACOS_CERT_BASE64" ]; then release="-release"; fi
           giode build $release dmg
-      # iOS installs need a provisioning profile; without one the release
-      # has no .ipa.
-      - name: Build iOS
-        if: env.IOS_PROFILE_BASE64 != ''
-        env:
-          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
-        run: |
-          echo "$IOS_PROFILE_BASE64" | base64 -d > App.mobileprovision
-          sed -i '' -e 's|^# profile = .*|profile = "App.mobileprovision"|' -e "s|^# team_id = .*|team_id = \"$IOS_TEAM_ID\"|" giode.toml
-          giode build ios
       - uses: actions/upload-artifact@v4
         with:
           name: macos
+          path: dist/macos/*.dmg
+
+  ios:
+    needs: test
+    runs-on: macos-latest
+    env:
+      IOS_CERT_BASE64: ${{ secrets.IOS_CERT_BASE64 }}
+      IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: go install github.com/mehran9675/giode-cli/cmd/giode@latest
+      - name: Signing certificate and profile
+        if: env.IOS_CERT_BASE64 != '' && env.IOS_PROFILE_BASE64 != ''
+        env:
+          IOS_CERT_PASS: ${{ secrets.IOS_CERT_PASS }}
+        run: |
+          echo "$IOS_CERT_BASE64" | base64 -d > cert.p12
+          security create-keychain -p ci build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ci build.keychain
+          security import cert.p12 -k build.keychain -P "$IOS_CERT_PASS" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci build.keychain
+          rm cert.p12
+          echo "$IOS_PROFILE_BASE64" | base64 -d > "$RUNNER_TEMP/app.mobileprovision"
+          echo "GIODE_IOS_PROFILE=$RUNNER_TEMP/app.mobileprovision" >> "$GITHUB_ENV"
+      - name: Build
+        env:
+          GIODE_IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          # A device build needs the certificate and profile; without
+          # them, check that the app builds for the simulator.
+          if [ -n "$GIODE_IOS_PROFILE" ]; then giode build ios; else giode build ios-sim; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
           if-no-files-found: ignore
-          path: |
-            dist/macos/*.dmg
-            dist/ios/*.ipa
+          path: dist/ios/*.ipa
 
   publish:
-    needs: [linux, macos]
+    needs: [linux, macos, ios]
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -142,5 +168,5 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name }}
           files: artifacts/**/*
+          tag_name: ${{ github.ref_name }}

@@ -16,7 +16,6 @@ import (
 	"github.com/mehran9675/remanence/ui/components"
 	"github.com/mehran9675/remanence/ui/icons"
 	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/native"
 	"github.com/mehran9675/remanence/ui/platform"
 	"github.com/mehran9675/remanence/ui/theme"
 )
@@ -46,8 +45,9 @@ func NewRecoverDialog(m *model.Model) *RecoverDialog {
 	d.dest = giode.Input.Text("Folder to save into", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius})
 	d.dest.SetText(platform.DefaultDestination())
 	d.choose = components.SecondaryButton("Choose…", "folder").OnClick(func() {
+		opts := giode.FolderOptions{Title: "Where should the recovered files go?", Directory: d.dest.Text()}
 		go func() {
-			if dir, err := native.PickFolder("Where should the recovered files go?"); err == nil {
+			if dir, err := m.App.PickFolder(context.Background(), opts); err == nil {
 				m.App.Post(func() { d.dest.SetText(dir) })
 			}
 		}()

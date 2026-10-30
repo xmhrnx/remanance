@@ -1,10 +1,8 @@
 // Package androidusb lists the USB drives plugged into an Android phone
 // with an OTG adapter, and opens them for a deep scan without root:
 // UsbBridge.java gets the drive from Android's USB host API once the
-// user allows it, and engine/disk/usbmass reads it.
-//
-// UsbBridge is shipped as usbbridge_android.jar, which gogio packs into
-// the APK; build-jar.sh rebuilds it. Elsewhere Register does nothing.
+// user allows it, and engine/disk/usbmass reads it. giode build compiles
+// UsbBridge into the APK (android.java in giode.toml).
 package androidusb
 
 import (
@@ -13,8 +11,6 @@ import (
 
 	"github.com/mehran9675/remanence/engine/disk"
 )
-
-//go:generate sh build-jar.sh
 
 // prefix starts the ID of every drive found here.
 const prefix = "usb:"

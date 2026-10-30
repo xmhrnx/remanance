@@ -15,8 +15,12 @@ website = "https://github.com/mehran9675/remanence"
 
 [android]
 min_sdk = 21
-# Recovered files go to Download/Remanence.
+# Recovered files go to Download/Remanence; Android 10 needs the legacy
+# storage flag to write there by path.
 permissions = ["storage"]
+application_attributes = { requestLegacyExternalStorage = "true" }
+# The USB bridge, compiled into the APK.
+java = ["ui/platform/androidusb"]
 # USB drives on an OTG adapter, read through the USB host API. Not
 # required, so phones without USB host can still install the app to
 # recover from disk images.
@@ -27,8 +31,8 @@ manifest = '''
 
 [ios]
 min_os = 15
-# profile = "App.mobileprovision"
-# team_id = "TEAMID"
+# CI signs device builds with the IOS_CERT_BASE64, IOS_CERT_PASS and
+# IOS_PROFILE_BASE64 secrets.
 
 # Recovered files land in the app's Documents folder; these show it in
 # the Files app and in Finder when the device is connected.
@@ -60,3 +64,10 @@ license = "GPL-3.0-or-later"
 name = "Disk image"
 extensions = ["img", "dd", "raw", "iso", "bin"]
 role = "viewer"
+
+# Release builds run when a GitHub release is published, after the
+# engine's tests pass on disk images made with each file system's own
+# tools.
+[ci]
+trigger = "release"
+test = 'docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/remanence-cli/... && go test ./engine/... ./ui/platform/...'

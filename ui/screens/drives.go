@@ -5,7 +5,7 @@ package screens
 
 import (
 	"context"
-	"os"
+	"errors"
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/iconbutton"
@@ -16,7 +16,6 @@ import (
 	"github.com/mehran9675/remanence/ui/components"
 	"github.com/mehran9675/remanence/ui/icons"
 	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/native"
 	"github.com/mehran9675/remanence/ui/theme"
 )
 
@@ -40,13 +39,12 @@ type Drives struct {
 // NewDrives builds the drive list.
 func NewDrives(m *model.Model) *Drives {
 	d := &Drives{m: m}
-	d.mode = giode.Input.Segmented("Quick scan", "Deep scan").Styles(segmentStyles())
+	d.mode = giode.Input.Segmented("Quick scan", "Deep scan").Styles(segmentStyles().With(giode.Styles{Width: 280}))
 	d.start = components.PrimaryButton("Start scan", "search").OnClick(d.startScan)
 	d.refresh = components.IconAction("refresh", "Refresh the drive list").OnClick(m.LoadDrives)
 	d.elevate = components.SecondaryButton("Restart as administrator", "shield").OnClick(func() {
-		if err := native.Elevate(); err == nil {
-			os.Exit(0)
-		} else {
+		// It quits this copy once the new one starts.
+		if err := m.App.RestartElevated(); err != nil && !errors.Is(err, giode.ErrDeclined) {
 			d.pickErr = err
 		}
 	})
@@ -86,12 +84,11 @@ func (d *Drives) pickImage() {
 		f := files[0]
 		d.m.App.Post(func() {
 			defer f.Close()
-			named, ok := f.ReadCloser.(interface{ Name() string })
-			if !ok {
+			if f.Path == "" {
 				d.pickErr = errNoPath
 				return
 			}
-			dev, err := disk.OpenImage(named.Name())
+			dev, err := disk.OpenImage(f.Path)
 			if err != nil {
 				d.pickErr = err
 				return
@@ -133,7 +130,6 @@ func (d *Drives) View() giode.Element {
 	} else {
 		d.start.Label("Start scan")
 	}
-	d.mode.Styles(segmentStyles()) // mixed per frame, so it follows the theme
 	return giode.Stack(giode.Styles{Width: -1, Height: -1},
 		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, d.view),
 		d.bar(),
@@ -147,7 +143,7 @@ func (d *Drives) content() giode.Element {
 		pad = theme.S4
 	}
 	var notes []giode.Element
-	if d.m.NeedsAdmin && native.CanElevate() {
+	if d.m.NeedsAdmin && !giode.IsElevated() {
 		notes = append(notes, components.Banner("lock", "theme.warning",
 			"Reading drives directly needs administrator rights. Remanence only reads; it never writes to the drive you scan.", d.elevate))
 	}
@@ -257,7 +253,7 @@ func (d *Drives) bar() giode.Element {
 	compact := giode.Compact()
 	inner := []giode.Element{
 		giode.Stack(giode.Styles{Gap: 6, FlexGrow: 1},
-			giode.Box(giode.Styles{Width: 280}, d.mode),
+			d.mode,
 			giode.Text(hint, theme.Caption().With(giode.Styles{FontWeight: giode.FontWeightNormal})),
 		),
 		d.start,
