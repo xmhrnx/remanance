@@ -55,6 +55,10 @@ arch = "amd64"
 desktop_shortcut = true
 license = "LICENSE"
 
+[windows.msix]
+# Must match the subject of the certificate that signs the package.
+publisher = "CN=xmhrnx"
+
 [linux]
 categories = ["Utility", "System"]
 license = "Apache-2.0"
