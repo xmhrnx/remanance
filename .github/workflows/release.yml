@@ -27,6 +27,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
+      - name: Project setup (giode.toml ci.setup)
+        run: |
+          sudo curl -fsSL -o "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/bundletool-all-1.18.3.jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
       - name: Test (giode.toml ci.test)
         run: |
           docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/remanence-cli/... && go test ./engine/... ./ui/platform/...
@@ -50,6 +53,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev nsis osslsigncode
           go install github.com/mehran9675/giode-cli/cmd/giode@latest
+      - name: Project setup (giode.toml ci.setup)
+        run: |
+          sudo curl -fsSL -o "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/bundletool-all-1.18.3.jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
       - name: Signing keys
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
