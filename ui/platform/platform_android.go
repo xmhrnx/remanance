@@ -12,6 +12,8 @@ import (
 const (
 	ChooseDestination = false
 	CanReveal         = false
+	// ReadsBackups is false: phones keep no backups of other phones.
+	ReadsBackups = false
 )
 
 // downloads is the phone's shared Downloads folder. Since Android 11 an

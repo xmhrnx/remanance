@@ -17,9 +17,12 @@ type VolumeResult struct {
 
 // Result is everything a scan found.
 type Result struct {
-	Device  disk.Info
-	Mode    Mode
-	Table   partition.Table
+	Device disk.Info
+	Mode   Mode
+	Table  partition.Table
+	// Files is set for a Tree: the volumes are groups of files, such as
+	// a backup's, not partitions.
+	Files   bool
 	Volumes []*VolumeResult
 	// Carved holds the files found by signature, in folders by category
 	// and type. nil after a quick scan.

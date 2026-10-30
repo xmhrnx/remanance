@@ -97,3 +97,25 @@ func Read(dir string) (Backup, error) {
 	}
 	return b, nil
 }
+
+// ErrNotBackup means a folder holds no backup.
+var ErrNotBackup = errors.New("that folder isn't an iPhone or iPad backup: choose the folder with Info.plist and Manifest.db in it, or the Backup folder that holds them")
+
+// ReadPicked reads the backup in dir or, given a folder of backups such
+// as MobileSync/Backup, the newest one in it.
+func ReadPicked(dir string) (Backup, error) {
+	if b, err := Read(dir); err == nil {
+		return b, nil
+	}
+	var newest Backup
+	dirs, _ := os.ReadDir(dir)
+	for _, d := range dirs {
+		if b, err := Read(filepath.Join(dir, d.Name())); err == nil && (newest.Dir == "" || b.Date.After(newest.Date)) {
+			newest = b
+		}
+	}
+	if newest.Dir == "" {
+		return newest, ErrNotBackup
+	}
+	return newest, nil
+}

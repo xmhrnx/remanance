@@ -73,3 +73,11 @@ func (m *Model) use(dev disk.Device) {
 	m.Dev = dev
 	m.Source = dev.Info()
 }
+
+// SourceName is what to call the drive or files being scanned.
+func (m *Model) SourceName() string {
+	if m.Source.Model != "" && m.Source.Kind != disk.KindFiles {
+		return m.Source.Model
+	}
+	return m.Source.Name
+}

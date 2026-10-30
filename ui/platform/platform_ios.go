@@ -12,6 +12,8 @@ import (
 const (
 	ChooseDestination = false
 	CanReveal         = false
+	// ReadsBackups is false: phones keep no backups of other phones.
+	ReadsBackups = false
 )
 
 // DefaultDestination is the app's Documents folder, which the Files app

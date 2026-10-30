@@ -15,6 +15,9 @@ const ChooseDestination = true
 // CanReveal is true where the file manager can be opened on the result.
 const CanReveal = true
 
+// ReadsBackups is true where Finder or iTunes keep iPhone backups.
+const ReadsBackups = true
+
 // DefaultDestination suggests a folder in the user's home. It is often on
 // the system drive, so the dialog checks it against the scanned drive.
 func DefaultDestination() string {

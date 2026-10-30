@@ -19,13 +19,16 @@ min_sdk = 21
 # storage flag to write there by path.
 permissions = ["storage"]
 application_attributes = { requestLegacyExternalStorage = "true" }
-# The USB bridge, compiled into the APK.
-java = ["ui/platform/androidusb"]
+# The USB and storage bridges, compiled into the APK.
+java = ["ui/platform/androidusb", "ui/platform/androidstore"]
 # USB drives on an OTG adapter, read through the USB host API. Not
 # required, so phones without USB host can still install the app to
-# recover from disk images.
+# recover from disk images. "All files access" lets Remanence look
+# through the phone's storage for the trash and the copies apps hide;
+# the user turns it on in Android's settings when they first scan it.
 manifest = '''
 <uses-feature android:name="android.hardware.usb.host" android:required="false"/>
+<uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 '''
 # keystore = "release.keystore"   # created by giode keystore; signs giode build -release
 

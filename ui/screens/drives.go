@@ -6,16 +6,20 @@ package screens
 import (
 	"context"
 	"errors"
+	"slices"
+	"strings"
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/iconbutton"
 	"github.com/mehran9675/giode/components/scroll"
 	"github.com/mehran9675/giode/components/segmented"
 	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/iosbackup"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/platform"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
 
@@ -27,6 +31,7 @@ type Drives struct {
 	m        *model.Model
 	selected string // the chosen drive's ID
 	images   []disk.Info
+	backups  []disk.Info // backups opened from a folder the user picked
 	pickErr  error
 	// elevating is set while the system asks for administrator rights.
 	elevating bool
@@ -68,7 +73,7 @@ func NewDrives(m *model.Model) *Drives {
 }
 
 func (d *Drives) chosen() (disk.Info, bool) {
-	for _, l := range [][]disk.Info{d.images, d.m.Drives} {
+	for _, l := range [][]disk.Info{d.images, d.backups, d.m.Drives} {
 		for _, i := range l {
 			if i.ID == d.selected {
 				return i, true
@@ -114,6 +119,36 @@ func (d *Drives) pickImage() {
 		})
 	}()
 }
+
+// pickBackup opens an iPhone backup from a folder the user picks: the
+// backup itself, or the Backup folder of a copy kept elsewhere.
+func (d *Drives) pickBackup() {
+	opts := giode.FolderOptions{Title: "Choose an iPhone or iPad backup"}
+	go func() {
+		dir, err := d.m.App.PickFolder(context.Background(), opts)
+		if err != nil || dir == "" {
+			return
+		}
+		b, err := iosbackup.ReadPicked(dir)
+		d.m.App.Post(func() {
+			if err != nil {
+				d.pickErr = err
+				return
+			}
+			info := iosbackup.Info(b)
+			d.selected, d.pickErr = info.ID, nil
+			for _, i := range slices.Concat(d.backups, d.m.Drives) {
+				if i.ID == info.ID {
+					return
+				}
+			}
+			d.backups = append(d.backups, info)
+		})
+	}()
+}
+
+// isBackup tells the iPhone backups apart from drives.
+func isBackup(info disk.Info) bool { return strings.HasPrefix(info.ID, "iosbackup:") }
 
 func (d *Drives) addImage(info disk.Info) {
 	for _, i := range d.images {
@@ -184,6 +219,7 @@ func (d *Drives) content() giode.Element {
 			giode.Stack(giode.Styles{Gap: theme.S3}, notes...),
 			d.section("Drives", d.refresh, d.driveCards(compact)),
 			d.section("Disk images", nil, d.imageCards(compact)),
+			d.backupSection(compact),
 		),
 	)
 }
@@ -233,9 +269,28 @@ func (d *Drives) driveCards(compact bool) giode.Element {
 	}
 	var cards []giode.Element
 	for _, info := range d.m.Drives {
-		cards = append(cards, d.card(info, compact))
+		if !isBackup(info) {
+			cards = append(cards, d.card(info, compact))
+		}
 	}
 	return giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)
+}
+
+// backupSection lists the iPhone and iPad backups on this computer, on
+// desktops: Remanence can't read an iPhone's storage, but its backups
+// hold its photos, Recently Deleted included.
+func (d *Drives) backupSection(compact bool) giode.Element {
+	if !platform.ReadsBackups {
+		return giode.Box(giode.Styles{})
+	}
+	var cards []giode.Element
+	for _, info := range slices.Concat(d.m.Drives, d.backups) {
+		if isBackup(info) {
+			cards = append(cards, d.card(info, compact))
+		}
+	}
+	cards = append(cards, d.openCard("open-backup", "phone", "Open an iPhone backup", "A backup folder made by Finder or iTunes", compact, d.pickBackup))
+	return d.section("iPhone and iPad backups", nil, giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...))
 }
 
 func (d *Drives) imageCards(compact bool) giode.Element {
@@ -243,26 +298,33 @@ func (d *Drives) imageCards(compact bool) giode.Element {
 	for _, info := range d.images {
 		cards = append(cards, d.card(info, compact))
 	}
-	open := giode.Keyed("drive", "open-image", func() *giode.PressableElement {
-		return giode.Pressable(func(s giode.PressState) giode.Element {
-			border := "theme.border"
-			if s.Hovered {
-				border = "theme.primary"
-			}
-			return giode.Row(giode.Styles{Width: -1, Height: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap,
-				Padding: giode.UniformInset(theme.S4), BorderRadius: theme.RadiusLarge, BorderWidth: 1, BorderColor: border,
-				Cursor: giode.CursorPointer},
-				giode.Box(giode.Styles{Width: 44, Height: 44, BorderRadius: 12, Align: giode.AlignCenter, Justify: giode.JustifyCenter,
-					Background: giode.Mix("theme.primary", "theme.surface", 0.12)}, icons.Icon("plus", 20, "theme.primary")),
-				giode.Stack(giode.Styles{Gap: 3, FlexGrow: 1},
-					giode.Text("Open a disk image", theme.Heading()),
-					giode.Text("A copy of a drive: .img, .dd, .iso, .dmg", theme.Secondary()),
-				),
-			)
-		}).OnClick(func(giode.ClickEvent) { d.pickImage() }).Label("Open a disk image")
-	})
-	cards = append(cards, giode.Box(d.cardWidth(compact), open))
+	cards = append(cards, d.openCard("open-image", "plus", "Open a disk image", "A copy of a drive: .img, .dd, .iso, .dmg", compact, d.pickImage))
 	return giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)
+}
+
+// openCard is the card that opens something not listed: a disk image, a
+// backup kept elsewhere.
+func (d *Drives) openCard(key, icon, title, detail string, compact bool, open func()) giode.Element {
+	p := giode.Keyed("drive", key, func() *giode.PressableElement {
+		return giode.Pressable(func(giode.PressState) giode.Element { return nil })
+	})
+	p.Content(func(s giode.PressState) giode.Element {
+		border := "theme.border"
+		if s.Hovered {
+			border = "theme.primary"
+		}
+		return giode.Row(giode.Styles{Width: -1, Height: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap,
+			Padding: giode.UniformInset(theme.S4), BorderRadius: theme.RadiusLarge, BorderWidth: 1, BorderColor: border,
+			Cursor: giode.CursorPointer},
+			giode.Box(giode.Styles{Width: 44, Height: 44, BorderRadius: 12, Align: giode.AlignCenter, Justify: giode.JustifyCenter,
+				Background: giode.Mix("theme.primary", "theme.surface", 0.12)}, icons.Icon(icon, 20, "theme.primary")),
+			giode.Stack(giode.Styles{Gap: 3, FlexGrow: 1},
+				giode.Text(title, theme.Heading()),
+				giode.Text(detail, theme.Secondary()),
+			),
+		)
+	}).OnClick(func(giode.ClickEvent) { open() }).Label(title)
+	return giode.Box(d.cardWidth(compact), p)
 }
 
 // bar is the strip along the bottom: the scan mode and the start button.

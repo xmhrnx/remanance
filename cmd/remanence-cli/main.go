@@ -10,6 +10,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/xmhrnx/remanance/ui/platform/iosbackups"
 )
 
 const usage = `Remanence recovers deleted and lost files.
@@ -21,8 +23,9 @@ Usage:
                                              copy deleted files out (-all: every file)
   remanence-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
 
-SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2)
-or a disk image file. Reading drives needs administrator rights.
+SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
+a disk image file, or an iPhone backup's folder ("list" shows the ones
+Finder and iTunes made). Reading drives needs administrator rights.
 `
 
 func main() {
@@ -30,6 +33,7 @@ func main() {
 		fmt.Fprint(os.Stderr, usage)
 		os.Exit(2)
 	}
+	iosbackups.Register()
 	var err error
 	switch os.Args[1] {
 	case "list":

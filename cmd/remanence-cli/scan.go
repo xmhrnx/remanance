@@ -59,11 +59,15 @@ func runScan(args []string) error {
 }
 
 func printResult(res *scan.Result) {
-	fmt.Printf("%s (%s), partition table: %s", res.Device.Name, recovery.FormatBytes(res.Device.Size), res.Table.Scheme)
-	if res.Table.Damaged {
-		fmt.Print(" (damaged)")
+	if res.Files {
+		fmt.Printf("%s (%s of files)\n", res.Device.Name, recovery.FormatBytes(res.Device.Size))
+	} else {
+		fmt.Printf("%s (%s), partition table: %s", res.Device.Name, recovery.FormatBytes(res.Device.Size), res.Table.Scheme)
+		if res.Table.Damaged {
+			fmt.Print(" (damaged)")
+		}
+		fmt.Println()
 	}
-	fmt.Println()
 	for _, v := range res.Volumes {
 		p := v.Partition
 		label := p.Label

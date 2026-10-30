@@ -49,7 +49,7 @@ func (s *scanner) runTree(ctx context.Context, t Tree) error {
 	s.safe = disk.NewSafeReader(t, t.Size(), t.SectorSize())
 	s.cached = disk.NewCache(s.safe, t.Size(), 64<<10, 2048)
 	s.sm.size = t.Size()
-	s.res.Device = t.Info()
+	s.res.Device, s.res.Files = t.Info(), true
 	for i, v := range vols {
 		p := partition.Partition{Index: i + 1, Scheme: partition.SchemeNone, Length: t.Size(), FS: v.FS, Label: v.Label}
 		s.res.Volumes = append(s.res.Volumes, &VolumeResult{Partition: p, Volume: v})

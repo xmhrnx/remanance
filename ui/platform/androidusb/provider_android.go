@@ -9,7 +9,6 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk/usbmass"
 )
 
-
 // Register adds the USB drives to disk.List.
 func Register() { disk.Register(provider{}) }
 

@@ -7,6 +7,7 @@ import (
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/scroll"
 	"github.com/mehran9675/giode/styles/properties"
+	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/ui/components"
@@ -47,10 +48,7 @@ func (s *Scanning) content() giode.Element {
 		giode.Box(giode.Styles{MaxWidth: properties.MaxWidth(ringSize - 70)}, giode.Text(string(p.Phase), theme.Secondary().With(giode.Styles{TextAlign: giode.TextAlignCenter}))),
 	)
 
-	name := s.m.Source.Model
-	if name == "" {
-		name = s.m.Source.Name
-	}
+	name := s.m.SourceName()
 	mode := "Quick scan"
 	if s.m.Mode == scan.Deep {
 		mode = "Deep scan"
@@ -72,10 +70,15 @@ func (s *Scanning) content() giode.Element {
 	if compact {
 		stats = giode.Stack(giode.Styles{Width: -1, Gap: theme.S3}, row(files, deleted), row(carved, vols))
 	}
+	reading := recovery.FormatBytes(s.m.Source.Size) + " · reading only, nothing is written"
+	if s.m.Source.Kind == disk.KindFiles {
+		// Files: their size is known only once they're listed.
+		reading = "Reading only, nothing is written"
+	}
 	parts := []giode.Element{
 		giode.Stack(giode.Styles{Gap: 4, Align: giode.AlignCenter},
 			giode.Text(mode+" of "+name, theme.Title().With(giode.Styles{TextAlign: giode.TextAlignCenter})),
-			giode.Text(recovery.FormatBytes(s.m.Source.Size)+" · reading only, nothing is written", theme.Secondary()),
+			giode.Text(reading, theme.Secondary()),
 		),
 		s.ring.View(p.Fraction, ringSize, s.m.Scanning, center),
 		giode.Text(speed, theme.Code()),

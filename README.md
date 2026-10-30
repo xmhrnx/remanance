@@ -37,6 +37,7 @@ writes to it.
     programs, Android apps.
 - **Failing drives**: copy a drive to an image once, then recover from
   the image as often as you like.
+- **Phones**: see [Phones](#phones) below.
 
 Every file gets a health estimate: Remanence checks whether its
 clusters were reused since it was deleted. You can also preview photos,
@@ -49,13 +50,41 @@ text and raw bytes before you recover anything.
 | **Windows** | Internal, USB, SD cards | Asks for administrator rights when you open a drive. |
 | **macOS** | Internal, USB, SD cards | Asks for your password to read raw disks. |
 | **Linux** | Internal, USB, SD cards | Relaunches through `pkexec` for raw access. |
-| **Android** | USB drives and SD card readers on an OTG adapter | **No root needed.** It uses Android's USB host API and its own USB mass storage driver (SCSI over Bulk-Only Transport). Android asks once per drive. Recovered files go to `Download/Remanence`. |
-| **iOS / iPadOS** | Disk images | iOS gives no app raw access to storage, so Remanence on iOS scans disk images. Recovered files appear in the Files app. |
+| **Android** | The phone's own storage, USB drives and SD card readers on an OTG adapter, and with root the phone's partitions and memory card | See [Phones](#phones). Recovered files go to `Download/Remanence`. |
+| **iOS / iPadOS** | Disk images | iOS gives no app raw access to storage. Recover an iPhone's files from its backup on a computer instead. Recovered files appear in the Files app. |
 
-The phone's own internal storage is encrypted per file and can't be
-read raw without root on Android, or at all on iOS. To recover photos
-deleted from a phone, look first in its "Recently deleted" album, then
-in your backups.
+## Phones
+
+A phone encrypts its storage file by file and throws away a deleted
+file's key, so its sectors can't give the file back, with or without
+root. What Remanence can still find:
+
+- **The Android trash.** Since Android 11, many apps delete photos and
+  videos by moving them to a system trash for 30 days. Remanence lists
+  everything in it, from every app.
+- **Copies apps hide.** Thumbnails, and media that messaging and other
+  apps keep in hidden folders or behind a `.nomedia` file, often
+  outlive the original. A deep scan also searches caches, such as the
+  gallery's thumbnail databases, for the pictures inside them.
+
+  Reading other apps' files needs Android's "All files access": the
+  first scan of "This phone" opens the setting.
+- **USB drives and memory cards** on an OTG adapter, **no root
+  needed**. Remanence uses Android's USB host API and its own USB mass
+  storage driver (SCSI over Bulk-Only Transport). Android asks once
+  per drive.
+- **Rooted phones**: the phone's userdata partition and a memory card
+  in the phone's slot, read raw through `su`. A card set up as portable
+  storage isn't encrypted, so a deep scan finds its deleted files like
+  any card's; userdata gives back files only on older phones that
+  didn't encrypt it. Recovered files are saved to the phone's own
+  storage, so recover the files that matter most first.
+- **iPhones, from a computer.** Remanence on Windows and macOS lists the
+  backups Finder and iTunes made, and opens any backup folder you pick.
+  A backup holds the phone's photos, those in Recently Deleted
+  included, and every app's files. On macOS, give Remanence Full Disk
+  Access to see the backups. Encrypted backups aren't read yet: turn
+  off "Encrypt local backup" and back up again first.
 
 ## Install
 
@@ -90,6 +119,9 @@ remanence-cli recover -to ~/Recovered -type jpg,mp4 /dev/sdb
 ```bash
 remanence-cli image /dev/sdb sdb.img
 ```
+
+`list` also shows the iPhone backups on the computer, and `scan` and
+`recover` take a backup's folder as the source.
 
 ## Building
 
@@ -133,7 +165,8 @@ repository has the `IOS_CERT_BASE64`, `IOS_CERT_PASS` and
 - APFS, HFS+, Btrfs, XFS and ReFS. Deleted files on these drives are
   found only by carving, without their names.
 - RAID reconstruction and recovery over the network.
-- Reading iPhone backups.
+- Encrypted iPhone backups, and deleted messages and notes still inside
+  the databases of a backup.
 
 ## License
 

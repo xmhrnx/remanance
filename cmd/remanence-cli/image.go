@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/imaging"
 	"github.com/xmhrnx/remanance/engine/recovery"
 )
@@ -20,6 +21,9 @@ func runImage(args []string) error {
 		return err
 	}
 	defer dev.Close()
+	if dev.Info().Kind == disk.KindFiles {
+		return fmt.Errorf("%s is a set of files, not a drive: scan or recover from it directly", args[0])
+	}
 	if recovery.SameDevice(dev.Info(), args[1]) {
 		return fmt.Errorf("%s is on the drive being imaged; choose another drive", args[1])
 	}

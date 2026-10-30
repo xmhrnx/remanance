@@ -236,10 +236,7 @@ func (r *Results) View() giode.Element {
 // summary is the line along the top: what was scanned and what was found.
 func (r *Results) summary(compact bool) giode.Element {
 	res := r.m.Result
-	name := r.m.Source.Model
-	if name == "" {
-		name = r.m.Source.Name
-	}
+	name := r.m.SourceName()
 	files, deleted, carved := 0, 0, 0
 	if res != nil {
 		files, deleted, carved = res.Stats()

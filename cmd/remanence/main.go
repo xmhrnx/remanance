@@ -12,7 +12,10 @@ import (
 	_ "github.com/xmhrnx/remanance/engine/fsys/all"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/platform/androidroot"
+	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 	"github.com/xmhrnx/remanance/ui/platform/androidusb"
+	"github.com/xmhrnx/remanance/ui/platform/iosbackups"
 	"github.com/xmhrnx/remanance/ui/shell"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
@@ -21,7 +24,10 @@ func main() {
 	theme.LoadFonts()
 	theme.Apply()
 	icons.Register()
+	androidstore.Register()
 	androidusb.Register()
+	androidroot.Register()
+	iosbackups.Register()
 
 	var m *model.Model
 	app := giode.New(giode.Config{

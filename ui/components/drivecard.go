@@ -16,6 +16,8 @@ func DriveIcon(info disk.Info) string {
 	switch {
 	case info.Kind == disk.KindImage:
 		return "disc"
+	case info.Kind == disk.KindFiles, bus == "internal, with root":
+		return "phone"
 	case strings.Contains(bus, "sd") && info.Removable, strings.Contains(bus, "mmc"):
 		return "sdcard"
 	case info.Kind == disk.KindUSB || strings.Contains(bus, "usb"):
@@ -45,6 +47,11 @@ func DriveCard(info disk.Info, selected bool, s giode.PressState) giode.Element 
 	detail := []string{recovery.FormatBytes(info.Size)}
 	if info.Bus != "" {
 		detail = append(detail, info.Bus)
+	}
+	if info.Kind == disk.KindFiles {
+		// Files, not sectors: the size is only known once they're
+		// listed, and Model describes the source.
+		name, detail = info.Name, []string{info.Model}
 	}
 	var tags []giode.Element
 	for _, m := range info.Mounts {

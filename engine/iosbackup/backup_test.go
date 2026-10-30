@@ -85,3 +85,14 @@ func TestEncrypted(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestReadPicked(t *testing.T) {
+	for _, dir := range []string{fixture, "testdata/backup"} {
+		if b, err := ReadPicked(dir); err != nil || b.DeviceName != "Test iPhone" {
+			t.Fatalf("%s: %+v %v", dir, b, err)
+		}
+	}
+	if _, err := ReadPicked("testdata"); err != ErrNotBackup {
+		t.Fatalf("testdata: %v", err)
+	}
+}

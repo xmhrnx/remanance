@@ -63,6 +63,9 @@ func runRecover(args []string) error {
 		if v.Volume.Label != "" {
 			name += " " + v.Volume.Label
 		}
+		if res.Files {
+			name = v.Volume.Label
+		}
 		collect(v.Volume.Root, name)
 		collect(v.Volume.Lost, name+"/Lost and found")
 	}
