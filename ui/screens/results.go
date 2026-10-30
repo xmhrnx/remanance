@@ -304,7 +304,7 @@ func (r *Results) table(compact bool) giode.Element {
 	}
 	if r.m.Searching() && len(rows) > 0 {
 		parts = append(parts, giode.Box(giode.Styles{Padding: giode.SymmetricInset(theme.S5, 6)},
-			giode.Text(fmt.Sprintf("%d matches in this folder and the folders inside it", len(rows)), theme.Caption())))
+			giode.Text(count(len(rows), "match", "matches")+" in this folder and the folders inside it", theme.Caption())))
 	}
 	parts = append(parts, giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, list))
 	return giode.Stack(giode.Styles{Width: -1, Height: -1}, parts...)
