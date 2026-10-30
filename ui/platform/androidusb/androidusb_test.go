@@ -1,6 +1,10 @@
 package androidusb
 
-import "testing"
+import (
+	"os"
+	"strings"
+	"testing"
+)
 
 func TestParse(t *testing.T) {
 	got := parse("/dev/bus/usb/001/002\t2385\t5734\tKingston\tDataTraveler 3.0\t0\n/dev/bus/usb/001/003\t1234\t43981\t\t\t1\n")
@@ -28,5 +32,16 @@ func TestParseOpen(t *testing.T) {
 	}
 	if _, _, _, _, err := parseOpen("garbage"); err == nil {
 		t.Fatal("garbage accepted")
+	}
+}
+
+func TestBridgeClass(t *testing.T) {
+	src, err := os.ReadFile("UsbBridge.java")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pkg := strings.ReplaceAll(strings.TrimSuffix(bridgeClass, "/UsbBridge"), "/", ".")
+	if !strings.Contains(string(src), "package "+pkg+";") {
+		t.Fatalf("UsbBridge.java isn't in package %s, which bridgeClass names", pkg)
 	}
 }

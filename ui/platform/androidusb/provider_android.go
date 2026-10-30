@@ -9,7 +9,6 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk/usbmass"
 )
 
-const bridgeClass = "io/github/xmhrnx/remanance/UsbBridge"
 
 // Register adds the USB drives to disk.List.
 func Register() { disk.Register(provider{}) }
