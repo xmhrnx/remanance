@@ -1,0 +1,37 @@
+//go:build android
+
+package platform
+
+import (
+	"os"
+	"path/filepath"
+
+	"github.com/mehran9675/remanence/engine/recovery"
+)
+
+const (
+	ChooseDestination = false
+	CanReveal         = false
+)
+
+// downloads is the phone's shared Downloads folder. Since Android 11 an
+// app may create files there by path; Android 10 needs
+// requestLegacyExternalStorage, which giode.toml sets.
+const downloads = "/storage/emulated/0/Download"
+
+// DefaultDestination is a folder in Downloads.
+func DefaultDestination() string { return filepath.Join(downloads, "Remanence") }
+
+// DestinationNote says where to find the files.
+func DestinationNote() string {
+	return "Files are saved in Downloads/Remanence on this phone's storage, apart from the drive being recovered."
+}
+
+// Sink saves into Downloads/Remanence, whatever dir says.
+func Sink(string) (recovery.Sink, error) {
+	dir := DefaultDestination()
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, err
+	}
+	return recovery.DirSink{Dir: dir}, nil
+}
