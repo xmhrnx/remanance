@@ -57,7 +57,7 @@ license = "LICENSE"
 
 [linux]
 categories = ["Utility", "System"]
-license = "GPL-3.0-or-later"
+license = "Apache-2.0"
 
 # Disk images open with the app.
 [[file_types]]

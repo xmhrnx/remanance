@@ -137,7 +137,7 @@ repository has the `IOS_CERT_BASE64`, `IOS_CERT_PASS` and
 
 ## License
 
-Remanence is licensed under the GPL, version 3 or later (see
+Remanence is licensed under the Apache License, version 2.0 (see
 [LICENSE](LICENSE)). The bundled fonts, Inter and JetBrains Mono, are
 under the SIL Open Font License; their licenses are in
 `ui/theme/fonts/`.
