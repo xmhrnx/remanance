@@ -28,6 +28,8 @@ type Drives struct {
 	selected string // the chosen drive's ID
 	images   []disk.Info
 	pickErr  error
+	// elevating is set while the system asks for administrator rights.
+	elevating bool
 
 	mode    *segmented.Control
 	start   *giode.ButtonElement
@@ -43,10 +45,23 @@ func NewDrives(m *model.Model) *Drives {
 	d.start = components.PrimaryButton("Start scan", "search").OnClick(d.startScan)
 	d.refresh = components.IconAction("refresh", "Refresh the drive list").OnClick(m.LoadDrives)
 	d.elevate = components.SecondaryButton("Restart as administrator", "shield").OnClick(func() {
-		// It quits this copy once the new one starts.
-		if err := m.App.RestartElevated(); err != nil && !errors.Is(err, giode.ErrDeclined) {
-			d.pickErr = err
+		if d.elevating {
+			return
 		}
+		d.elevating = true
+		// Off the window's thread: RestartElevated waits for the user to
+		// answer the system prompt, and a window that stops handling its
+		// messages that long is closed by Windows as hung. It quits this
+		// copy once the new one starts.
+		go func() {
+			err := m.App.RestartElevated()
+			m.App.Post(func() {
+				d.elevating = false
+				if err != nil && !errors.Is(err, giode.ErrDeclined) {
+					d.pickErr = err
+				}
+			})
+		}()
 	})
 	d.view = giode.Scroll(d.content, giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
 	return d
@@ -144,6 +159,12 @@ func (d *Drives) content() giode.Element {
 	}
 	var notes []giode.Element
 	if d.m.NeedsAdmin && !giode.IsElevated() {
+		d.elevate.Disabled(d.elevating)
+		if d.elevating {
+			d.elevate.Label("Waiting for permission…")
+		} else {
+			d.elevate.Label("Restart as administrator")
+		}
 		notes = append(notes, components.Banner("lock", "theme.warning",
 			"Reading drives directly needs administrator rights. Remanence only reads; it never writes to the drive you scan.", d.elevate))
 	}

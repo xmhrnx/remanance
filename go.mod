@@ -4,7 +4,7 @@ go 1.26.6
 
 require (
 	gioui.org v0.10.2
-	github.com/mehran9675/giode v0.1.15-alpha.1.0.20261030090429-cdc84f705fee
+	github.com/mehran9675/giode v0.1.16-alpha.1
 	golang.org/x/image v0.47.0
 	golang.org/x/sys v0.49.0
 )
