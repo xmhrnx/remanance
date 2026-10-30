@@ -54,11 +54,6 @@ func (r *ProgressRing) View(fraction float64, size int, active bool, center giod
 		track := rgba(giode.Mix("theme.text", "theme.background", 0.07))
 		amber, deep := rgba("theme.primary"), rgba("theme.secondary")
 
-		// Groove lines inside, like the platter's.
-		for i, k := range []float32{0.80, 0.70, 0.60} {
-			a := float32(0.05 - 0.012*float32(i))
-			paintStroke(ops, arc(ops, c, rad*k, 0, 2*math.Pi), float32(gtx.Dp(1)), withAlpha(rgba("theme.text"), a))
-		}
 		paintStroke(ops, arc(ops, c, rad, 0, 2*math.Pi), stroke, track)
 
 		start := float32(-math.Pi / 2)

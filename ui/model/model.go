@@ -53,6 +53,7 @@ type Model struct {
 	Preview  *fsys.Entry
 	Checked  map[*fsys.Entry]bool
 	Filter   Filter
+	Order    Order
 	rowCache []*fsys.Entry
 	rowKey   rowKey
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mehran9675/giode"
+	"github.com/mehran9675/giode/components/dropdown"
 	"github.com/mehran9675/giode/components/iconbutton"
 	"github.com/mehran9675/giode/components/input"
 	"github.com/mehran9675/giode/components/segmented"
@@ -34,6 +35,7 @@ type Results struct {
 	checkAll  *giode.PressableElement
 	search    *input.Input
 	show      *segmented.Control
+	sort      *dropdown.Select
 	cats      []*components.FilterChip
 	catValues []model.Category
 
@@ -68,6 +70,12 @@ func NewResults(m *model.Model) *Results {
 		OnChange(func(t string) { f := m.Filter; f.Query = t; m.SetFilter(f) })
 	r.show = giode.Input.Segmented("Deleted", "All files").Styles(segmentStyles().With(giode.Styles{Width: 180, FontSize: 12.5})).
 		OnChange(func(i int) { f := m.Filter; f.Show = model.Show(i); m.SetFilter(f) })
+	var sorts []string
+	for _, c := range model.SortChoices {
+		sorts = append(sorts, c.Label)
+	}
+	r.sort = giode.Input.Select(giode.Styles{FontSize: 13, BorderRadius: theme.Radius}, sorts...).Sheet(giode.SheetCompact).
+		OnChange(func(i int) { m.Order = model.SortChoices[i].Order })
 	r.catValues = []model.Category{model.CatPictures, model.CatVideo, model.CatAudio, model.CatDocuments, model.CatArchives}
 	catIcons := []string{"picture", "video", "music", "document", "archive"}
 	for i, c := range r.catValues {
@@ -287,7 +295,15 @@ func (r *Results) table(compact bool) giode.Element {
 		giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap}, bar...),
 	)
 	if compact {
-		head = append(head, giode.Box(giode.Styles{Width: -1}, r.search))
+		// No header to click on a phone: a menu sorts instead.
+		for i, c := range model.SortChoices {
+			if c.Order == r.m.Order && r.sort.Selected() != i {
+				r.sort.SetSelected(i)
+			}
+		}
+		head = append(head, giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
+			giode.Box(giode.Styles{FlexGrow: 1}, r.search),
+			giode.Box(giode.Styles{Width: 168}, r.sort)))
 	}
 	head = append(head, giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter}, filters...))
 
@@ -300,7 +316,7 @@ func (r *Results) table(compact bool) giode.Element {
 		giode.Stack(giode.Styles{Width: -1, Gap: theme.S3, Padding: giode.Inset{Top: theme.S4, Left: theme.S5, Right: theme.S5, Bottom: theme.S3}}, head...),
 	}
 	if !compact {
-		parts = append(parts, giode.Box(giode.Styles{Width: -1, BorderWidth: 1, BorderColor: theme.Hairline()}, components.FileHeader(r.checkAll)))
+		parts = append(parts, giode.Box(giode.Styles{Width: -1, BorderWidth: 1, BorderColor: theme.Hairline()}, components.FileHeader(r.checkAll, r.m.Order, r.m.SortBy)))
 	}
 	if r.m.Searching() && len(rows) > 0 {
 		parts = append(parts, giode.Box(giode.Styles{Padding: giode.SymmetricInset(theme.S5, 6)},

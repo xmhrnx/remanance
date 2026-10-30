@@ -206,6 +206,10 @@ func (s *scanner) send(force bool) {
 		Deleted:  int(s.deleted.Load()),
 		BadBytes: s.safe.BadBytes(),
 		Map:      s.sm.snapshot(),
+		Current:  -1,
+	}
+	if s.phase == PhaseSectors {
+		p.Current = s.sm.cell(s.opts.Start + p.Position)
 	}
 	t0 := s.searchT0
 	s.mu.Unlock()

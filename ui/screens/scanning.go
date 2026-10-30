@@ -86,12 +86,16 @@ func (s *Scanning) content() giode.Element {
 		if compact {
 			cols = 40
 		}
+		current := -1
+		if s.m.Scanning {
+			current = p.Current
+		}
 		parts = append(parts, components.Card(giode.Styles{Width: -1, Gap: theme.S4},
 			giode.Row(giode.Styles{Width: -1, Align: giode.AlignCenter, Justify: giode.JustifySpaceBetween},
 				giode.Text("Sector map", theme.Heading()),
 				giode.Text(badLine(p.BadBytes), theme.Caption().With(giode.Styles{Color: "theme.danger"})),
 			),
-			components.SectorMap(p.Map, cols),
+			components.SectorMap(p.Map, cols, current),
 			components.SectorLegend(),
 		))
 	}

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"sort"
 	"strings"
 
 	"github.com/xmhrnx/remanance/engine/carve"
@@ -39,6 +38,7 @@ type Filter struct {
 type rowKey struct {
 	folder *Node
 	filter Filter
+	order  Order
 }
 
 var extCategory = map[string]Category{}
@@ -90,7 +90,7 @@ const maxSearchRows = 50000
 // Rows lists what the table shows: the current folder's folders and
 // files, or with a query, every match below it.
 func (m *Model) Rows() []*fsys.Entry {
-	key := rowKey{m.Folder, m.Filter}
+	key := rowKey{m.Folder, m.Filter, m.Order}
 	if key == m.rowKey && m.rowCache != nil {
 		return m.rowCache
 	}
@@ -108,7 +108,7 @@ func (m *Model) Rows() []*fsys.Entry {
 			}
 			return len(m.rowCache) < maxSearchRows
 		})
-		sort.SliceStable(m.rowCache, func(i, j int) bool { return m.rowCache[i].Name < m.rowCache[j].Name })
+		m.Order.sortRows(m.rowCache)
 		return m.rowCache
 	}
 	for _, c := range m.Folder.Entry.Children {
@@ -116,6 +116,7 @@ func (m *Model) Rows() []*fsys.Entry {
 			m.rowCache = append(m.rowCache, c)
 		}
 	}
+	m.Order.sortRows(m.rowCache)
 	return m.rowCache
 }
 

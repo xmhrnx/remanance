@@ -30,6 +30,9 @@ type Progress struct {
 	Partitions      int // volumes found, lost ones included
 	BadBytes        int64
 	Map             []Cell // the sector map, MapCells long
+	// Current is the map cell the sector search is reading, or -1
+	// outside it.
+	Current int
 }
 
 // Cell is one cell of the sector map the UI draws.
@@ -70,6 +73,14 @@ func (m *sectorMap) mark(off, n int64, c Cell) {
 			}
 		}
 	}
+}
+
+// cell is the map cell holding byte off.
+func (m *sectorMap) cell(off int64) int {
+	if m.size <= 0 {
+		return -1
+	}
+	return int(min(max(off*MapCells/m.size, 0), MapCells-1))
 }
 
 func (m *sectorMap) snapshot() []Cell {
