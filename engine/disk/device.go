@@ -16,6 +16,9 @@ const (
 	KindVolume               // a mounted volume or partition
 	KindImage                // a disk image file
 	KindUSB                  // a USB drive reached without the OS (Android OTG)
+	// KindFiles is a set of files read as one device: a phone's shared
+	// storage or an iPhone backup.
+	KindFiles
 )
 
 func (k Kind) String() string {
@@ -28,6 +31,8 @@ func (k Kind) String() string {
 		return "Image"
 	case KindUSB:
 		return "USB drive"
+	case KindFiles:
+		return "Files"
 	}
 	return "Unknown"
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Big</key>
+	<integer>1099511627776</integer>
+	<key>Blob</key>
+	<data>
+	AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJw==
+	</data>
+	<key>Count</key>
+	<integer>42</integer>
+	<key>List</key>
+	<array>
+		<string>a</string>
+		<integer>1</integer>
+		<array>
+			<integer>2</integer>
+			<integer>3</integer>
+		</array>
+	</array>
+	<key>Long</key>
+	<string>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
+	<key>Name</key>
+	<string>Mehran's iPhone</string>
+	<key>Negative</key>
+	<integer>-7</integer>
+	<key>No</key>
+	<false/>
+	<key>Ratio</key>
+	<real>0.5</real>
+	<key>Unicode</key>
+	<string>Fotos – été</string>
+	<key>When</key>
+	<date>2026-10-30T12:00:00Z</date>
+	<key>Yes</key>
+	<true/>
+</dict>
+</plist>

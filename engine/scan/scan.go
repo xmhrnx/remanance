@@ -50,7 +50,12 @@ func Run(ctx context.Context, dev disk.Device, opts Options, onProgress func(Pro
 	s.cached = disk.NewCache(s.safe, dev.Size(), 64<<10, 2048)
 	s.sm.size = dev.Size()
 	s.res = &Result{Device: dev.Info(), Mode: opts.Mode, Started: s.started}
-	err := s.run(ctx)
+	var err error
+	if t, ok := dev.(Tree); ok {
+		err = s.runTree(ctx, t)
+	} else {
+		err = s.run(ctx)
+	}
 	// What the search carved stays, however the scan ended.
 	if s.carver != nil && s.res.Carved == nil {
 		s.res.Carved = carvedVolume(s.carver.Found(), s.dev.Size())

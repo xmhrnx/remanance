@@ -3,3 +3,6 @@
 *.ttf binary
 *.otf binary
 *.jar binary
+*.plist binary
+*.db binary
+engine/iosbackup/testdata/** binary
