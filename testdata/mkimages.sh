@@ -18,7 +18,9 @@ mkdir -p /t/fixtures
 mkdir -p "$OUT"
 MNT=/mnt/fx
 mkdir -p "$MNT"
-trap 'umount "$MNT" 2>/dev/null' EXIT
+# Usually nothing is mounted by the end; umount failing then must not
+# become the script's exit status.
+trap 'umount "$MNT" 2>/dev/null || true' EXIT
 
 # populate DIR writes the same tree of files into every file system.
 populate() {
