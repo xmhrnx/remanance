@@ -3,7 +3,7 @@
 // device for lost partitions and files known only by their content.
 package scan
 
-import "github.com/mehran9675/remanence/engine/carve"
+import "github.com/xmhrnx/remanance/engine/carve"
 
 // Mode is how thorough a scan is.
 type Mode int

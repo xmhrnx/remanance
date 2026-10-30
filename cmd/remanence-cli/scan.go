@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/recovery"
-	"github.com/mehran9675/remanence/engine/scan"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/engine/scan"
 )
 
 // scanSource opens and scans a source, printing progress on one line.

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mehran9675/remanence/engine/disk"
+	"github.com/xmhrnx/remanance/engine/disk"
 )
 
 // SameDevice reports whether dest lies on the device being recovered.

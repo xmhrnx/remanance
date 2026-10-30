@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // Tag is a small rounded label in color, on a faint wash of it.

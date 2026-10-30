@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/mehran9675/remanence/engine/disk"
+	"github.com/xmhrnx/remanance/engine/disk"
 )
 
 // openSource opens a drive by the path "list" shows, or an image file.

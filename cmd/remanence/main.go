@@ -8,13 +8,13 @@ import (
 	"os"
 
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/assets"
-	_ "github.com/mehran9675/remanence/engine/fsys/all"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/platform/androidusb"
-	"github.com/mehran9675/remanence/ui/shell"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/assets"
+	_ "github.com/xmhrnx/remanance/engine/fsys/all"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/platform/androidusb"
+	"github.com/xmhrnx/remanance/ui/shell"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 func main() {

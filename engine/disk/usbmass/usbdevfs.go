@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"github.com/mehran9675/remanence/engine/disk"
+	"github.com/xmhrnx/remanance/engine/disk"
 )
 
 // usbdevfs request structures, laid out as the kernel's: Go's alignment

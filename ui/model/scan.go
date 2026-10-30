@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/engine/scan"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/scan"
 )
 
 // StartScan scans the open device in mode.

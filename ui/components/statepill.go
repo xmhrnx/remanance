@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/fsys"
 )
 
 // StateColor is the color that marks a file's state.

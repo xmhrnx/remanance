@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/recovery"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/recovery"
 )
 
 func runList() error {

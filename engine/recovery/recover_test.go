@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/fsys"
-	_ "github.com/mehran9675/remanence/engine/fsys/all"
-	"github.com/mehran9675/remanence/engine/partition"
-	"github.com/mehran9675/remanence/engine/recovery"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	_ "github.com/xmhrnx/remanance/engine/fsys/all"
+	"github.com/xmhrnx/remanance/engine/partition"
+	"github.com/xmhrnx/remanance/engine/recovery"
 )
 
 var fixtures = filepath.Join("..", "..", "testdata", "fixtures")

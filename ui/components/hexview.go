@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // HexView dumps data eight bytes to a line, which fits a narrow panel:

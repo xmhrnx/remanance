@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mehran9675/remanence/engine/carve"
-	"github.com/mehran9675/remanence/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/carve"
+	"github.com/xmhrnx/remanance/engine/fsys"
 )
 
 // carvedVolume arranges found files as Category/Type/file, naming each by

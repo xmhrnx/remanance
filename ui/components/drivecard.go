@@ -4,10 +4,10 @@ import (
 	"strings"
 
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/recovery"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // DriveIcon picks the icon for a drive from how it's attached.

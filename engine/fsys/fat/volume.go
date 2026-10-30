@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mehran9675/remanence/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/fsys"
 )
 
 func init() { fsys.RegisterParser(Open, "FAT12", "FAT16", "FAT32") }

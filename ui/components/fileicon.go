@@ -2,9 +2,9 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/model"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/model"
 )
 
 // fileKind is how a kind of file is drawn: an icon and its color.

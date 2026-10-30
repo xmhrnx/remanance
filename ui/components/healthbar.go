@@ -5,7 +5,7 @@ import (
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/styles/properties"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // HealthColor grades a recovery chance: green when the file's space is

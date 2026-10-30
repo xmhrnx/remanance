@@ -2,8 +2,8 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // Stat is one figure on the scan screen: an icon in a tinted well, the

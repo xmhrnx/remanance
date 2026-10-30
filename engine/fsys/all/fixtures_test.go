@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/engine/partition"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/partition"
 )
 
 // The images come from testdata/mkimages.sh.

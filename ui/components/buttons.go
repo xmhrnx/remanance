@@ -3,8 +3,8 @@ package components
 import (
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/iconbutton"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 func withIcon(b *giode.ButtonElement, icon string) *giode.ButtonElement {

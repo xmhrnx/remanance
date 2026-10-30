@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/icons"
+	"github.com/xmhrnx/remanance/ui/icons"
 )
 
 // CheckZone is how wide, in dp from a row's left edge, a click toggles

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/mehran9675/remanence/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/fsys"
 )
 
 const lznt1Chunk = 4096

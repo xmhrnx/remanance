@@ -8,11 +8,11 @@ import (
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/iconbutton"
 	"github.com/mehran9675/giode/components/titlebar"
-	"github.com/mehran9675/remanence/ui/components"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/screens"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/components"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/screens"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // Desktop is true where the window draws its own title bar.

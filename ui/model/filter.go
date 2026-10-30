@@ -4,9 +4,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mehran9675/remanence/engine/carve"
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/engine/recovery"
+	"github.com/xmhrnx/remanance/engine/carve"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/recovery"
 )
 
 // Show picks which files the table lists.

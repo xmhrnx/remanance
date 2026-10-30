@@ -9,11 +9,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/carve"
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/fsys"
-	_ "github.com/mehran9675/remanence/engine/fsys/all"
-	"github.com/mehran9675/remanence/engine/partition"
+	"github.com/xmhrnx/remanance/engine/carve"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	_ "github.com/xmhrnx/remanance/engine/fsys/all"
+	"github.com/xmhrnx/remanance/engine/partition"
 )
 
 const blockSize = 4 << 20 // bytes per read in the sector search

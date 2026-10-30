@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // CardStyles is the panel every card sits on: the surface, a hairline

@@ -1,4 +1,4 @@
-module github.com/mehran9675/remanence
+module github.com/xmhrnx/remanance
 
 go 1.26.6
 

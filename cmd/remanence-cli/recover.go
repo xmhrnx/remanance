@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"strings"
 
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/engine/recovery"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/recovery"
 )
 
 func runRecover(args []string) error {

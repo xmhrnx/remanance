@@ -10,8 +10,8 @@ import (
 	"gioui.org/unit"
 
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/engine/scan"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // CellColor is the color a sector map cell is drawn in.

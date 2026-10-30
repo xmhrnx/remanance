@@ -2,9 +2,9 @@ package components
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // Breadcrumb shows the path to the open folder; each step opens its

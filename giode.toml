@@ -11,7 +11,7 @@ package = "./cmd/remanence"
 platforms = ["windows", "macos", "linux", "android", "ios"]
 publisher = "xmhrnx"
 description = "Free, open-source data recovery: deleted files, formatted drives and lost partitions"
-website = "https://github.com/mehran9675/remanence"
+website = "https://github.com/xmhrnx/remanance"
 
 [android]
 min_sdk = 21

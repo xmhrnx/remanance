@@ -3,7 +3,7 @@ package components
 import (
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/chip"
-	"github.com/mehran9675/remanence/ui/icons"
+	"github.com/xmhrnx/remanance/ui/icons"
 )
 
 // FilterChip is a rounded toggle in the filter row: an outline at rest,

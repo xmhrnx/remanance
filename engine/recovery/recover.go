@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/fsys"
 )
 
 // Item is a file or folder to recover, with the folder it goes under.

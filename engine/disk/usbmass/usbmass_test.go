@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/disk"
+	"github.com/xmhrnx/remanance/engine/disk"
 )
 
 // target is a USB drive in memory: it parses CBWs, answers SCSI commands

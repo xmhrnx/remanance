@@ -1,6 +1,6 @@
 package model
 
-import "github.com/mehran9675/remanence/engine/fsys"
+import "github.com/xmhrnx/remanance/engine/fsys"
 
 // Toggle checks or unchecks a file or folder for recovery; a folder
 // stands for everything recoverable in it.

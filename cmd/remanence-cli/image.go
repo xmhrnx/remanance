@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/imaging"
-	"github.com/mehran9675/remanence/engine/recovery"
+	"github.com/xmhrnx/remanance/engine/imaging"
+	"github.com/xmhrnx/remanance/engine/recovery"
 )
 
 func runImage(args []string) error {

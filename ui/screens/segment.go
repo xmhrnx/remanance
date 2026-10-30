@@ -2,7 +2,7 @@ package screens
 
 import (
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // segmentStyles is the look of every segmented control: a dark track and

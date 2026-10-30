@@ -16,11 +16,11 @@ import (
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/scroll"
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/engine/recovery"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // maxPreviewImage is the largest picture decoded for a thumbnail.

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mehran9675/remanence/engine/disk"
+	"github.com/xmhrnx/remanance/engine/disk"
 )
 
 // maxRead keeps each READ within what every drive accepts; 64 KiB

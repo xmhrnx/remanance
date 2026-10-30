@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/mehran9675/giode"
-	"github.com/mehran9675/remanence/engine/fsys"
-	"github.com/mehran9675/remanence/engine/scan"
+	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/engine/scan"
 )
 
 // Kind tells the tree's top-level nodes apart.

@@ -5,11 +5,11 @@ import (
 
 	"github.com/mehran9675/giode/android"
 
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/disk/usbmass"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/disk/usbmass"
 )
 
-const bridgeClass = "io/github/mehran9675/remanence/UsbBridge"
+const bridgeClass = "io/github/xmhrnx/remanance/UsbBridge"
 
 // Register adds the USB drives to disk.List.
 func Register() { disk.Register(provider{}) }

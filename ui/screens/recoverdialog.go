@@ -11,13 +11,13 @@ import (
 	"github.com/mehran9675/giode/components/checkbox"
 	"github.com/mehran9675/giode/components/dialog"
 	"github.com/mehran9675/giode/components/input"
-	"github.com/mehran9675/remanence/engine/disk"
-	"github.com/mehran9675/remanence/engine/recovery"
-	"github.com/mehran9675/remanence/ui/components"
-	"github.com/mehran9675/remanence/ui/icons"
-	"github.com/mehran9675/remanence/ui/model"
-	"github.com/mehran9675/remanence/ui/platform"
-	"github.com/mehran9675/remanence/ui/theme"
+	"github.com/xmhrnx/remanance/engine/disk"
+	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/ui/components"
+	"github.com/xmhrnx/remanance/ui/icons"
+	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/platform"
+	"github.com/xmhrnx/remanance/ui/theme"
 )
 
 // RecoverDialog asks where to save the checked files, copies them and
