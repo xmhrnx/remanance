@@ -1,0 +1,62 @@
+# giode.toml configures how the giode CLI builds this app.
+# Reference: https://github.com/mehran9675/giode-cli#giodetoml
+
+[app]
+name = "Remanence"
+id = "io.github.mehran9675.remanence"
+version = "0.1.0"
+build = 1
+icon = "assets/icon.png"
+package = "./cmd/remanence"
+platforms = ["windows", "macos", "linux", "android", "ios"]
+publisher = "xmhrnx"
+description = "Free, open-source data recovery: deleted files, formatted drives and lost partitions"
+website = "https://github.com/mehran9675/remanence"
+
+[android]
+min_sdk = 21
+# Recovered files go to Download/Remanence.
+permissions = ["storage"]
+# USB drives on an OTG adapter, read through the USB host API. Not
+# required, so phones without USB host can still install the app to
+# recover from disk images.
+manifest = '''
+<uses-feature android:name="android.hardware.usb.host" android:required="false"/>
+'''
+# keystore = "release.keystore"   # created by giode keystore; signs giode build -release
+
+[ios]
+min_os = 15
+# profile = "App.mobileprovision"
+# team_id = "TEAMID"
+
+# Recovered files land in the app's Documents folder; these show it in
+# the Files app and in Finder when the device is connected.
+[ios.plist]
+UIFileSharingEnabled = true
+LSSupportsOpeningDocumentsInPlace = true
+
+[macos]
+min_os = 11
+# identity = "Developer ID Application: Your Name (TEAMID)"  # signs giode build -release
+# notary_id = "you@example.com"
+# notary_team_id = "TEAMID"
+
+[windows]
+arch = "amd64"
+
+[windows.installer]
+# Reading raw drives needs administrator rights; the app asks for them
+# when the user opens one, so it installs per user.
+desktop_shortcut = true
+license = "LICENSE"
+
+[linux]
+categories = ["Utility", "System"]
+license = "GPL-3.0-or-later"
+
+# Disk images open with the app.
+[[file_types]]
+name = "Disk image"
+extensions = ["img", "dd", "raw", "iso", "bin"]
+role = "viewer"

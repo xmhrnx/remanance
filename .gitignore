@@ -7,3 +7,5 @@
 *.pfx
 /testdata/fixtures/
 /.claude/
+*.mobileprovision
+*.p12

@@ -4,6 +4,7 @@ go 1.26.6
 
 require (
 	gioui.org v0.10.2
+	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/mehran9675/giode v0.1.15-alpha.1
 	golang.org/x/image v0.47.0
 	golang.org/x/sys v0.49.0
@@ -14,7 +15,6 @@ require (
 	gioui.org/shader v1.0.9 // indirect
 	gioui.org/x v0.10.2 // indirect
 	git.sr.ht/~jackmordaunt/go-toast v1.0.0 // indirect
-	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect
 	github.com/esiqveland/notify v0.11.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-text/typesetting v0.3.4 // indirect

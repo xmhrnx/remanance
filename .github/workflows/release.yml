@@ -1,0 +1,146 @@
+# Builds the installers when a GitHub release is published, and attaches
+# them to it. Written by giode ci, then changed to run on releases only.
+name: release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  GIODE_VERSION: ${{ github.event.release.tag_name }}
+  GIODE_BUILD: ${{ github.run_number }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build the test disk images
+        run: docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh
+      - run: go vet ./engine/... ./cmd/remanence-cli/... ./ui/platform/androidusb/...
+      - run: go test ./engine/... ./ui/platform/androidusb/...
+
+  linux:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            primary: true
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev nsis osslsigncode
+          go install github.com/mehran9675/giode-cli/cmd/giode@latest
+      - name: Signing keys
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          WINDOWS_CERT_BASE64: ${{ secrets.WINDOWS_CERT_BASE64 }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > release.keystore; fi
+          if [ -n "$WINDOWS_CERT_BASE64" ]; then echo "$WINDOWS_CERT_BASE64" | base64 -d > codesign.pfx; fi
+      - name: Build Linux packages
+        run: giode build deb rpm
+      - name: Rebuild the Android USB bridge against the SDK
+        if: matrix.primary
+        run: |
+          export ANDROID_JAR="$(ls -d "$ANDROID_HOME"/platforms/android-* | sort -V | tail -1)/android.jar"
+          sh ui/platform/androidusb/build-jar.sh
+      - name: Build Windows and Android
+        if: matrix.primary
+        env:
+          GIODE_KEYSTORE_PASS: ${{ secrets.GIODE_KEYSTORE_PASS }}
+          GIODE_WINDOWS_CERT_PASS: ${{ secrets.GIODE_WINDOWS_CERT_PASS }}
+        run: |
+          # Signed when the repository has the certificate or keystore.
+          win=""; if [ -n "$GIODE_WINDOWS_CERT_PASS" ]; then win="-release"; fi
+          giode build $win -arch amd64 windows-installer msix
+          apk=""; if [ -n "$GIODE_KEYSTORE_PASS" ]; then apk="-release"; fi
+          giode build $apk android aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          if-no-files-found: ignore
+          path: |
+            dist/linux/*.deb
+            dist/linux/*.rpm
+            dist/windows/*.exe
+            dist/windows/*.msix
+            dist/android/*.apk
+            dist/android/*.aab
+            dist/android/native-debug-symbols.zip
+
+  macos:
+    needs: test
+    runs-on: macos-latest
+    env:
+      MACOS_CERT_BASE64: ${{ secrets.MACOS_CERT_BASE64 }}
+      IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go install github.com/mehran9675/giode-cli/cmd/giode@latest
+      - name: Signing certificate
+        if: env.MACOS_CERT_BASE64 != ''
+        env:
+          MACOS_CERT_PASS: ${{ secrets.MACOS_CERT_PASS }}
+        run: |
+          echo "$MACOS_CERT_BASE64" | base64 -d > cert.p12
+          security create-keychain -p ci build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ci build.keychain
+          security import cert.p12 -k build.keychain -P "$MACOS_CERT_PASS" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci build.keychain
+          rm cert.p12
+      - name: Build
+        env:
+          GIODE_NOTARY_PASS: ${{ secrets.GIODE_NOTARY_PASS }}
+        run: |
+          release=""
+          if [ -n "$MACOS_CERT_BASE64" ]; then release="-release"; fi
+          giode build $release dmg
+      # iOS installs need a provisioning profile; without one the release
+      # has no .ipa.
+      - name: Build iOS
+        if: env.IOS_PROFILE_BASE64 != ''
+        env:
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          echo "$IOS_PROFILE_BASE64" | base64 -d > App.mobileprovision
+          sed -i '' -e 's|^# profile = .*|profile = "App.mobileprovision"|' -e "s|^# team_id = .*|team_id = \"$IOS_TEAM_ID\"|" giode.toml
+          giode build ios
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          if-no-files-found: ignore
+          path: |
+            dist/macos/*.dmg
+            dist/ios/*.ipa
+
+  publish:
+    needs: [linux, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: artifacts/**/*
