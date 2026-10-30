@@ -67,14 +67,14 @@ func (d *Drives) chosen() (disk.Info, bool) {
 
 func (d *Drives) startScan() {
 	info, ok := d.chosen()
-	if !ok || !d.m.Open(info) {
+	if !ok {
 		return
 	}
 	mode := scan.Quick
 	if d.mode.Selected() == 1 {
 		mode = scan.Deep
 	}
-	d.m.StartScan(mode)
+	d.m.Open(info, func() { d.m.StartScan(mode) })
 }
 
 func (d *Drives) pickImage() {
@@ -127,7 +127,12 @@ func (d *Drives) View() giode.Element {
 		}
 	}
 	_, ok := d.chosen()
-	d.start.Disabled(!ok)
+	d.start.Disabled(!ok || d.m.Opening)
+	if d.m.Opening {
+		d.start.Label("Opening…")
+	} else {
+		d.start.Label("Start scan")
+	}
 	d.mode.Styles(segmentStyles()) // mixed per frame, so it follows the theme
 	return giode.Stack(giode.Styles{Width: -1, Height: -1},
 		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, d.view),

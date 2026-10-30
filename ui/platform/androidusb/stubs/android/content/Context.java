@@ -1,0 +1,10 @@
+package android.content;
+public abstract class Context {
+	public static final String USB_SERVICE = "usb";
+	public static final int RECEIVER_NOT_EXPORTED = 4;
+	public abstract Object getSystemService(String name);
+	public abstract String getPackageName();
+	public abstract Intent registerReceiver(BroadcastReceiver r, IntentFilter f);
+	public abstract Intent registerReceiver(BroadcastReceiver r, IntentFilter f, int flags);
+	public abstract void unregisterReceiver(BroadcastReceiver r);
+}

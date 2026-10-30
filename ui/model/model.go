@@ -34,6 +34,7 @@ type Model struct {
 	// NeedsAdmin is set when a drive couldn't be opened for lack of
 	// rights, so the app offers to restart with them.
 	NeedsAdmin bool
+	Opening    bool
 	OpenErr    error
 
 	// The scan

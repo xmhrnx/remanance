@@ -12,6 +12,7 @@ import (
 	_ "github.com/mehran9675/remanence/engine/fsys/all"
 	"github.com/mehran9675/remanence/ui/icons"
 	"github.com/mehran9675/remanence/ui/model"
+	"github.com/mehran9675/remanence/ui/platform/androidusb"
 	"github.com/mehran9675/remanence/ui/shell"
 	"github.com/mehran9675/remanence/ui/theme"
 )
@@ -20,6 +21,7 @@ func main() {
 	theme.LoadFonts()
 	theme.Apply()
 	icons.Register()
+	androidusb.Register()
 
 	var m *model.Model
 	app := giode.New(giode.Config{

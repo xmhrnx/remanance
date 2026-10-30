@@ -24,19 +24,29 @@ func (m *Model) LoadDrives() {
 	}()
 }
 
-// Open opens a drive for scanning. ok is false when it couldn't be
-// opened; OpenErr says why.
-func (m *Model) Open(info disk.Info) bool {
-	dev, err := disk.Open(info)
-	if err != nil {
-		m.OpenErr = err
-		if errors.Is(err, disk.ErrPermission) {
-			m.NeedsAdmin = true
-		}
-		return false
+// Open opens a drive in the background, since it can wait on the user
+// (Android asks before an app may use a USB drive), then runs then. If
+// the drive can't be opened, OpenErr says why.
+func (m *Model) Open(info disk.Info, then func()) {
+	if m.Opening {
+		return
 	}
-	m.use(dev)
-	return true
+	m.Opening, m.OpenErr = true, nil
+	go func() {
+		dev, err := disk.Open(info)
+		m.App.Post(func() {
+			m.Opening = false
+			if err != nil {
+				m.OpenErr = err
+				if errors.Is(err, disk.ErrPermission) {
+					m.NeedsAdmin = true
+				}
+				return
+			}
+			m.use(dev)
+			then()
+		})
+	}()
 }
 
 // OpenImage opens a disk image file picked by the user. A file that can
