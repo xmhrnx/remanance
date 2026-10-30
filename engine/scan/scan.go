@@ -51,6 +51,10 @@ func Run(ctx context.Context, dev disk.Device, opts Options, onProgress func(Pro
 	s.sm.size = dev.Size()
 	s.res = &Result{Device: dev.Info(), Mode: opts.Mode, Started: s.started}
 	err := s.run(ctx)
+	// What the search carved stays, however the scan ended.
+	if s.carver != nil && s.res.Carved == nil {
+		s.res.Carved = carvedVolume(s.carver.Found(), s.dev.Size())
+	}
 	s.res.Bad = s.safe.BadRanges()
 	s.res.Duration = time.Since(s.started)
 	s.res.Map = s.sm.snapshot()
@@ -74,15 +78,15 @@ func (s *scanner) run(ctx context.Context) error {
 	}
 	s.setPhase(PhaseFileSystem, 0.02)
 	for i, p := range table.Partitions {
-		if err := ctx.Err(); err != nil {
+		if err := s.stopped(ctx); err != nil {
 			return err
 		}
 		from := 0.02 + fsShare*float64(i)/float64(len(table.Partitions))
 		to := 0.02 + fsShare*float64(i+1)/float64(len(table.Partitions))
 		s.res.Volumes = append(s.res.Volumes, s.parse(ctx, p, from, to))
 	}
-	if s.opts.Mode != Deep {
-		return nil
+	if err := s.stopped(ctx); err != nil || s.opts.Mode != Deep {
+		return err
 	}
 
 	if err := s.search(ctx, 0.02+fsShare, 0.95); err != nil {
@@ -93,17 +97,23 @@ func (s *scanner) run(ctx context.Context) error {
 	lost := s.finder.Lost(table.Partitions)
 	s.setPhase(PhaseLost, 0.95)
 	for i, p := range lost {
-		if err := ctx.Err(); err != nil {
+		if err := s.stopped(ctx); err != nil {
 			return err
 		}
 		from := 0.95 + 0.04*float64(i)/float64(len(lost))
 		s.res.Volumes = append(s.res.Volumes, s.parse(ctx, p, from, from+0.04/float64(len(lost))))
 	}
 	sortVolumes(s.res.Volumes)
-	if s.carver != nil {
-		s.res.Carved = carvedVolume(s.carver.Found(), s.dev.Size())
+	return s.stopped(ctx)
+}
+
+// stopped returns why the scan has to end early: cancelled, or the drive
+// disconnected, when the reads after it would only fail.
+func (s *scanner) stopped(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
 	}
-	return nil
+	return s.safe.Gone()
 }
 
 // parse reads the file system of one partition.

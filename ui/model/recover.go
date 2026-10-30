@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/mehran9675/remanence/engine/disk"
 	"github.com/mehran9675/remanence/engine/fsys"
 	"github.com/mehran9675/remanence/engine/recovery"
 )
@@ -50,6 +51,9 @@ func (m *Model) StartRecover(sink recovery.Sink, keepFolders bool) {
 			m.Report, m.RecoverErr = rep, err
 			if errors.Is(err, context.Canceled) {
 				m.RecoverErr = fmt.Errorf("stopped after %d files", rep.Recovered)
+			}
+			if disk.IsGone(err) {
+				m.RecoverErr = errors.New("the drive disconnected. Plug it back in and recover again; what the scan found is kept")
 			}
 			m.changed()
 		})

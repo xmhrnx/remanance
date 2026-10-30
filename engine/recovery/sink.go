@@ -16,6 +16,9 @@ type Sink interface {
 	Create(rel string) (io.WriteCloser, error)
 	// Finish sets the file's times once written, where supported.
 	Finish(rel string, modified, accessed time.Time)
+	// Remove deletes a file that failed half way, so a later attempt
+	// gets its name rather than a copy.
+	Remove(rel string)
 	// Exists reports whether rel is taken.
 	Exists(rel string) bool
 	// Location describes the destination to people.
@@ -44,6 +47,8 @@ func (d DirSink) Finish(rel string, modified, accessed time.Time) {
 	}
 	os.Chtimes(d.path(rel), accessed, modified)
 }
+
+func (d DirSink) Remove(rel string) { os.Remove(d.path(rel)) }
 
 func (d DirSink) Exists(rel string) bool {
 	_, err := os.Lstat(d.path(rel))

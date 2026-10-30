@@ -10,6 +10,8 @@ import (
 	"unsafe"
 
 	"golang.org/x/sys/unix"
+
+	"github.com/mehran9675/remanence/engine/disk"
 )
 
 // usbdevfs request structures, laid out as the kernel's: Go's alignment
@@ -73,7 +75,7 @@ func (d *DevFS) bulk(ep uint32, data []byte, timeout time.Duration) (int, error)
 	case errors.Is(err, unix.ETIMEDOUT):
 		return 0, fmt.Errorf("usb: the drive stopped answering")
 	case errors.Is(err, unix.ENODEV), errors.Is(err, unix.ESHUTDOWN):
-		return 0, fmt.Errorf("usb: the drive was unplugged")
+		return 0, fmt.Errorf("usb: %w", disk.ErrGone)
 	case err != nil:
 		return 0, fmt.Errorf("usb: %w", err)
 	}

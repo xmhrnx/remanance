@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mehran9675/remanence/engine/disk"
 	"github.com/mehran9675/remanence/engine/fsys"
 )
 
@@ -114,6 +115,21 @@ func Recover(ctx context.Context, dev io.ReaderAt, items []Item, sink Sink, opts
 			}
 		})
 		out.Err = err
+		if err != nil && n == 0 {
+			// Nothing of it was read: leave no empty file behind.
+			sink.Remove(rel)
+			out.Dest = ""
+		}
+		if disk.IsGone(err) {
+			// Every file after it would fail the same way.
+			rep.Failed++
+			rep.Outcomes = append(rep.Outcomes, out)
+			rep.Duration = time.Since(started)
+			if opts.Report {
+				writeReport(sink, rep)
+			}
+			return rep, err
+		}
 		if err != nil {
 			rep.Failed++
 		} else {
@@ -204,7 +220,11 @@ func writeReport(sink Sink, rep *Report) {
 		case o.Health < 100:
 			status = fmt.Sprintf("recovered, %d%% intact", o.Health)
 		}
-		fmt.Fprintf(w, "%s\r\n    -> %s (%s) %s\r\n", o.Source, o.Dest, FormatBytes(o.Size), status)
+		if o.Dest == "" {
+			fmt.Fprintf(w, "%s (%s) %s\r\n", o.Source, FormatBytes(o.Size), status)
+		} else {
+			fmt.Fprintf(w, "%s\r\n    -> %s (%s) %s\r\n", o.Source, o.Dest, FormatBytes(o.Size), status)
+		}
 		if o.Note != "" {
 			fmt.Fprintf(w, "    %s\r\n", o.Note)
 		}

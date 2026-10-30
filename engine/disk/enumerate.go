@@ -73,5 +73,9 @@ func Open(info Info) (Device, error) {
 			return p.Open(info)
 		}
 	}
-	return openPhysical(info)
+	dev, err := openPhysical(info)
+	if err != nil {
+		return nil, err
+	}
+	return Reconnecting(dev), nil
 }

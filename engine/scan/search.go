@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mehran9675/remanence/engine/carve"
+	"github.com/mehran9675/remanence/engine/disk"
 	"github.com/mehran9675/remanence/engine/partition"
 )
 
@@ -19,6 +20,9 @@ type block struct {
 // the lost-partition finder and the carver. Reading runs ahead in its own
 // goroutine so the device never waits on the parsing.
 func (s *scanner) search(ctx context.Context, from, to float64) error {
+	// Ending the search early, however it ends, releases the reader.
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	s.setPhase(PhaseSectors, from)
 	start := s.opts.Start - s.opts.Start%int64(s.dev.SectorSize())
 	end := s.searchEnd()
@@ -56,6 +60,9 @@ func (s *scanner) search(ctx context.Context, from, to float64) error {
 			// The 1 KB overlap lets a superblock straddle blocks.
 			badBefore := s.safe.BadBytes()
 			m, err := s.safe.ReadAt(buf[:n], pos)
+			if disk.IsGone(err) {
+				return
+			}
 			if m < n {
 				clear(buf[m:n])
 			}
@@ -93,9 +100,9 @@ func (s *scanner) search(ctx context.Context, from, to float64) error {
 		s.phase, s.fraction = PhaseSectors, from+(to-from)*float64(b.pos+int64(scanLen)-start)/total
 		s.mu.Unlock()
 		s.send(false)
-		if ctx.Err() != nil {
+		if s.stopped(ctx) != nil {
 			break
 		}
 	}
-	return ctx.Err()
+	return s.stopped(ctx)
 }

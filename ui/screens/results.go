@@ -8,6 +8,7 @@ import (
 	"github.com/mehran9675/giode/components/input"
 	"github.com/mehran9675/giode/components/segmented"
 	"github.com/mehran9675/giode/components/sheet"
+	"github.com/mehran9675/remanence/engine/disk"
 	"github.com/mehran9675/remanence/engine/fsys"
 	"github.com/mehran9675/remanence/engine/recovery"
 	"github.com/mehran9675/remanence/engine/scan"
@@ -249,7 +250,9 @@ func (r *Results) summary(compact bool) giode.Element {
 		giode.Text(facts, theme.Caption().With(giode.Styles{FontWeight: giode.FontWeightNormal})),
 	)
 	kids := []giode.Element{r.newScan, left}
-	if r.m.ScanErr != nil {
+	if disk.IsGone(r.m.ScanErr) {
+		kids = append(kids, components.Tag("Drive disconnected", "theme.danger"))
+	} else if r.m.ScanErr != nil {
 		kids = append(kids, components.Tag("Stopped early", "theme.warning"))
 	}
 	if compact {
