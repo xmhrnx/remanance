@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/xmhrnx/remanance/engine/disk"
-	"github.com/xmhrnx/remanance/engine/iphone"
 	"github.com/xmhrnx/remanance/engine/recovery"
 )
 
@@ -33,11 +32,6 @@ func runList() error {
 			tags = append(tags, strings.Join(i.Mounts, " "))
 		}
 		fmt.Printf("%-22s %9s  %s  [%s]\n", i.Path, recovery.FormatBytes(i.Size), i.Name, strings.Join(tags, ", "))
-	}
-	// iPhones connected by USB, for "backup".
-	phones, _ := iphone.Connected()
-	for _, p := range phones {
-		fmt.Printf("%-22s %9s  %s  [iPhone, connected by USB: back it up first]\n", p.UDID, "", p.Name)
 	}
 	return nil
 }

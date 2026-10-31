@@ -9,7 +9,6 @@ import (
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/fsys"
-	"github.com/xmhrnx/remanance/engine/iphone"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/scan"
 )
@@ -37,15 +36,6 @@ type Model struct {
 	NeedsAdmin bool
 	Opening    bool
 	OpenErr    error
-
-	// iPhones connected by USB, and backing one up
-	Phones []iphone.Phone
-	// PhoneService is false when Apple's USB service, which reaching
-	// an iPhone needs, isn't there.
-	PhoneService bool
-	BackingUp    *iphone.Progress // while backing up
-	BackupErr    error
-	backupCancel context.CancelFunc
 
 	// The scan
 	Source   disk.Info

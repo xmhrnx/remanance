@@ -95,26 +95,28 @@ root. What Remanence can still find:
 - **Android phones, from a computer.** Connect the phone by USB with
   USB debugging turned on (in Developer options), and Remanence on
   Windows, macOS and Linux lists it through ADB, Android's debug bridge:
-  its storage, searched as above, and on a rooted phone its apps'
-  databases. It needs Android's platform tools (`adb`) installed; it
+  its storage, searched as above along with the apps' own caches in
+  `Android/data`, where gallery and chat apps keep thumbnails and copies
+  of photos, and on a rooted phone its apps' databases. It needs Android's platform tools (`adb`) installed; it
   starts the adb server itself.
-- **iPhones, from a computer.** iOS lets no app read its storage, so an
-  iPhone is recovered from a backup:
-  - Connect the iPhone by USB and choose "Back up" in Remanence. It
-    backs the phone up itself, the way Finder does, after the phone asks
-    you to trust the computer. On Windows this needs Apple Devices or
-    iTunes installed, for Apple's USB driver; on Linux, `usbmuxd`.
-  - Or scan a backup Finder or iTunes already made: Remanence lists
-    them, and opens any backup folder you pick. On macOS, give Remanence
-    Full Disk Access to see them.
+- **iPhones, from a computer.** Connect the iPhone by USB, unlock it
+  and tap Trust when it asks, and Remanence on Windows, macOS and Linux
+  lists it with the drives and reads its photo storage directly. A scan
+  finds:
+  - photos and videos in Recently Deleted, which iOS keeps for 30 days;
+  - previews of deleted photos: iOS keeps a thumbnail of every photo,
+    and it often stays after the photo is gone;
+  - deleted rows in the Photos library, which name deleted photos and
+    when they were taken;
+  - pictures inside the thumbnail caches, with a deep scan.
 
-  A backup holds the phone's photos, those in Recently Deleted
-  included, and every app's files and databases, where deleted
-  messages, calls, notes and chats are found. **Encrypted backups**
-  open with their password, the one set for encrypted backups in Finder
-  or iTunes (or on the phone), and hold more: call history, Health data
-  and saved passwords among them. Photos kept only in iCloud aren't in a
-  backup.
+  On Windows this needs Apple Devices or iTunes installed, for Apple's
+  USB driver; on Linux, `usbmuxd`. An iPhone encrypts each file with
+  its own key and erases the key when the file is deleted, so a deleted
+  photo past Recently Deleted comes back only as its preview, from no
+  tool. Remanence also scans backups Finder or iTunes already made,
+  which hold the photos and app data the phone had then (encrypted ones
+  open with their password).
 
 ## Install
 
@@ -150,14 +152,10 @@ remanence-cli recover -to ~/Recovered -type jpg,mp4 /dev/sdb
 remanence-cli image /dev/sdb sdb.img
 ```
 
-```bash
-remanence-cli backup
-```
-
-`list` also shows the iPhone backups on the computer and the phones
-connected by USB. `backup` backs up the connected iPhone; `scan` and
-`recover` take a backup's folder as the source, and read an encrypted
-one with the password in `REMANENCE_BACKUP_PASSWORD`.
+`list` also shows the iPhones and Android phones connected by USB and
+the iPhone backups on the computer; `scan` and `recover` take any of
+them as the source. For an encrypted backup, set
+`REMANENCE_BACKUP_PASSWORD` to its password.
 
 ## Building
 
@@ -201,7 +199,7 @@ repository has the `IOS_CERT_BASE64`, `IOS_CERT_PASS` and
 - APFS, HFS+, Btrfs, XFS and ReFS. Deleted files on these drives are
   found only by carving, without their names.
 - RAID reconstruction and recovery over the network.
-- Reading an iPhone straight over USB without a backup, or from iCloud.
+- Recovering from iCloud.
 - Deleted rows a database has already overwritten, or apps that wipe
   deleted rows on purpose (SQLite's `secure_delete`).
 

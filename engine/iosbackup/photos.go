@@ -2,6 +2,7 @@ package iosbackup
 
 import (
 	"fmt"
+	"io"
 	"path"
 	"strings"
 	"time"
@@ -18,15 +19,28 @@ const photosDB = "CameraRollDomain/Media/PhotoData/Photos.sqlite"
 var coreDataEpoch = time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
 
 // markTrashed marks the photos and videos in Recently Deleted as
-// deleted, from the Photos library in the backup. The files are still
-// there: iOS keeps them for 30 days. byPath has every file by its
-// domain and path.
+// deleted, from the Photos library in the backup. byPath has every file
+// by its domain and path.
 func markTrashed(set *disk.FileSet, byPath map[string]*fsys.Entry) {
 	lib := byPath[photosDB]
 	if lib == nil || len(lib.Runs) == 0 {
 		return
 	}
-	db, err := sqlite.Open(disk.NewSection(set, lib.Runs[0].Offset, lib.Size), lib.Size)
+	media := map[string]*fsys.Entry{}
+	for p, e := range byPath {
+		if rest, ok := strings.CutPrefix(p, "CameraRollDomain/Media/"); ok {
+			media[rest] = e
+		}
+	}
+	MarkTrashed(disk.NewSection(set, lib.Runs[0].Offset, lib.Size), lib.Size, media)
+}
+
+// MarkTrashed marks the photos and videos in Recently Deleted as
+// deleted, from the Photos library, Photos.sqlite. The files are still
+// there: iOS keeps them for 30 days. media has the files by their path
+// in the phone's media folder, such as "DCIM/100APPLE/IMG_0001.HEIC".
+func MarkTrashed(lib io.ReaderAt, size int64, media map[string]*fsys.Entry) {
+	db, err := sqlite.Open(lib, size)
 	if err != nil {
 		return
 	}
@@ -44,11 +58,9 @@ func markTrashed(set *disk.FileSet, byPath map[string]*fsys.Entry) {
 	// A photo's files, such as the picture and a Live Photo's video,
 	// share the name before the extension.
 	byStem := map[string][]*fsys.Entry{}
-	for p, e := range byPath {
-		if rest, ok := strings.CutPrefix(p, "CameraRollDomain/Media/"); ok {
-			stem := strings.ToLower(strings.TrimSuffix(rest, path.Ext(rest)))
-			byStem[stem] = append(byStem[stem], e)
-		}
+	for p, e := range media {
+		stem := strings.ToLower(strings.TrimSuffix(p, path.Ext(p)))
+		byStem[stem] = append(byStem[stem], e)
 	}
 	t.Rows(func(_ int64, row []any) bool {
 		if state, _ := row[cState].(int64); state != 1 {

@@ -9,7 +9,9 @@
 //     a .nomedia file, which the gallery doesn't show and which often
 //     outlive the original;
 //   - caches with pictures inside, such as the gallery's thumbnail
-//     databases, which a deep scan searches by signature.
+//     databases, which a deep scan searches by signature;
+//   - apps' own caches in Android/data, which ADB can read: gallery,
+//     camera and chat apps keep thumbnails and copies of photos there.
 //
 // Reading other apps' files takes Android's "All files access", on the
 // phone; from a computer, ADB reads them (see engine/adb).
@@ -221,9 +223,12 @@ func (f *folders) at(rel string) *fsys.Entry {
 	return e
 }
 
-// skip are folders not worth walking: Android denies them to every app
-// but their own, or they hold app packages.
-var skip = map[string]bool{"Android/data": true, "Android/obb": true}
+// skip are folders not worth walking: they hold app packages. Apps'
+// own folders, Android/data, are walked: Android denies them to other
+// apps, so on the phone the walk passes them by, but over ADB they can
+// be read, and gallery and chat apps keep thumbnails and copies of
+// photos there that outlive the originals.
+var skip = map[string]bool{"Android/obb": true}
 
 // cacheDir names folders apps keep caches in.
 var cacheDir = map[string]bool{"cache": true, "caches": true, "thumbnails": true, "thumbs": true}

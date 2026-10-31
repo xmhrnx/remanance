@@ -17,6 +17,7 @@ import (
 	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 	"github.com/xmhrnx/remanance/ui/platform/androidusb"
 	"github.com/xmhrnx/remanance/ui/platform/iosbackups"
+	"github.com/xmhrnx/remanance/ui/platform/iphones"
 	"github.com/xmhrnx/remanance/ui/shell"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
@@ -30,6 +31,7 @@ func main() {
 	androidroot.Register()
 	iosbackups.Register()
 	adbphones.Register()
+	iphones.Register()
 
 	var m *model.Model
 	app := giode.New(giode.Config{

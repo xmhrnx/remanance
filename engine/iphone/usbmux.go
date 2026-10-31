@@ -1,9 +1,3 @@
-// Package iphone backs up an iPhone or iPad connected to this computer
-// by USB, as Finder and iTunes do, so its files can be scanned: iOS
-// keeps them encrypted with keys that go with a deleted file, so a
-// backup is the way in. It talks to the phone through Apple's USB
-// service, usbmuxd, which iTunes or the Apple Devices app installs on
-// Windows and macOS has built in; Linux has its own usbmuxd.
 package iphone
 
 import (

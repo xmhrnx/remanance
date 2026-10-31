@@ -6,7 +6,6 @@ package screens
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slices"
 	"strings"
 
@@ -17,8 +16,6 @@ import (
 	"github.com/mehran9675/giode/components/segmented"
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/iosbackup"
-	"github.com/xmhrnx/remanance/engine/iphone"
-	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
@@ -40,9 +37,8 @@ type Drives struct {
 	// elevating is set while the system asks for administrator rights.
 	elevating bool
 
-	mode       *segmented.Control
-	start      *giode.ButtonElement
-	stopBackup *giode.ButtonElement
+	mode  *segmented.Control
+	start *giode.ButtonElement
 	// password and unlock ask for an encrypted backup's password.
 	password *input.Input
 	unlock   *giode.ButtonElement
@@ -56,16 +52,7 @@ func NewDrives(m *model.Model) *Drives {
 	d := &Drives{m: m}
 	d.mode = giode.Input.Segmented("Quick scan", "Deep scan").Styles(segmentStyles().With(giode.Styles{Width: 280}))
 	d.start = components.PrimaryButton("Start scan", "search").OnClick(d.startScan)
-	d.refresh = components.IconAction("refresh", "Refresh the drive list").OnClick(func() {
-		m.LoadDrives()
-		if platform.ReadsBackups {
-			m.LoadPhones()
-		}
-	})
-	if platform.ReadsBackups {
-		m.LoadPhones()
-	}
-	d.stopBackup = components.SecondaryButton("Stop", "stop").OnClick(m.CancelPhoneBackup)
+	d.refresh = components.IconAction("refresh", "Refresh the drive list").OnClick(m.LoadDrives)
 	d.password = giode.Input.Text("Backup password", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
 		Password(true).Submit(func(string) { d.unlockBackup() })
 	d.unlock = components.PrimaryButton("Unlock", "lock").OnClick(d.unlockBackup)
@@ -240,9 +227,6 @@ func (d *Drives) content() giode.Element {
 		notes = append(notes, components.Banner("lock", "theme.warning",
 			"Reading drives directly needs administrator rights. Remanence only reads; it never writes to the drive you scan.", d.elevate))
 	}
-	if p := d.m.BackingUp; p != nil {
-		notes = append(notes, components.Banner("phone", "theme.primary", backupStatus(*p), d.stopBackup))
-	}
 	if needsPassword(d.m.OpenErr) {
 		d.unlock.Disabled(d.m.Opening)
 		if d.m.Opening {
@@ -254,7 +238,7 @@ func (d *Drives) content() giode.Element {
 			giode.Row(giode.Styles{Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
 				giode.Box(giode.Styles{Width: 220}, d.password), d.unlock)))
 	}
-	for _, err := range []error{d.m.OpenErr, d.m.DrivesErr, d.pickErr, d.m.BackupErr} {
+	for _, err := range []error{d.m.OpenErr, d.m.DrivesErr, d.pickErr} {
 		if err != nil && !(d.m.NeedsAdmin && err == d.m.OpenErr) && !needsPassword(err) {
 			notes = append(notes, components.Banner("alert", "theme.danger", err.Error(), nil))
 		}
@@ -328,8 +312,7 @@ func (d *Drives) driveCards(compact bool) giode.Element {
 }
 
 // backupSection lists the iPhone and iPad backups on this computer, on
-// desktops: Remanence can't read an iPhone's storage, but its backups
-// hold its photos, Recently Deleted included.
+// desktops, which hold photos and app data the phone has since lost.
 func (d *Drives) backupSection(compact bool) giode.Element {
 	if !platform.ReadsBackups {
 		return giode.Box(giode.Styles{})
@@ -340,37 +323,8 @@ func (d *Drives) backupSection(compact bool) giode.Element {
 			cards = append(cards, d.card(info, compact))
 		}
 	}
-	for _, p := range d.m.Phones {
-		cards = append(cards, d.openCard("iphone-"+p.UDID, "phone", "Back up "+p.Name,
-			"Connected by USB: back it up here, then scan the backup", compact, func() { d.backUp(p) }))
-	}
 	cards = append(cards, d.openCard("open-backup", "phone", "Open an iPhone backup", "A backup folder made by Finder or iTunes", compact, d.pickBackup))
-	body := []giode.Element{giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)}
-	if !d.m.PhoneService && len(d.m.Phones) == 0 {
-		body = append(body, giode.Text("To back up an iPhone connected to this computer, install Apple Devices or iTunes (on Windows) or usbmuxd (on Linux), then refresh.",
-			theme.Secondary().With(giode.Styles{FontSize: 12.5})))
-	}
-	return d.section("iPhone and iPad backups", nil, giode.Stack(giode.Styles{Width: -1, Gap: theme.S3}, body...))
-}
-
-// backUp backs up a connected iPhone, then chooses its backup to scan.
-func (d *Drives) backUp(p iphone.Phone) {
-	d.m.BackUpPhone(p, func(id string) { d.selected = id })
-}
-
-// backupStatus says how a backup of a phone is going.
-func backupStatus(p iphone.Progress) string {
-	s := p.Step
-	if p.Fraction > 0 {
-		s += fmt.Sprintf(": %.0f%%", p.Fraction*100)
-	}
-	if p.Bytes > 0 {
-		s += ", " + recovery.FormatBytes(p.Bytes) + " so far"
-	}
-	if p.Step == iphone.StepBackup {
-		s += ". Keep it connected and unlocked"
-	}
-	return s
+	return d.section("iPhone and iPad backups", nil, giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...))
 }
 
 func (d *Drives) imageCards(compact bool) giode.Element {

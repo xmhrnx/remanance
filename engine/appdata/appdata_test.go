@@ -87,8 +87,8 @@ func TestScan(t *testing.T) {
 func TestShown(t *testing.T) {
 	for p, want := range map[string]string{
 		"/data/data/com.whatsapp/databases/msgstore.db": "com.whatsapp/databases/msgstore.db",
-		"/data/user_de/0/a/b.db":                         "a/b.db",
-		"/data/media/0/x.db":                             "",
+		"/data/user_de/0/a/b.db":                        "a/b.db",
+		"/data/media/0/x.db":                            "",
 	} {
 		if got := shown(p); got != want {
 			t.Errorf("%s: %q", p, got)

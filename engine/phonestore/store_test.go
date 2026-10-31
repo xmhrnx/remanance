@@ -29,7 +29,9 @@ func TestStore(t *testing.T) {
 		"Android/media/com.whatsapp/Sent/IMG-1.jpg": []byte("sent copy"),
 		"Pictures/.thumbnails/1234.jpg":             []byte("a thumbnail"),
 		"DCIM/.thumbnails/.thumbdata4--1967290299":  cache,
-		"Android/data/com.app/files/secret.jpg":     []byte("not ours to read"),
+		"Android/data/com.app/files/photo.jpg":      []byte("in plain sight"),
+		"Android/data/com.app/cache/thumb.jpg":      []byte("a cached copy"),
+		"Android/obb/com.app/main.obb":              []byte("an app package"),
 		"Download/report.pdf":                       []byte("in plain sight"),
 	} {
 		p := filepath.Join(root, filepath.FromSlash(rel))
@@ -58,13 +60,14 @@ func TestStore(t *testing.T) {
 			return true
 		})
 	}
-	if len(got) != 3 {
+	if len(got) != 4 {
 		t.Fatalf("found %v", got)
 	}
 	if e := got["Trash:/DCIM/Camera/IMG_2.jpg"]; e == nil || e.State != fsys.Deleted || e.Note == "In the trash" {
 		t.Fatalf("trash: %+v", e)
 	}
-	for _, p := range []string{"Hidden copies:/Android/media/com.whatsapp/Sent/IMG-1.jpg", "Hidden copies:/Pictures/.thumbnails/1234.jpg"} {
+	for _, p := range []string{"Hidden copies:/Android/media/com.whatsapp/Sent/IMG-1.jpg", "Hidden copies:/Pictures/.thumbnails/1234.jpg",
+		"Hidden copies:/Android/data/com.app/cache/thumb.jpg"} {
 		if e := got[p]; e == nil || e.State != fsys.Orphan {
 			t.Fatalf("%s: %+v", p, e)
 		}

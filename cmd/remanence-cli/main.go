@@ -13,6 +13,7 @@ import (
 
 	"github.com/xmhrnx/remanance/ui/platform/adbphones"
 	"github.com/xmhrnx/remanance/ui/platform/iosbackups"
+	"github.com/xmhrnx/remanance/ui/platform/iphones"
 )
 
 const usage = `Remanence recovers deleted and lost files.
@@ -23,11 +24,10 @@ Usage:
   remanence-cli recover -to DIR [-deep] [-all] [-flat] [-type jpg,pdf] SOURCE
                                              copy deleted files out (-all: every file)
   remanence-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
-  remanence-cli backup [-to DIR] [UDID]      back up an iPhone connected by USB, to scan it
 
 SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
-a disk image file, or an iPhone backup's folder ("list" shows the ones
-Finder and iTunes made). Reading drives needs administrator rights. For
+a disk image file, an iPhone or Android phone connected by USB, or an
+iPhone backup's folder ("list" shows them all). Reading drives needs administrator rights. For
 an encrypted backup, set REMANENCE_BACKUP_PASSWORD to its password.
 `
 
@@ -38,6 +38,7 @@ func main() {
 	}
 	iosbackups.Register()
 	adbphones.Register()
+	iphones.Register()
 	var err error
 	switch os.Args[1] {
 	case "list":
@@ -48,8 +49,6 @@ func main() {
 		err = runRecover(os.Args[2:])
 	case "image":
 		err = runImage(os.Args[2:])
-	case "backup":
-		err = runBackup(os.Args[2:])
 	case "help", "-h", "--help":
 		fmt.Print(usage)
 		return

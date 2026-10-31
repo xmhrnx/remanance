@@ -85,7 +85,11 @@ func (r reader) ReadAt(p []byte, off int64) (int, error) {
 	return len(p), nil
 }
 
-type file struct{ r interface{ ReadAt([]byte, int64) (int, error) } }
+type file struct {
+	r interface {
+		ReadAt([]byte, int64) (int, error)
+	}
+}
 
 func (f file) ReadAt(p []byte, off int64) (int, error) { return f.r.ReadAt(p, off) }
 func (f file) Close() error                            { return nil }
