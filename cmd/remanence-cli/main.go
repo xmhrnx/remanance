@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/xmhrnx/remanance/ui/platform/adbphones"
 	"github.com/xmhrnx/remanance/ui/platform/iosbackups"
 )
 
@@ -36,6 +37,7 @@ func main() {
 		os.Exit(2)
 	}
 	iosbackups.Register()
+	adbphones.Register()
 	var err error
 	switch os.Args[1] {
 	case "list":

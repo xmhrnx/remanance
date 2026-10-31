@@ -15,14 +15,25 @@ import (
 // can describe a file as a run on the device and recover, preview and
 // carve it like any other. The space between files reads as zeros.
 type FileSet struct {
-	info  Info
-	files []setFile
-	size  int64
+	info   Info
+	files  []setFile
+	size   int64
+	opener Opener
 
 	mu   sync.Mutex
-	open map[int]*os.File // a few open files, closed least recently used
+	open map[int]File // a few open files, closed least recently used
 	used []int
 }
+
+// File is an open file of a set.
+type File interface {
+	io.ReaderAt
+	io.Closer
+}
+
+// Opener opens a file of a set by the path it was added with: on this
+// computer, or on a phone over USB.
+type Opener func(path string) (File, error)
 
 type setFile struct {
 	path      string
@@ -36,8 +47,13 @@ const maxOpen = 16
 // NewFileSet returns an empty set described by info; Size and SectorSize
 // are filled in as files are added.
 func NewFileSet(info Info) *FileSet {
+	return NewFileSetWith(info, func(path string) (File, error) { return os.Open(path) })
+}
+
+// NewFileSetWith returns an empty set whose files open opens.
+func NewFileSetWith(info Info, open Opener) *FileSet {
 	info.SectorSize = 512
-	return &FileSet{info: info, open: map[int]*os.File{}}
+	return &FileSet{info: info, opener: open, open: map[int]File{}}
 }
 
 // Add places the file at path, size bytes long, in the set and returns
@@ -148,7 +164,7 @@ func (s *FileSet) readPlain(i int, p []byte, off int64) (int, error) {
 	f, ok := s.open[i]
 	if !ok {
 		var err error
-		if f, err = os.Open(s.files[i].path); err != nil {
+		if f, err = s.opener(s.files[i].path); err != nil {
 			s.mu.Unlock()
 			return 0, err
 		}

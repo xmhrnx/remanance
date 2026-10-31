@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xmhrnx/remanance/engine/appdata"
 	"github.com/xmhrnx/remanance/engine/disk"
 )
 
@@ -57,8 +58,19 @@ func (p *provider) List() ([]disk.Info, error) {
 	if err != nil {
 		return nil, nil
 	}
-	return parse(out), nil
+	// The apps' databases, where deleted texts and chats are found.
+	return append(parse(out), appdata.Info(appdataID, "This phone's apps")), nil
 }
+
+// appdataID is the ID of the apps' databases.
+const appdataID = prefix + "appdata"
+
+// rootShell lets engine/appdata read files through the root shell.
+type rootShell struct{ s *session }
+
+func (r rootShell) Run(command string) (string, error) { return r.s.run(command, 5*time.Minute) }
+
+func (r rootShell) Read(path string, p []byte, off int64) error { return r.s.read(path, 512, p, off) }
 
 func (p *provider) Handles(id string) bool { return strings.HasPrefix(id, prefix) }
 
@@ -66,6 +78,9 @@ func (p *provider) Open(info disk.Info) (disk.Device, error) {
 	s, err := p.session()
 	if err != nil {
 		return nil, err
+	}
+	if info.ID == appdataID {
+		return appdata.Open(info, rootShell{s}), nil
 	}
 	bs := 4096
 	if info.Size%4096 != 0 {

@@ -11,11 +11,13 @@
 //   - caches with pictures inside, such as the gallery's thumbnail
 //     databases, which a deep scan searches by signature.
 //
-// Reading other apps' files takes Android's "All files access".
+// Reading other apps' files takes Android's "All files access", on the
+// phone; from a computer, ADB reads them (see engine/adb).
 package phonestore
 
 import (
 	"context"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,7 +36,7 @@ const Root = "/storage/emulated/0"
 // files are listed when the scan starts.
 type Device struct {
 	*disk.FileSet
-	root       string
+	fs         fs.FS // the storage, its paths relative to its top
 	start, end int64 // what a deep scan searches: the caches
 }
 
@@ -49,13 +51,19 @@ func Open(root string) (*Device, error) {
 	if _, err := os.ReadDir(root); err != nil {
 		return nil, err
 	}
-	return &Device{FileSet: disk.NewFileSet(Info(root)), root: root}, nil
+	open := func(p string) (disk.File, error) { return os.Open(filepath.Join(root, filepath.FromSlash(p))) }
+	return OpenFS(Info(root), os.DirFS(root), open), nil
+}
+
+// OpenFS opens shared storage that storage lists and open reads, by
+// paths relative to its top, such as a phone's over ADB.
+func OpenFS(info disk.Info, storage fs.FS, open disk.Opener) *Device {
+	return &Device{FileSet: disk.NewFileSetWith(info, open), fs: storage}
 }
 
 // found is a file worth listing or searching.
 type found struct {
 	rel  string // its path under the root, with "/"
-	abs  string
 	size int64
 	mod  time.Time
 	kind kind
@@ -72,7 +80,7 @@ const (
 // Volumes walks the storage and lists the trash, then the hidden copies.
 // A deep scan then searches the caches.
 func (d *Device) Volumes(ctx context.Context, progress func(float64)) ([]*fsys.Volume, error) {
-	top, err := os.ReadDir(d.root)
+	top, err := fs.ReadDir(d.fs, ".")
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +98,7 @@ func (d *Device) Volumes(ctx context.Context, progress func(float64)) ([]*fsys.V
 	// The caches go first, so a deep scan searches one stretch.
 	for _, f := range all {
 		if f.kind == cache {
-			d.Add(f.abs, f.size)
+			d.Add(f.rel, f.size)
 		}
 	}
 	d.end = d.Size()
@@ -108,7 +116,7 @@ func (d *Device) Volumes(ctx context.Context, progress func(float64)) ([]*fsys.V
 		}
 		id++
 		e := &fsys.Entry{ID: id, Size: f.size, Modified: f.mod, Health: 100}
-		e.Runs = []fsys.Run{{Offset: d.Add(f.abs, f.size), Length: f.size}}
+		e.Runs = []fsys.Run{{Offset: d.Add(f.rel, f.size), Length: f.size}}
 		dir, name := path.Split(f.rel)
 		dirs := copyDirs
 		if f.kind == trashed {
@@ -139,8 +147,7 @@ func (d *Device) walk(ctx context.Context, rel string, hidden bool, out *[]found
 	if skip[rel] || ctx.Err() != nil {
 		return
 	}
-	abs := filepath.Join(d.root, filepath.FromSlash(rel))
-	entries, err := os.ReadDir(abs)
+	entries, err := fs.ReadDir(d.fs, rel)
 	if err != nil {
 		return
 	}
@@ -163,7 +170,7 @@ func (d *Device) walk(ctx context.Context, rel string, hidden bool, out *[]found
 		if err != nil || info.Size() == 0 {
 			continue
 		}
-		f := found{rel: p, abs: filepath.Join(abs, name), size: info.Size(), mod: info.ModTime()}
+		f := found{rel: p, size: info.Size(), mod: info.ModTime()}
 		switch {
 		case strings.HasPrefix(name, ".trashed-"):
 			f.kind = trashed

@@ -12,6 +12,7 @@ import (
 	_ "github.com/xmhrnx/remanance/engine/fsys/all"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
+	"github.com/xmhrnx/remanance/ui/platform/adbphones"
 	"github.com/xmhrnx/remanance/ui/platform/androidroot"
 	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 	"github.com/xmhrnx/remanance/ui/platform/androidusb"
@@ -28,6 +29,7 @@ func main() {
 	androidusb.Register()
 	androidroot.Register()
 	iosbackups.Register()
+	adbphones.Register()
 
 	var m *model.Model
 	app := giode.New(giode.Config{
