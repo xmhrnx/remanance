@@ -80,9 +80,63 @@ func TestOpen(t *testing.T) {
 	}
 }
 
+const encrypted = "testdata/backup-encrypted/00008110-000E2C3D4E5F6071"
+
 func TestEncrypted(t *testing.T) {
-	if _, err := Open(Backup{Dir: fixture, Encrypted: true}); err != ErrEncrypted {
+	b, err := Read(encrypted)
+	if err != nil || !b.Encrypted {
+		t.Fatalf("%+v %v", b, err)
+	}
+	if _, err := Open(b); err != ErrPassword {
+		t.Fatalf("without a password: %v", err)
+	}
+	SetPassword(b.Dir, "1234")
+	if _, err := Open(b); err != ErrWrongPassword {
+		t.Fatalf("with the wrong password: %v", err)
+	}
+	SetPassword(b.Dir, "test password")
+	d, err := Open(b)
+	if err != nil {
 		t.Fatal(err)
+	}
+	defer d.Close()
+	files := map[string]*fsys.Entry{}
+	d.vol.Root.Walk(func(e *fsys.Entry) bool {
+		if !e.IsDir {
+			files[e.Path()] = e
+		}
+		return true
+	})
+	photo := files["/Camera Roll/DCIM/100APPLE/IMG_0001.HEIC"]
+	if photo == nil {
+		t.Fatalf("files: %v", files)
+	}
+	got := make([]byte, photo.Size)
+	if _, err := d.ReadAt(got, photo.Runs[0].Offset); err != nil && err != io.EOF {
+		t.Fatal(err)
+	}
+	if string(got) != "photo one, encrypted" {
+		t.Errorf("photo reads %q", got)
+	}
+	sms := files["/Phone/Library/SMS/sms.db"]
+	if sms == nil || sms.Size != 49152 {
+		t.Fatalf("sms.db: %+v", sms)
+	}
+
+	// A scan finds the messages deleted from it.
+	res, err := scan.Run(context.Background(), d, scan.Options{}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var msgs *fsys.Entry
+	res.Volumes[0].Volume.Root.Walk(func(e *fsys.Entry) bool {
+		if e.Name == "Messages.csv" {
+			msgs = e
+		}
+		return true
+	})
+	if msgs == nil || !strings.Contains(string(msgs.Inline), "Message number 3: see you at 4 o'clock") {
+		t.Fatalf("no deleted messages found: %+v", msgs)
 	}
 }
 

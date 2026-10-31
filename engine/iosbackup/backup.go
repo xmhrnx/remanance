@@ -11,15 +11,37 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/xmhrnx/remanance/engine/plist"
 )
 
-// ErrEncrypted means the backup is encrypted, which this package can't
-// read yet.
-var ErrEncrypted = errors.New("this backup is encrypted, and Remanence can't read encrypted backups yet. " +
-	"In Finder or iTunes, turn off \"Encrypt local backup\" (it asks for the backup's password), back up again, and scan the new backup")
+// ErrPassword means the backup is encrypted, and opening it needs the
+// password it was made with (see SetPassword).
+var ErrPassword = errors.New("this backup is encrypted: enter the password it was made with, the one Finder or iTunes asked for when \"Encrypt local backup\" was turned on")
+
+// ErrWrongPassword means the password set for a backup isn't its own.
+var ErrWrongPassword = errors.New("that isn't this backup's password. It's the one set for encrypted backups in Finder or iTunes, not the iPhone's passcode or Apple Account password")
+
+// passwords are the passwords set for encrypted backups, and their
+// class keys once unlocked, by backup folder.
+var passwords = struct {
+	sync.Mutex
+	pw   map[string]string
+	keys map[string]map[uint32][]byte
+}{pw: map[string]string{}, keys: map[string]map[uint32][]byte{}}
+
+// SetPassword sets the password Open tries for the encrypted backup in
+// dir.
+func SetPassword(dir, password string) {
+	passwords.Lock()
+	defer passwords.Unlock()
+	if passwords.pw[dir] != password {
+		delete(passwords.keys, dir)
+	}
+	passwords.pw[dir] = password
+}
 
 // ErrOld means the backup is from before iOS 10, listed in a
 // Manifest.mbdb rather than a Manifest.db.

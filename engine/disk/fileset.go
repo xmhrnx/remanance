@@ -1,6 +1,8 @@
 package disk
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"io"
 	"os"
 	"sort"
@@ -25,6 +27,7 @@ type FileSet struct {
 type setFile struct {
 	path      string
 	off, size int64
+	cbc       cipher.Block // decrypts the file, for AddEncrypted
 }
 
 // maxOpen is how many of a set's files stay open between reads.
@@ -45,6 +48,19 @@ func (s *FileSet) Add(path string, size int64) int64 {
 	s.size = off + size
 	s.info.Size = s.size
 	return off
+}
+
+// AddEncrypted places a file encrypted with AES in CBC mode, from a
+// zero IV, as an iPhone's encrypted backup keeps them; size is how long
+// it is decrypted. It reads decrypted.
+func (s *FileSet) AddEncrypted(path string, size int64, key []byte) (int64, error) {
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		return 0, err
+	}
+	off := s.Add(path, size)
+	s.files[len(s.files)-1].cbc = b
+	return off, nil
 }
 
 // ReadAt reads the files the range covers.
@@ -88,6 +104,46 @@ func (s *FileSet) ReadAt(p []byte, off int64) (int, error) {
 }
 
 func (s *FileSet) readFile(i int, p []byte, off int64) (int, error) {
+	if b := s.files[i].cbc; b != nil {
+		return s.readDecrypted(i, b, p, off)
+	}
+	return s.readPlain(i, p, off)
+}
+
+// readDecrypted reads the whole blocks under p, and the one before them,
+// whose ciphertext is the next one's IV.
+func (s *FileSet) readDecrypted(i int, b cipher.Block, p []byte, off int64) (int, error) {
+	const bs = aes.BlockSize
+	start := off &^ (bs - 1)
+	end := (off + int64(len(p)) + bs - 1) &^ (bs - 1)
+	from := max(start-bs, 0)
+	enc := make([]byte, end-from)
+	n, err := s.readPlain(i, enc, from)
+	n -= n % bs
+	iv := make([]byte, bs)
+	if start > 0 {
+		if n < bs {
+			return 0, err
+		}
+		copy(iv, enc[:bs])
+		enc, n = enc[bs:], n-bs
+	}
+	if n <= 0 {
+		return 0, err
+	}
+	cipher.NewCBCDecrypter(b, iv).CryptBlocks(enc[:n], enc[:n])
+	skip := int(off - start)
+	if skip >= n {
+		return 0, err
+	}
+	m := copy(p, enc[skip:n])
+	if m < len(p) && err == nil {
+		err = io.EOF
+	}
+	return m, err
+}
+
+func (s *FileSet) readPlain(i int, p []byte, off int64) (int, error) {
 	s.mu.Lock()
 	f, ok := s.open[i]
 	if !ok {

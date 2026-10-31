@@ -25,7 +25,8 @@ Usage:
 
 SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
 a disk image file, or an iPhone backup's folder ("list" shows the ones
-Finder and iTunes made). Reading drives needs administrator rights.
+Finder and iTunes made). Reading drives needs administrator rights. For
+an encrypted backup, set REMANENCE_BACKUP_PASSWORD to its password.
 `
 
 func main() {

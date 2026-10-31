@@ -11,6 +11,7 @@ import (
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/iconbutton"
+	"github.com/mehran9675/giode/components/input"
 	"github.com/mehran9675/giode/components/scroll"
 	"github.com/mehran9675/giode/components/segmented"
 	"github.com/xmhrnx/remanance/engine/disk"
@@ -38,6 +39,9 @@ type Drives struct {
 
 	mode    *segmented.Control
 	start   *giode.ButtonElement
+	// password and unlock ask for an encrypted backup's password.
+	password *input.Input
+	unlock   *giode.ButtonElement
 	refresh *iconbutton.Button
 	elevate *giode.ButtonElement
 	view    *scroll.Scroll
@@ -49,6 +53,9 @@ func NewDrives(m *model.Model) *Drives {
 	d.mode = giode.Input.Segmented("Quick scan", "Deep scan").Styles(segmentStyles().With(giode.Styles{Width: 280}))
 	d.start = components.PrimaryButton("Start scan", "search").OnClick(d.startScan)
 	d.refresh = components.IconAction("refresh", "Refresh the drive list").OnClick(m.LoadDrives)
+	d.password = giode.Input.Text("Backup password", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
+		Password(true).Submit(func(string) { d.unlockBackup() })
+	d.unlock = components.PrimaryButton("Unlock", "lock").OnClick(d.unlockBackup)
 	d.elevate = components.SecondaryButton("Restart as administrator", "shield").OnClick(func() {
 		if d.elevating {
 			return
@@ -93,6 +100,23 @@ func (d *Drives) startScan() {
 		mode = scan.Deep
 	}
 	d.m.Open(info, func() { d.m.StartScan(mode) })
+}
+
+// unlockBackup scans the chosen encrypted backup with the password
+// typed.
+func (d *Drives) unlockBackup() {
+	info, ok := d.chosen()
+	if !ok || !isBackup(info) || d.password.Text() == "" || d.m.Opening {
+		return
+	}
+	iosbackup.SetPassword(strings.TrimPrefix(info.ID, "iosbackup:"), d.password.Text())
+	d.startScan()
+}
+
+// needsPassword tells whether err asks for an encrypted backup's
+// password.
+func needsPassword(err error) bool {
+	return errors.Is(err, iosbackup.ErrPassword) || errors.Is(err, iosbackup.ErrWrongPassword)
 }
 
 func (d *Drives) pickImage() {
@@ -203,8 +227,19 @@ func (d *Drives) content() giode.Element {
 		notes = append(notes, components.Banner("lock", "theme.warning",
 			"Reading drives directly needs administrator rights. Remanence only reads; it never writes to the drive you scan.", d.elevate))
 	}
+	if needsPassword(d.m.OpenErr) {
+		d.unlock.Disabled(d.m.Opening)
+		if d.m.Opening {
+			d.unlock.Label("Unlocking…")
+		} else {
+			d.unlock.Label("Unlock")
+		}
+		notes = append(notes, components.Banner("lock", "theme.warning", d.m.OpenErr.Error(),
+			giode.Row(giode.Styles{Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
+				giode.Box(giode.Styles{Width: 220}, d.password), d.unlock)))
+	}
 	for _, err := range []error{d.m.OpenErr, d.m.DrivesErr, d.pickErr} {
-		if err != nil && !(d.m.NeedsAdmin && err == d.m.OpenErr) {
+		if err != nil && !(d.m.NeedsAdmin && err == d.m.OpenErr) && !needsPassword(err) {
 			notes = append(notes, components.Banner("alert", "theme.danger", err.Error(), nil))
 		}
 	}

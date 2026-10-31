@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/xmhrnx/remanance/engine/disk"
@@ -10,9 +12,14 @@ import (
 // openSource opens a drive by the path "list" shows, an image file, or
 // an iPhone backup's folder.
 func openSource(arg string) (disk.Device, error) {
+	// An encrypted backup's password, kept out of the shell's history.
+	password := os.Getenv("REMANENCE_BACKUP_PASSWORD")
 	infos, _ := disk.List()
 	for _, i := range infos {
 		if i.Path == arg || i.ID == arg {
+			if password != "" && i.Kind == disk.KindFiles {
+				iosbackup.SetPassword(i.Path, password)
+			}
 			return disk.Open(i)
 		}
 	}
@@ -23,7 +30,14 @@ func openSource(arg string) (disk.Device, error) {
 		if err != nil {
 			return nil, err
 		}
-		return iosbackup.Open(b)
+		if password != "" {
+			iosbackup.SetPassword(b.Dir, password)
+		}
+		d, err := iosbackup.Open(b)
+		if errors.Is(err, iosbackup.ErrPassword) {
+			return nil, fmt.Errorf("%w; set REMANENCE_BACKUP_PASSWORD to it", err)
+		}
+		return d, err
 	}
 	// A device the listing missed: try it directly.
 	return disk.Open(disk.Info{ID: arg, Path: arg, Kind: disk.KindPhysical, Name: arg})

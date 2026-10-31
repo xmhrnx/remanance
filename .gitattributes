@@ -6,3 +6,4 @@
 *.plist binary
 *.db binary
 engine/iosbackup/testdata/** binary
+*.db-wal binary

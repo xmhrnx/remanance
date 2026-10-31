@@ -2,6 +2,8 @@ package disk
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"io"
 	"os"
 	"path/filepath"
@@ -60,5 +62,39 @@ func TestFileSetEOF(t *testing.T) {
 	buf := make([]byte, 10)
 	if n, err := s.ReadAt(buf, 1); n != 2 || err != io.EOF {
 		t.Fatalf("read %d, %v", n, err)
+	}
+}
+
+func TestFileSetEncrypted(t *testing.T) {
+	plain := make([]byte, 1000)
+	for i := range plain {
+		plain[i] = byte(i * 7)
+	}
+	key := bytes.Repeat([]byte{0x42}, 32)
+	b, _ := aes.NewCipher(key)
+	padded := append(bytes.Clone(plain), bytes.Repeat([]byte{8}, 8)...) // PKCS#7 to 1008
+	enc := make([]byte, len(padded))
+	cipher.NewCBCEncrypter(b, make([]byte, 16)).CryptBlocks(enc, padded)
+	path := filepath.Join(t.TempDir(), "enc")
+	os.WriteFile(path, enc, 0o644)
+
+	s := NewFileSet(Info{})
+	defer s.Close()
+	s.Add(path, 100) // read as it is
+	off, err := s.AddEncrypted(path, int64(len(plain)), key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, r := range [][2]int{{0, 1000}, {0, 1}, {15, 2}, {16, 16}, {17, 300}, {990, 10}, {999, 1}, {500, 0}} {
+		got := make([]byte, r[1])
+		if _, err := s.ReadAt(got, off+int64(r[0])); err != nil && err != io.EOF {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(got, plain[r[0]:r[0]+r[1]]) {
+			t.Errorf("at %d, %d bytes: wrong", r[0], r[1])
+		}
+	}
+	if s.Size() != off+1000 {
+		t.Errorf("size %d", s.Size())
 	}
 }

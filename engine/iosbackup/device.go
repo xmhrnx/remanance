@@ -1,6 +1,7 @@
 package iosbackup
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -32,28 +33,34 @@ func Info(b Backup) disk.Info {
 	if !b.Date.IsZero() {
 		model = "Backed up " + b.Date.Local().Format("Jan 2, 2006")
 	}
+	if b.Encrypted {
+		model += ", encrypted"
+	}
 	return disk.Info{ID: "iosbackup:" + b.Dir, Path: b.Dir, Name: name, Model: model, Bus: "Backup", Kind: disk.KindFiles}
 }
 
-// Open reads the backup's list of files, Manifest.db, and opens it.
+// Open reads the backup's list of files, Manifest.db, and opens it. An
+// encrypted backup needs its password set first; without it, Open
+// returns ErrPassword.
 func Open(b Backup) (*Device, error) {
-	if b.Encrypted {
-		return nil, ErrEncrypted
-	}
-	mf := filepath.Join(b.Dir, "Manifest.db")
-	f, err := os.Open(mf)
+	var classes map[uint32][]byte
+	data, err := os.ReadFile(filepath.Join(b.Dir, "Manifest.db"))
 	if err != nil {
 		if _, e := os.Stat(filepath.Join(b.Dir, "Manifest.mbdb")); e == nil {
 			return nil, ErrOld
 		}
 		return nil, err
 	}
-	defer f.Close()
-	st, err := f.Stat()
-	if err != nil {
-		return nil, err
+	if b.Encrypted {
+		var mkey []byte
+		if classes, mkey, err = unlock(b.Dir); err != nil {
+			return nil, err
+		}
+		if data, err = decrypt(mkey, data); err != nil {
+			return nil, fmt.Errorf("decrypting the backup's list of files: %w", err)
+		}
 	}
-	db, err := sqlite.Open(f, st.Size())
+	db, err := sqlite.Open(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return nil, fmt.Errorf("reading the backup's list of files: %w", err)
 	}
@@ -102,12 +109,26 @@ func Open(b Backup) (*Device, error) {
 		where := path.Join(place(domain), shorten(domain, rel))
 		id++
 		e := &fsys.Entry{ID: id, Name: path.Base(where), Size: st.Size(), Health: 100, Modified: st.ModTime()}
+		var m fileMeta
 		if cFile >= 0 {
 			if blob, ok := row[cFile].([]byte); ok {
-				meta(e, blob)
+				m = meta(e, blob)
 			}
 		}
-		e.Runs = []fsys.Run{{Offset: d.Add(src, st.Size()), Length: st.Size()}}
+		off := int64(0)
+		if b.Encrypted {
+			key, err := fileKey(classes, m.key)
+			if err != nil || m.size < 0 {
+				return true // not decryptable: a file of the device's own keys
+			}
+			e.Size = min(m.size, st.Size())
+			if off, err = d.AddEncrypted(src, e.Size, key); err != nil {
+				return true
+			}
+		} else {
+			off = d.Add(src, st.Size())
+		}
+		e.Runs = []fsys.Run{{Offset: off, Length: e.Size}}
 		folder(path.Dir(where)).Add(e)
 		byPath[domain+"/"+rel] = e
 		return true
@@ -122,17 +143,25 @@ func Open(b Backup) (*Device, error) {
 	return d, nil
 }
 
-// meta fills in an entry's dates from the MBFile archived for it.
-func meta(e *fsys.Entry, blob []byte) {
+// fileMeta is what an MBFile tells besides dates.
+type fileMeta struct {
+	size int64  // -1 if not given
+	key  []byte // the file's key, wrapped, in an encrypted backup
+}
+
+// meta fills in an entry's dates from the MBFile archived for it, and
+// returns its size and key.
+func meta(e *fsys.Entry, blob []byte) fileMeta {
+	m := fileMeta{size: -1}
 	v, err := plist.Parse(blob)
 	if err != nil {
-		return
+		return m
 	}
 	a := plist.Dict(v)
 	objs, _ := a["$objects"].([]any)
 	root := plist.Int(plist.Dict(a["$top"])["root"])
 	if root <= 0 || root >= int64(len(objs)) {
-		return
+		return m
 	}
 	f := plist.Dict(objs[root])
 	if t := plist.Int(f["LastModified"]); t > 0 {
@@ -141,6 +170,56 @@ func meta(e *fsys.Entry, blob []byte) {
 	if t := plist.Int(f["Birth"]); t > 0 {
 		e.Created = time.Unix(t, 0)
 	}
+	if n, ok := f["Size"]; ok {
+		m.size = plist.Int(n)
+	}
+	if ref, ok := f["EncryptionKey"].(plist.UID); ok && int(ref) < len(objs) {
+		m.key, _ = plist.Dict(objs[ref])["NS.data"].([]byte)
+	}
+	return m
+}
+
+// unlock unwraps an encrypted backup's class keys with the password set
+// for it, and Manifest.db's key with them.
+func unlock(dir string) (map[uint32][]byte, []byte, error) {
+	data, err := os.ReadFile(filepath.Join(dir, "Manifest.plist"))
+	if err != nil {
+		return nil, nil, err
+	}
+	v, err := plist.Parse(data)
+	if err != nil {
+		return nil, nil, err
+	}
+	mp := plist.Dict(v)
+	bag, _ := mp["BackupKeyBag"].([]byte)
+	mkey, _ := mp["ManifestKey"].([]byte)
+	kb, err := parseKeybag(bag)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	passwords.Lock()
+	pw, set := passwords.pw[dir]
+	classes := passwords.keys[dir]
+	passwords.Unlock()
+	if !set {
+		return nil, nil, ErrPassword
+	}
+	if classes == nil {
+		if classes, err = kb.unlock(pw); err == errWrong {
+			return nil, nil, ErrWrongPassword
+		} else if err != nil {
+			return nil, nil, err
+		}
+		passwords.Lock()
+		passwords.keys[dir] = classes
+		passwords.Unlock()
+	}
+	key, err := fileKey(classes, mkey)
+	if err != nil {
+		return nil, nil, fmt.Errorf("the key to the backup's list of files: %w", err)
+	}
+	return classes, key, nil
 }
 
 // Volumes returns the backup's files, read when it was opened.
