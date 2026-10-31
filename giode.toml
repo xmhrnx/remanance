@@ -15,6 +15,11 @@ website = "https://github.com/xmhrnx/remanance"
 
 [android]
 min_sdk = 21
+# The adaptive icon's layers, drawn by assets/icon/make_icon.py with the
+# platter inside the middle that every launcher's mask leaves visible.
+icon_foreground = "assets/icon/android-foreground.png"
+icon_background = "assets/icon/android-background.png"
+icon_monochrome = "assets/icon/android-monochrome.png"
 # Recovered files go to Download/Remanence; Android 10 needs the legacy
 # storage flag to write there by path.
 permissions = ["storage"]

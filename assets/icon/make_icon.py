@@ -176,6 +176,26 @@ def icon():
     return clipped.resize((OUT, OUT), Image.LANCZOS)
 
 
+def android_monochrome():
+    """Android 13 and later tint this shape for themed icons: the platter
+    as a solid disc with the read trace and the spindle cut out, the same
+    size as the foreground's platter."""
+    m = Image.new("L", (S, S), 0)
+    d = ImageDraw.Draw(m)
+    c = S / 2
+    R = S * 0.24
+    d.ellipse((c - R, c - R, c + R, c + R), fill=255)
+    w = int(S * 0.022)
+    arc(d, c, R * 0.72, 200, 322, w, 0)
+    hub = R * 0.16
+    d.ellipse((c - hub, c - hub, c + hub, c + hub), fill=0)
+    h2 = hub * 0.42
+    d.ellipse((c - h2, c - h2, c + h2, c + h2), fill=255)
+    out = Image.new("RGBA", (S, S), (255, 255, 255, 0))
+    out.putalpha(m)
+    return out.resize((OUT, OUT), Image.LANCZOS)
+
+
 def android_layers():
     """Android draws an adaptive icon from two 108dp layers and shows only
     the middle 72dp, cut to the launcher's shape, a circle on many phones:
@@ -203,4 +223,5 @@ if __name__ == "__main__":
     fg, bg = android_layers()
     fg.save(os.path.join(HERE, "android-foreground.png"))
     bg.save(os.path.join(HERE, "android-background.png"))
+    android_monochrome().save(os.path.join(HERE, "android-monochrome.png"))
     print("wrote assets/icon.png, assets/icon/mark.png and the Android layers")
