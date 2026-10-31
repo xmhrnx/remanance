@@ -24,9 +24,12 @@ func (m *Model) StartScan(mode scan.Mode) {
 	m.cancel = cancel
 	dev := m.Dev
 	started := time.Now()
+	release := keepRunning(m.App, "Scanning for deleted files")
 	go func() {
+		defer release()
+		var progress latest[scan.Progress]
 		res, err := scan.Run(ctx, dev, scan.Options{Mode: mode}, func(p scan.Progress) {
-			m.App.Post(func() {
+			progress.post(m.App, p, func(p scan.Progress) {
 				if m.Scanning {
 					m.Progress = p
 				}

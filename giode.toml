@@ -23,6 +23,9 @@ icon_monochrome = "assets/icon/android-monochrome.png"
 # Recovered files go to Download/Remanence; Android 10 needs the legacy
 # storage flag to write there by path.
 permissions = ["storage"]
+# Scans and recoveries keep going when the app leaves the screen, in
+# giode's foreground service, with a notification that brings it back.
+keep_alive = true
 application_attributes = { requestLegacyExternalStorage = "true" }
 # The USB and storage bridges, compiled into the APK.
 java = ["ui/platform/androidusb", "ui/platform/androidstore"]

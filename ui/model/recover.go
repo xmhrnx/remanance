@@ -42,9 +42,12 @@ func (m *Model) StartRecover(sink recovery.Sink, keepFolders bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 	m.recCancel = cancel
 	dev := m.Dev
+	release := keepRunning(m.App, "Recovering files")
 	go func() {
+		defer release()
+		var progress latest[recovery.Progress]
 		rep, err := recovery.Recover(ctx, dev, items, sink, recovery.Options{KeepFolders: keepFolders, Report: true}, func(p recovery.Progress) {
-			m.App.Post(func() { m.RecoverP = p })
+			progress.post(m.App, p, func(p recovery.Progress) { m.RecoverP = p })
 		})
 		m.App.Post(func() {
 			m.Recovering, m.recCancel = false, nil
