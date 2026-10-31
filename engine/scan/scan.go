@@ -14,6 +14,7 @@ import (
 	"github.com/xmhrnx/remanance/engine/fsys"
 	_ "github.com/xmhrnx/remanance/engine/fsys/all"
 	"github.com/xmhrnx/remanance/engine/partition"
+	"github.com/xmhrnx/remanance/engine/records"
 )
 
 const blockSize = 4 << 20 // bytes per read in the sector search
@@ -51,10 +52,17 @@ func Run(ctx context.Context, dev disk.Device, opts Options, onProgress func(Pro
 	s.sm.size = dev.Size()
 	s.res = &Result{Device: dev.Info(), Mode: opts.Mode, Started: s.started}
 	var err error
-	if t, ok := dev.(Tree); ok {
+	t, tree := dev.(Tree)
+	if tree {
 		err = s.runTree(ctx, t)
 	} else {
 		err = s.run(ctx)
+	}
+	if err == nil {
+		// A phone's or a backup's every database; on other disks, only
+		// those of the apps records knows, of the thousands there.
+		s.records(ctx, tree)
+		err = s.stopped(ctx)
 	}
 	// What the search carved stays, however the scan ended.
 	if s.carver != nil && s.res.Carved == nil {
@@ -110,6 +118,22 @@ func (s *scanner) run(ctx context.Context) error {
 	}
 	sortVolumes(s.res.Volumes)
 	return s.stopped(ctx)
+}
+
+// records adds the deleted messages and other rows found in the
+// volumes' databases.
+func (s *scanner) records(ctx context.Context, all bool) {
+	from := s.fraction
+	n := float64(len(s.res.Volumes))
+	for i, v := range s.res.Volumes {
+		if v.Volume == nil || ctx.Err() != nil {
+			continue
+		}
+		s.setPhase(PhaseRecords, from)
+		records.Find(ctx, s.cached, v.Volume, all, func(f float64) {
+			s.setPhase(PhaseRecords, from+(0.995-from)*(float64(i)+f)/n)
+		})
+	}
 }
 
 // stopped returns why the scan has to end early: cancelled, or the drive

@@ -13,6 +13,7 @@ const (
 	PhaseFileSystem Phase = "Reading file systems"
 	PhaseSectors    Phase = "Searching every sector"
 	PhaseLost       Phase = "Reading lost partitions"
+	PhaseRecords    Phase = "Looking for deleted messages and records"
 	PhaseDone       Phase = "Done"
 )
 

@@ -29,6 +29,8 @@ type DB struct {
 	pages    uint32
 	enc      int
 	tables   map[string]*Table
+	wal      map[uint32][]byte // pages the write-ahead log replaces
+	frames   []walFrame        // every page image in the log
 }
 
 // Open reads the header of the database in r, size bytes long.
@@ -62,6 +64,9 @@ func Open(r io.ReaderAt, size int64) (*DB, error) {
 func (db *DB) page(n uint32) ([]byte, error) {
 	if n == 0 || n > db.pages {
 		return nil, fmt.Errorf("sqlite: page %d is outside the file", n)
+	}
+	if p, ok := db.wal[n]; ok {
+		return p, nil
 	}
 	p := make([]byte, db.pageSize)
 	if _, err := db.r.ReadAt(p, int64(n-1)*int64(db.pageSize)); err != nil && err != io.EOF {

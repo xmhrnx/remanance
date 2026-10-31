@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -10,6 +11,9 @@ type Table struct {
 	Name    string
 	Root    uint32
 	Columns []string
+	// Types are the columns' declared types, upper case: "INTEGER",
+	// "TEXT", "" when the column has none.
+	Types []string
 	// rowidCol is the INTEGER PRIMARY KEY column, which the file stores
 	// as NULL and keeps as the rowid; -1 if there is none.
 	rowidCol int
@@ -46,8 +50,8 @@ func (db *DB) readSchema() error {
 		if kind != "table" || root <= 0 || strings.Contains(strings.ToUpper(sql), "WITHOUT ROWID") {
 			return true
 		}
-		cols, rowid := columns(sql)
-		db.tables[strings.ToLower(name)] = &Table{Name: name, Root: uint32(root), Columns: cols, rowidCol: rowid, db: db}
+		cols, types, rowid := columns(sql)
+		db.tables[strings.ToLower(name)] = &Table{Name: name, Root: uint32(root), Columns: cols, Types: types, rowidCol: rowid, db: db}
 		return true
 	})
 }
@@ -77,13 +81,28 @@ func (t *Table) Rows(fn func(rowid int64, row []any) bool) error {
 	})
 }
 
-// columns reads the column names out of a CREATE TABLE statement, and
-// which one is an alias of the rowid.
-func columns(sql string) (cols []string, rowid int) {
+// Tables lists the database's tables.
+func (db *DB) Tables() ([]*Table, error) {
+	if db.tables == nil {
+		if err := db.readSchema(); err != nil {
+			return nil, err
+		}
+	}
+	out := make([]*Table, 0, len(db.tables))
+	for _, t := range db.tables {
+		out = append(out, t)
+	}
+	slices.SortFunc(out, func(a, b *Table) int { return strings.Compare(a.Name, b.Name) })
+	return out, nil
+}
+
+// columns reads the column names and declared types out of a CREATE
+// TABLE statement, and which column is an alias of the rowid.
+func columns(sql string) (cols, types []string, rowid int) {
 	rowid = -1
 	open, end := strings.Index(sql, "("), strings.LastIndex(sql, ")")
 	if open < 0 || end <= open {
-		return nil, -1
+		return nil, nil, -1
 	}
 	depth, from := 0, open+1
 	var defs []string
@@ -116,6 +135,27 @@ func columns(sql string) (cols []string, rowid int) {
 			rowid = len(cols)
 		}
 		cols = append(cols, name)
+		types = append(types, declared(f[1:]))
 	}
-	return cols, rowid
+	return cols, types, rowid
+}
+
+// declared is the type a column definition gives, the words after its
+// name up to the first constraint.
+func declared(words []string) string {
+	var t []string
+	for _, w := range words {
+		u := strings.ToUpper(w)
+		if i := strings.IndexByte(u, '('); i >= 0 {
+			u = u[:i] // VARCHAR(255)
+		}
+		switch u {
+		case "PRIMARY", "NOT", "NULL", "DEFAULT", "UNIQUE", "CHECK", "REFERENCES", "COLLATE", "CONSTRAINT", "GENERATED", "AS":
+			return strings.Join(t, " ")
+		}
+		if u != "" {
+			t = append(t, u)
+		}
+	}
+	return strings.Join(t, " ")
 }
