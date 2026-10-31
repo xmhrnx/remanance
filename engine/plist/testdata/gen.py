@@ -4,7 +4,7 @@ import datetime, os, plistlib
 
 here = os.path.dirname(os.path.abspath(__file__))
 value = {
-    "Name": "Mehran's iPhone",
+    "Name": "Sam's iPhone",
     "Unicode": "Fotos – été",
     "Count": 42,
     "Big": 2**40,

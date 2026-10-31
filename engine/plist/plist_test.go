@@ -20,7 +20,7 @@ func TestParse(t *testing.T) {
 		}
 		d := Dict(v)
 		want := map[string]any{
-			"Name":     "Mehran's iPhone",
+			"Name":     "Sam's iPhone",
 			"Unicode":  "Fotos – été",
 			"Count":    int64(42),
 			"Big":      int64(1 << 40),

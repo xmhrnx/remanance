@@ -28,7 +28,7 @@ var ErrOld = errors.New("this backup is from iOS 9 or earlier, which Remanence c
 // Backup describes one backup.
 type Backup struct {
 	Dir        string // the folder named after the device's identifier
-	DeviceName string // "Mehran's iPhone"
+	DeviceName string // "Sam's iPhone"
 	Product    string // "iPhone 15 Pro"
 	IOS        string // the iOS version backed up
 	Date       time.Time
