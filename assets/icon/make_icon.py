@@ -176,7 +176,31 @@ def icon():
     return clipped.resize((OUT, OUT), Image.LANCZOS)
 
 
+def android_layers():
+    """Android draws an adaptive icon from two 108dp layers and shows only
+    the middle 72dp, cut to the launcher's shape, a circle on many phones:
+    the platter has to fit a circle 61% of the layer across to keep clear
+    of every mask. The background is full bleed; the mask shapes it."""
+    bg = radial(S, (S * 0.5, S * 0.12), S * 1.0, (46, 34, 28, 255), (8, 9, 12, 255))
+    p = platter(S)
+    # The platter is 67% of its canvas; 48% of the layer leaves room for
+    # the glow inside the safe circle.
+    k = 0.48 / 0.67
+    small = p.resize((int(S * k), int(S * k)), Image.LANCZOS)
+    fg = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    o = (S - small.width) // 2
+    sh = Image.new("RGBA", small.size, (0, 0, 0, 0))
+    sh.putalpha(small.split()[3].point(lambda v: v * 0.55))
+    sh = sh.filter(ImageFilter.GaussianBlur(S * 0.015))
+    fg.alpha_composite(sh, (o, o + int(S * 0.012)))
+    fg.alpha_composite(small, (o, o))
+    return fg.resize((OUT, OUT), Image.LANCZOS), bg.convert("RGB").resize((OUT, OUT), Image.LANCZOS)
+
+
 if __name__ == "__main__":
     icon().save(os.path.join(HERE, "..", "icon.png"))
     platter(S).resize((256, 256), Image.LANCZOS).save(os.path.join(HERE, "mark.png"))
-    print("wrote assets/icon.png and assets/icon/mark.png")
+    fg, bg = android_layers()
+    fg.save(os.path.join(HERE, "android-foreground.png"))
+    bg.save(os.path.join(HERE, "android-background.png"))
+    print("wrote assets/icon.png, assets/icon/mark.png and the Android layers")
