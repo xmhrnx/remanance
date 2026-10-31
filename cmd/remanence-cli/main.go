@@ -22,6 +22,7 @@ Usage:
   remanence-cli recover -to DIR [-deep] [-all] [-flat] [-type jpg,pdf] SOURCE
                                              copy deleted files out (-all: every file)
   remanence-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
+  remanence-cli backup [-to DIR] [UDID]      back up an iPhone connected by USB, to scan it
 
 SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
 a disk image file, or an iPhone backup's folder ("list" shows the ones
@@ -45,6 +46,8 @@ func main() {
 		err = runRecover(os.Args[2:])
 	case "image":
 		err = runImage(os.Args[2:])
+	case "backup":
+		err = runBackup(os.Args[2:])
 	case "help", "-h", "--help":
 		fmt.Print(usage)
 		return

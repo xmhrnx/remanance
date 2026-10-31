@@ -57,8 +57,22 @@ type Backup struct {
 	Encrypted  bool
 }
 
-// Places are where Finder and iTunes keep backups on this computer.
+// OwnPlace is where Remanence keeps the backups it makes itself.
+func OwnPlace() string {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		dir = os.TempDir()
+	}
+	return filepath.Join(dir, "Remanence", "iPhone backups")
+}
+
+// Places are where Finder and iTunes keep backups on this computer, and
+// where Remanence keeps its own.
 func Places() []string {
+	return append(applePlaces(), OwnPlace())
+}
+
+func applePlaces() []string {
 	home, _ := os.UserHomeDir()
 	switch runtime.GOOS {
 	case "windows":
