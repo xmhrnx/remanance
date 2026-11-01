@@ -15,3 +15,7 @@ const bridgeClass = "io/github/mehran9675/remanence/StorageBridge"
 // files yet; the settings to allow it have just opened.
 var ErrAccess = errors.New("Remanence needs \"All files access\" to look through this phone's storage. " +
 	"Turn it on in the settings that just opened, then come back and start the scan again")
+
+// ErrFileAccess is ErrAccess for the file tools.
+var ErrFileAccess = errors.New("Remanence needs \"All files access\" to read the folders on this phone. " +
+	"Turn it on in the settings that just opened, then come back and try again")

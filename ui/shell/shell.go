@@ -26,6 +26,10 @@ type Shell struct {
 	drives  *screens.Drives
 	scan    *screens.Scanning
 	results *screens.Results
+	space   *screens.Space
+	dupes   *screens.Dupes
+	sync    *screens.Sync
+	rename  *screens.Rename
 }
 
 // New builds the frame around m.
@@ -34,6 +38,10 @@ func New(app *giode.App, m *model.Model) *Shell {
 	s.drives = screens.NewDrives(m)
 	s.scan = screens.NewScanning(m)
 	s.results = screens.NewResults(m)
+	s.space = screens.NewSpace(m)
+	s.dupes = screens.NewDupes(m)
+	s.sync = screens.NewSync(m)
+	s.rename = screens.NewRename(m)
 	s.mode = components.IconAction("sun", "Switch between light and dark").OnClick(func() {
 		giode.ToggleMode()
 		giode.InvalidateCaches()
@@ -59,8 +67,8 @@ func (s *Shell) View() giode.Element {
 	// The page is built inside the breakpoint, so the screens can ask
 	// giode.Compact() while they build.
 	page := giode.Responsive(
-		giode.Breakpoint{MaxWidth: 760, Name: "compact", View: s.page},
-		giode.Breakpoint{View: s.page},
+		giode.Breakpoint{MaxWidth: 760, Name: "compact", View: s.compact},
+		giode.Breakpoint{View: s.wide},
 	)
 	kids := []giode.Element{}
 	if Desktop && !s.m.App.Fullscreen() {
@@ -70,7 +78,51 @@ func (s *Shell) View() giode.Element {
 	return giode.Stack(giode.Styles{Width: -1, Height: -1, Background: "theme.background"}, kids...)
 }
 
+// wide puts the tools in a rail along the left edge.
+func (s *Shell) wide() giode.Element {
+	items := []giode.Element{}
+	for _, t := range model.Tools {
+		items = append(items, s.navItem(t, components.NavRailItem))
+	}
+	rail := giode.Stack(giode.Styles{Width: components.NavRailWidth, Height: -1, Gap: theme.S1, Padding: giode.SymmetricInset(theme.S2, theme.S4),
+		Background: "theme.background", BorderWidth: 1, BorderColor: "theme.border"}, items...)
+	return giode.Row(giode.Styles{Width: -1, Height: -1, Wrap: giode.WrapNoWrap},
+		rail, giode.Box(giode.Styles{FlexGrow: 1, Height: -1}, s.page()))
+}
+
+// compact puts the tools in a tab bar along a phone's bottom edge.
+func (s *Shell) compact() giode.Element {
+	items := []giode.Element{}
+	for _, t := range model.Tools {
+		items = append(items, giode.Box(giode.Styles{FlexGrow: 1}, s.navItem(t, components.TabBarItem)))
+	}
+	bar := giode.Row(giode.Styles{Width: -1, Wrap: giode.WrapNoWrap, Padding: giode.SymmetricInset(theme.S1, theme.S1),
+		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"}, items...)
+	return giode.Stack(giode.Styles{Width: -1, Height: -1},
+		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, s.page()), bar)
+}
+
+// navItem is a tool's button in the rail or tab bar.
+func (s *Shell) navItem(t model.ToolInfo, draw func(model.ToolInfo, bool, giode.PressState) giode.Element) giode.Element {
+	active := s.m.Tool == t.Tool
+	p := giode.Keyed("tool-nav", t.Label, func() *giode.PressableElement {
+		return giode.Pressable(func(giode.PressState) giode.Element { return nil })
+	})
+	return p.Content(func(st giode.PressState) giode.Element { return draw(t, active, st) }).
+		OnClick(func(giode.ClickEvent) { s.m.Tool = t.Tool }).Label(t.Label)
+}
+
 func (s *Shell) page() giode.Element {
+	switch s.m.Tool {
+	case model.ToolSpace:
+		return s.space.View()
+	case model.ToolDupes:
+		return s.dupes.View()
+	case model.ToolSync:
+		return s.sync.View()
+	case model.ToolRename:
+		return s.rename.View()
+	}
 	switch s.m.Screen {
 	case model.ScreenScan:
 		return s.scan.View()

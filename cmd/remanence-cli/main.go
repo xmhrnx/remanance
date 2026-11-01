@@ -5,6 +5,10 @@
 //	remanence-cli scan [-deep] DEVICE|IMAGE
 //	remanence-cli recover [-deep] [-all] [-flat] [-type jpg,png] -to DIR DEVICE|IMAGE
 //	remanence-cli image DEVICE OUTPUT.img
+//	remanence-cli space FOLDER
+//	remanence-cli dupes [-similar] [-remove] FOLDER...
+//	remanence-cli rename -pattern P [-yes] FILE...
+//	remanence-cli sync id|add|share|run
 package main
 
 import (
@@ -24,6 +28,14 @@ Usage:
   remanence-cli recover -to DIR [-deep] [-all] [-flat] [-type jpg,pdf] SOURCE
                                              copy deleted files out (-all: every file)
   remanence-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
+
+Tools:
+  remanence-cli space [-top N] FOLDER        what fills a drive or folder
+  remanence-cli dupes [-similar] [-remove] FOLDER...
+                                             duplicate files and similar photos
+  remanence-cli rename -pattern "{date} {n:3}" [-find X -replace Y] [-case lower] [-yes] FILE...
+                                             rename many files at once
+  remanence-cli sync id|add|share|run        sync folders with your own devices
 
 SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
 a disk image file, an iPhone or Android phone connected by USB, or an
@@ -49,6 +61,14 @@ func main() {
 		err = runRecover(os.Args[2:])
 	case "image":
 		err = runImage(os.Args[2:])
+	case "space":
+		err = runSpace(os.Args[2:])
+	case "dupes":
+		err = runDupes(os.Args[2:])
+	case "rename":
+		err = runRename(os.Args[2:])
+	case "sync":
+		err = runSync(os.Args[2:])
 	case "help", "-h", "--help":
 		fmt.Print(usage)
 		return

@@ -51,6 +51,10 @@ func main() {
 	m = model.New(app)
 	s := shell.New(app, m)
 	m.LoadDrives()
+	// Folders synced with other devices keep syncing from launch.
+	if model.SyncConfigured() {
+		m.StartSync()
+	}
 	// A disk image opened with the app.
 	if len(os.Args) > 1 {
 		if err := s.OpenImage(os.Args[1]); err != nil {

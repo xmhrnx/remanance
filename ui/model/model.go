@@ -26,6 +26,14 @@ const (
 type Model struct {
 	App    *giode.App
 	Screen Screen
+	// Tool is the tool on show; Screen is the recovery tool's page.
+	Tool Tool
+
+	// The other tools
+	Space  SpaceState
+	Dupes  DupesState
+	Rename RenameState
+	Sync   SyncState
 
 	// Drives
 	Drives        []disk.Info
@@ -71,7 +79,8 @@ type Model struct {
 
 // New returns an empty model for app.
 func New(app *giode.App) *Model {
-	return &Model{App: app, Checked: map[*fsys.Entry]bool{}, Mode: scan.Quick}
+	return &Model{App: app, Checked: map[*fsys.Entry]bool{}, Mode: scan.Quick,
+		Dupes: DupesState{Similar: true, Threshold: 6, Remove: map[string]bool{}}}
 }
 
 // changed tells the views the model moved on.
@@ -86,6 +95,9 @@ func (m *Model) changed() {
 func (m *Model) Close() {
 	m.CancelScan()
 	m.CancelRecover()
+	m.CancelSpace()
+	m.CancelDupes()
+	m.StopSync()
 	if m.Dev != nil {
 		m.Dev.Close()
 		m.Dev = nil

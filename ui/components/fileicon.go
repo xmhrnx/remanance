@@ -1,6 +1,8 @@
 package components
 
 import (
+	"path/filepath"
+
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/ui/icons"
@@ -33,4 +35,9 @@ func FileIcon(e *fsys.Entry, size int) giode.Element {
 		}
 	}
 	return icons.Icon(k.icon, size, k.color)
+}
+
+// FileIconNamed draws the icon for a file on disk, by its name.
+func FileIconNamed(name string, size int) giode.Element {
+	return FileIcon(&fsys.Entry{Name: filepath.Base(name)}, size)
 }
