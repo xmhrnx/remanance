@@ -8,6 +8,7 @@ import (
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/iconbutton"
 	"github.com/mehran9675/giode/components/titlebar"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -42,7 +43,7 @@ func New(app *giode.App, m *model.Model) *Shell {
 	s.dupes = screens.NewDupes(m)
 	s.sync = screens.NewSync(m)
 	s.rename = screens.NewRename(m)
-	s.mode = components.IconAction("sun", "Switch between light and dark").OnClick(func() {
+	s.mode = components.IconAction("sun", locales.T("shell.switch_between_light_and_dark")).OnClick(func() {
 		giode.ToggleMode()
 		giode.InvalidateCaches()
 	})

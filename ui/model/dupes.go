@@ -8,6 +8,7 @@ import (
 
 	"github.com/xmhrnx/remanance/engine/dupes"
 	"github.com/xmhrnx/remanance/engine/trash"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 )
 
@@ -57,7 +58,7 @@ func (m *Model) FindDupes() {
 	ctx, cancel := context.WithCancel(context.Background())
 	d.cancel = cancel
 	roots, opts := slices.Clone(d.Roots), dupes.Options{Similar: d.Similar, Threshold: d.Threshold}
-	release := keepRunning(m.App, "Looking for duplicates")
+	release := keepRunning(m.App, locales.T("dupes.looking_for_duplicates"))
 	go func() {
 		defer release()
 		var progress latest[dupes.Progress]
@@ -169,21 +170,14 @@ func (m *Model) RemoveDupes() {
 				}
 			}
 			d.Groups = groups
-			where := "moved to the trash"
+			where := locales.T("dupes.moved_to_the_trash")
 			if !trash.Supported {
-				where = "deleted"
+				where = locales.T("dupes.deleted")
 			}
-			d.Done = fmt.Sprintf("%d %s %s, freeing %s", len(removed), plural(len(removed), "file", "files"), where, bytes(freed))
+			d.Done = locales.N("dupes.removed", len(removed), "where", where, "size", bytes(freed))
 			if failed != nil {
-				d.Err = fmt.Errorf("some files couldn't be removed: %w", failed)
+				d.Err = fmt.Errorf("%s: %w", locales.T("dupes.some_not_removed"), failed)
 			}
 		})
 	}()
-}
-
-func plural(n int, one, many string) string {
-	if n == 1 {
-		return one
-	}
-	return many
 }

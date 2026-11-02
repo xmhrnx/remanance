@@ -3,6 +3,7 @@ package components
 import (
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 // StateColor is the color that marks a file's state.
@@ -22,13 +23,13 @@ func StateColor(s fsys.State) string {
 func StateLabel(s fsys.State) string {
 	switch s {
 	case fsys.Deleted:
-		return "Deleted"
+		return locales.T("statepill.deleted")
 	case fsys.Orphan:
-		return "Orphaned"
+		return locales.T("statepill.orphaned")
 	case fsys.Carved:
-		return "By signature"
+		return locales.T("statepill.by_signature")
 	}
-	return "Existing"
+	return locales.T("statepill.existing")
 }
 
 // StatePill tags a file with its state.

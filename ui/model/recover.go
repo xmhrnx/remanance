@@ -3,21 +3,21 @@ package model
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 // ErrSameDrive refuses a destination on the drive being recovered:
 // writing there could overwrite the very files being saved.
-var ErrSameDrive = errors.New("that folder is on the drive being recovered; writing there could overwrite the files. Choose a folder on another drive")
+var ErrSameDrive = errors.New(locales.T("recover.that_folder_is_on_the_drive"))
 
 // CheckDestination reports why dest can't take the recovered files.
 func (m *Model) CheckDestination(dest string) error {
 	if dest == "" {
-		return errors.New("choose a folder to save the files in")
+		return errors.New(locales.T("recover.choose_a_folder_to_save_the"))
 	}
 	if recovery.SameDevice(m.Source, dest) {
 		return ErrSameDrive
@@ -42,7 +42,7 @@ func (m *Model) StartRecover(sink recovery.Sink, keepFolders bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 	m.recCancel = cancel
 	dev := m.Dev
-	release := keepRunning(m.App, "Recovering files")
+	release := keepRunning(m.App, locales.T("recover.recovering_files"))
 	go func() {
 		defer release()
 		var progress latest[recovery.Progress]
@@ -53,10 +53,10 @@ func (m *Model) StartRecover(sink recovery.Sink, keepFolders bool) {
 			m.Recovering, m.recCancel = false, nil
 			m.Report, m.RecoverErr = rep, err
 			if errors.Is(err, context.Canceled) {
-				m.RecoverErr = fmt.Errorf("stopped after %d files", rep.Recovered)
+				m.RecoverErr = errors.New(locales.N("recover.stopped_after", rep.Recovered))
 			}
 			if disk.IsGone(err) {
-				m.RecoverErr = errors.New("the drive disconnected. Plug it back in and recover again; what the scan found is kept")
+				m.RecoverErr = errors.New(locales.T("recover.the_drive_disconnected_plug_it_back"))
 			}
 			m.changed()
 		})

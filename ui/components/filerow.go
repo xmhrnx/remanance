@@ -7,6 +7,7 @@ import (
 	"github.com/mehran9675/giode/styles/properties"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
 	"github.com/xmhrnx/remanance/ui/theme"
@@ -63,7 +64,7 @@ func FileRow(e *fsys.Entry, checked, selected, compact bool, s giode.PressState)
 			health = HealthBar(e.Health)
 		}
 	} else if e.HasDeleted() {
-		state = Tag("Has deleted", "theme.muted")
+		state = Tag(locales.T("filerow.has_deleted"), "theme.muted")
 	}
 	return giode.Row(row,
 		check,
@@ -108,18 +109,18 @@ func FileHeader(check giode.Element, order model.Order, onSort func(model.Column
 				row.Justify = giode.JustifyEnd
 			}
 			return giode.Row(row, kids...)
-		}).OnClick(func(giode.ClickEvent) { onSort(c) }).Label("Sort by " + label)
+		}).OnClick(func(giode.ClickEvent) { onSort(c) }).Label(locales.T("filerow.sort_by_column", "column", label))
 		return giode.Box(st, p)
 	}
 	return giode.Row(giode.Styles{Width: -1, Height: 34, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap, Gap: theme.S3,
 		Padding: giode.Inset{Left: 12, Right: theme.S4}},
 		giode.Box(giode.Styles{Width: CheckZone - 12, Align: giode.AlignCenter}, check),
 		giode.Box(giode.Styles{Width: 18}),
-		h(model.ColName, "Name", 0, false),
-		h(model.ColSize, "Size", ColSize, true),
-		h(model.ColModified, "Modified", ColModified, false),
-		h(model.ColState, "State", ColState, false),
-		h(model.ColHealth, "Recovery", ColHealth, false),
+		h(model.ColName, locales.T("filerow.name"), 0, false),
+		h(model.ColSize, locales.T("filerow.size"), ColSize, true),
+		h(model.ColModified, locales.T("filerow.modified"), ColModified, false),
+		h(model.ColState, locales.T("filerow.state"), ColState, false),
+		h(model.ColHealth, locales.T("filerow.recovery"), ColHealth, false),
 	)
 }
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/xmhrnx/remanance/engine/fsys"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 // Column is a column of the table the files can be sorted by.
@@ -35,16 +36,16 @@ type SortChoice struct {
 
 // SortChoices are the ways to sort offered on a phone.
 var SortChoices = []SortChoice{
-	{"Name, A to Z", Order{ColName, false}},
-	{"Name, Z to A", Order{ColName, true}},
-	{"Largest first", Order{ColSize, true}},
-	{"Smallest first", Order{ColSize, false}},
-	{"Newest first", Order{ColModified, true}},
-	{"Oldest first", Order{ColModified, false}},
-	{"Deleted first", Order{ColState, false}},
-	{"Existing first", Order{ColState, true}},
-	{"Best recovery first", Order{ColHealth, true}},
-	{"Worst recovery first", Order{ColHealth, false}},
+	{locales.T("sort.name_a_to_z"), Order{ColName, false}},
+	{locales.T("sort.name_z_to_a"), Order{ColName, true}},
+	{locales.T("sort.largest_first"), Order{ColSize, true}},
+	{locales.T("sort.smallest_first"), Order{ColSize, false}},
+	{locales.T("sort.newest_first"), Order{ColModified, true}},
+	{locales.T("sort.oldest_first"), Order{ColModified, false}},
+	{locales.T("sort.deleted_first"), Order{ColState, false}},
+	{locales.T("sort.existing_first"), Order{ColState, true}},
+	{locales.T("sort.best_recovery_first"), Order{ColHealth, true}},
+	{locales.T("sort.worst_recovery_first"), Order{ColHealth, false}},
 }
 
 // SortBy sorts by a column, as when its header is clicked: the column

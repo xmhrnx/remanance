@@ -5,6 +5,7 @@ import (
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/styles/properties"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
 
@@ -24,11 +25,11 @@ func HealthColor(h uint8) string {
 func HealthLabel(h uint8) string {
 	switch {
 	case h >= 90:
-		return "Good"
+		return locales.T("healthbar.good")
 	case h >= 50:
-		return "Fair"
+		return locales.T("healthbar.fair")
 	}
-	return "Poor"
+	return locales.T("healthbar.poor")
 }
 
 // HealthBar shows a recovery chance as a short meter with its percentage.

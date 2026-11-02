@@ -10,6 +10,7 @@ import (
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/space"
 	"github.com/xmhrnx/remanance/engine/trash"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -42,32 +43,32 @@ type Space struct {
 // NewSpace builds the disk space screen.
 func NewSpace(m *model.Model) *Space {
 	s := &Space{m: m, confirm: NewConfirm()}
-	s.chooser = NewFolderChooser(m, "space-place", "Measure", m.MeasureSpace)
+	s.chooser = NewFolderChooser(m, "space-place", locales.T("space.measure"), m.MeasureSpace)
 	s.tree = components.NewTreemap(m.OpenSpace, func(n *space.Node) { m.Space.Selected = n })
 	s.intro = giode.Scroll(s.introView, giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
 	s.list = giode.VirtualList(func() int { return len(s.rows()) }, components.SizeRowHeight+2, s.row,
 		giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
-	s.stop = components.SecondaryButton("Stop", "stop").OnClick(m.CancelSpace)
-	s.back = components.IconAction("arrow-left", "Measure another folder").OnClick(m.CloseSpace)
-	s.up = components.IconAction("chevron-up", "Up one folder").OnClick(func() {
+	s.stop = components.SecondaryButton(locales.T("space.stop"), "stop").OnClick(m.CancelSpace)
+	s.back = components.IconAction("arrow-left", locales.T("space.measure_another_folder")).OnClick(m.CloseSpace)
+	s.up = components.IconAction("chevron-up", locales.T("space.up_one_folder")).OnClick(func() {
 		if c := m.Space.Current; c != nil && c.Parent != nil {
 			m.OpenSpace(c.Parent)
 		}
 	})
-	s.again = components.IconAction("refresh", "Measure again").OnClick(func() {
+	s.again = components.IconAction("refresh", locales.T("space.measure_again")).OnClick(func() {
 		if r := m.Space.Root; r != nil {
 			m.MeasureSpace(r.Path)
 		}
 	})
-	s.open = components.SecondaryButton("Open", "folder-open").OnClick(func() { m.OpenSpace(m.Space.Selected) })
-	s.reveal = components.SecondaryButton("Show", "external").OnClick(func() {
+	s.open = components.SecondaryButton(locales.T("space.open"), "folder-open").OnClick(func() { m.OpenSpace(m.Space.Selected) })
+	s.reveal = components.SecondaryButton(locales.T("space.show"), "external").OnClick(func() {
 		if n := m.Space.Selected; n != nil {
 			go m.App.Share(context.Background(), giode.ShareFile{Path: n.Path})
 		}
 	})
-	s.remove = components.SecondaryButton("Move to trash", "trash").OnClick(s.askRemove)
+	s.remove = components.SecondaryButton(locales.T("space.move_to_trash"), "trash").OnClick(s.askRemove)
 	if !trash.Supported {
-		s.remove.Label("Delete")
+		s.remove.Label(locales.T("space.delete"))
 	}
 	return s
 }
@@ -77,13 +78,14 @@ func (s *Space) askRemove() {
 	if n == nil || n.Parent == nil {
 		return
 	}
-	what := "file"
+	what := locales.T("space.the_file")
 	if n.IsDir {
-		what = "folder and the " + count(n.Files, "file", "files") + " in it"
+		what = locales.T("space.the_folder", "files", count(n.Files, "file"))
 	}
-	title, msg, yes := "Move to the trash?", fmt.Sprintf("%s, the %s, goes to the trash, freeing %s. You can put it back from there.", n.Name, what, recovery.FormatBytes(n.Size)), "Move to trash"
+	size := recovery.FormatBytes(n.Size)
+	title, msg, yes := locales.T("space.move_to_the_trash"), locales.T("space.trash_message", "name", n.Name, "what", what, "size", size), locales.T("space.move_to_trash")
 	if !trash.Supported {
-		title, msg, yes = "Delete for good?", fmt.Sprintf("%s, the %s, is deleted, freeing %s. This phone has no trash to put it back from.", n.Name, what, recovery.FormatBytes(n.Size)), "Delete"
+		title, msg, yes = locales.T("space.delete_for_good"), locales.T("space.delete_message", "name", n.Name, "what", what, "size", size), locales.T("space.delete")
 	}
 	s.confirm.Ask(title, msg, yes, func() { s.m.TrashSpace(n) })
 }
@@ -138,8 +140,8 @@ func (s *Space) View() giode.Element {
 func (s *Space) introView() giode.Element {
 	compact := giode.Compact()
 	kids := []giode.Element{
-		toolHeader("chart", "See what fills your drive",
-			"Measure a drive or folder to see every folder's size as a map: the larger the tile, the more space it takes. Open folders to look deeper, and move what you don't need to the trash."),
+		toolHeader("chart", locales.T("space.see_what_fills_your_drive"),
+			locales.T("space.measure_a_drive_or_folder_to")),
 	}
 	if err := s.m.Space.Err; err != nil {
 		kids = append(kids, components.Banner("alert", "theme.danger", err.Error(), nil))
@@ -152,8 +154,8 @@ func (s *Space) measuring() giode.Element {
 	p := s.m.Space.Progress
 	return giode.Stack(giode.Styles{Width: -1, Height: -1, Align: giode.AlignCenter, Justify: giode.JustifyCenter, Gap: theme.S4, Padding: giode.UniformInset(theme.S6)},
 		giode.Spinner(giode.Styles{Width: 36, Height: 36, Color: "theme.primary"}),
-		giode.Text("Measuring…", theme.Title()),
-		giode.Text(fmt.Sprintf("%s in %s files", recovery.FormatBytes(p.Bytes), number(p.Files)), theme.Figure(18)),
+		giode.Text(locales.T("space.measuring"), theme.Title()),
+		giode.Text(locales.T("space.measured", "size", recovery.FormatBytes(p.Bytes), "files", number(p.Files)), theme.Figure(18)),
 		giode.Box(giode.Styles{MaxWidth: 560}, giode.Text(p.Path, theme.Caption().With(giode.Styles{TextAlign: giode.TextAlignCenter, MaxLines: 1, TextOverflow: giode.TextOverflowEllipsis}))),
 		s.stop,
 	)
@@ -186,13 +188,13 @@ func (s *Space) results() giode.Element {
 				return giode.Text(n.Name, style.With(giode.Styles{Color: "theme.text"}))
 			}
 			return giode.Text(n.Name, style)
-		}).OnClick(func(giode.ClickEvent) { s.m.OpenSpace(n) }).Label("Open "+n.Name))
+		}).OnClick(func(giode.ClickEvent) { s.m.OpenSpace(n) }).Label(locales.T("space.open_name", "name", n.Name)))
 	}
 	bar := giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap, Padding: giode.SymmetricInset(theme.S4, theme.S3),
 		BorderWidth: 1, BorderColor: "theme.border", Background: "theme.surface"},
 		s.back, s.up,
 		giode.Box(giode.Styles{FlexGrow: 1}, giode.Row(giode.Styles{Gap: 6, Align: giode.AlignCenter}, crumbs...)),
-		giode.Text(fmt.Sprintf("%s · %s files", recovery.FormatBytes(cur.Size), number(int64(cur.Files))), theme.Caption()),
+		giode.Text(locales.T("space.size_files", "size", recovery.FormatBytes(cur.Size), "files", number(int64(cur.Files))), theme.Caption()),
 		s.again,
 	)
 
@@ -201,17 +203,17 @@ func (s *Space) results() giode.Element {
 		notes = append(notes, components.Banner("alert", "theme.danger", st.Err.Error(), nil))
 	}
 	if cur.Denied {
-		notes = append(notes, components.Banner("lock", "theme.warning", "Some of this folder couldn't be read, so its size counts only what could.", nil))
+		notes = append(notes, components.Banner("lock", "theme.warning", locales.T("space.some_of_this_folder_couldn_t"), nil))
 	}
 
 	mapView := giode.Box(giode.Styles{Width: -1, FlexGrow: 1, MinHeight: 260, Padding: giode.UniformInset(theme.S3), Background: theme.Sunken()},
 		s.tree.View(cur, st.Selected))
 	if len(cur.Children) == 0 {
-		mapView = giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, components.EmptyState("folder", "This folder is empty", "Nothing here takes any space.", nil))
+		mapView = giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, components.EmptyState("folder", locales.T("space.this_folder_is_empty"), locales.T("space.nothing_here_takes_any_space"), nil))
 	}
 	legend := s.legend(cur)
 	side := giode.Stack(giode.Styles{Width: -1, Height: -1, Gap: theme.S3, Padding: giode.UniformInset(theme.S3)},
-		giode.Text("Largest here", theme.Overline()),
+		giode.Text(locales.T("space.largest_here"), theme.Overline()),
 		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, s.list),
 		s.selection(),
 	)
@@ -239,7 +241,7 @@ func (s *Space) legend(n *space.Node) giode.Element {
 		if i == 6 || k.Size == 0 {
 			break
 		}
-		items = append(items, components.KindSwatch(k.Kind, k.Kind.Label()+" "+recovery.FormatBytes(k.Size)))
+		items = append(items, components.KindSwatch(k.Kind, locales.T("space.kind_size", "kind", label(k.Kind.Label()), "size", recovery.FormatBytes(k.Size))))
 	}
 	return giode.Row(giode.Styles{Width: -1, Gap: theme.S4, Align: giode.AlignCenter}, items...)
 }
@@ -248,11 +250,11 @@ func (s *Space) legend(n *space.Node) giode.Element {
 func (s *Space) selection() giode.Element {
 	n := s.m.Space.Selected
 	if n == nil {
-		return giode.Text("Click a tile or a row to select it; click it again to open a folder.", theme.Caption())
+		return giode.Text(locales.T("space.click_a_tile_or_a_row"), theme.Caption())
 	}
-	kind := space.KindOf(n.Name).Label()
+	kind := label(space.KindOf(n.Name).Label())
 	if n.IsDir {
-		kind = fmt.Sprintf("Folder · %s files", number(int64(n.Files)))
+		kind = locales.T("space.folder_files", "files", number(int64(n.Files)))
 	}
 	actions := []giode.Element{}
 	if n.IsDir {
@@ -274,7 +276,7 @@ func (s *Space) selection() giode.Element {
 func number(n int64) string {
 	switch {
 	case n >= 1_000_000:
-		return fmt.Sprintf("%.1f million", float64(n)/1e6)
+		return locales.T("space.million", "n", fmt.Sprintf("%.1f", float64(n)/1e6))
 	case n >= 10_000:
 		return fmt.Sprintf("%d,%03d", n/1000, n%1000)
 	}

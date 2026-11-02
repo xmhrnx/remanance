@@ -6,6 +6,7 @@ import (
 
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 // StartScan scans the open device in mode.
@@ -24,7 +25,7 @@ func (m *Model) StartScan(mode scan.Mode) {
 	m.cancel = cancel
 	dev := m.Dev
 	started := time.Now()
-	release := keepRunning(m.App, "Scanning for deleted files")
+	release := keepRunning(m.App, locales.T("scan.scanning_for_deleted_files"))
 	go func() {
 		defer release()
 		var progress latest[scan.Progress]

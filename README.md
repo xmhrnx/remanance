@@ -201,6 +201,16 @@ the iPhone backups on the computer; `scan` and `recover` take any of
 them as the source. For an encrypted backup, set
 `DATADOC_BACKUP_PASSWORD` to its password.
 
+## Languages
+
+The app's text is in [`locales/en.json`](locales/en.json), English for
+now. To add a language, copy it to the language's code (`fr.json`,
+`pt-br.json`), translate the values and keep the keys. Placeholders such
+as `{files}` are filled in by the app, and messages with `one` and
+`other` forms are chosen by count. The app follows the system's
+language and falls back to English for anything missing. The command
+line stays in English.
+
 ## Building
 
 DataDoc is written in Go. The UI uses

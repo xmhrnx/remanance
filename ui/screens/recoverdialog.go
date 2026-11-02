@@ -2,7 +2,6 @@ package screens
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/mehran9675/giode/components/input"
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -42,23 +42,23 @@ func NewRecoverDialog(m *model.Model) *RecoverDialog {
 	d := &RecoverDialog{m: m}
 	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: 520, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
 		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"})
-	d.dest = giode.Input.Text("Folder to save into", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius})
+	d.dest = giode.Input.Text(locales.T("recoverdialog.folder_to_save_into"), giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius})
 	d.dest.SetText(platform.DefaultDestination())
-	d.choose = components.SecondaryButton("Choose…", "folder").OnClick(func() {
-		opts := giode.FolderOptions{Title: "Where should the recovered files go?", Directory: d.dest.Text()}
+	d.choose = components.SecondaryButton(locales.T("recoverdialog.choose"), "folder").OnClick(func() {
+		opts := giode.FolderOptions{Title: locales.T("recoverdialog.where_should_the_recovered_files_go"), Directory: d.dest.Text()}
 		go func() {
 			if dir, err := m.App.PickFolder(context.Background(), opts); err == nil {
 				m.App.Post(func() { d.dest.SetText(dir) })
 			}
 		}()
 	})
-	d.folders = giode.Input.Checkbox("Keep the folders the files were in", giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary", BorderColor: "theme.border"})
+	d.folders = giode.Input.Checkbox(locales.T("recoverdialog.keep_the_folders_the_files_were"), giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary", BorderColor: "theme.border"})
 	d.folders.SetChecked(true)
-	d.start = components.PrimaryButton("Recover", "recover").OnClick(d.begin)
-	d.cancel = components.GhostButton("Cancel", "").OnClick(func() { d.open = false })
-	d.stop = components.SecondaryButton("Stop", "stop").OnClick(m.CancelRecover)
-	d.reveal = components.SecondaryButton("Show the files", "external").OnClick(d.show)
-	d.done = components.PrimaryButton("Done", "check").OnClick(func() {
+	d.start = components.PrimaryButton(locales.T("recoverdialog.recover"), "recover").OnClick(d.begin)
+	d.cancel = components.GhostButton(locales.T("recoverdialog.cancel"), "").OnClick(func() { d.open = false })
+	d.stop = components.SecondaryButton(locales.T("recoverdialog.stop"), "stop").OnClick(m.CancelRecover)
+	d.reveal = components.SecondaryButton(locales.T("recoverdialog.show_the_files"), "external").OnClick(d.show)
+	d.done = components.PrimaryButton(locales.T("recoverdialog.done"), "check").OnClick(func() {
 		d.open = false
 		m.Report, m.RecoverErr = nil, nil
 	})
@@ -128,12 +128,12 @@ func (d *RecoverDialog) header(icon, color, title, sub string) giode.Element {
 func (d *RecoverDialog) setup() giode.Element {
 	files, size := d.m.Selection()
 	parts := []giode.Element{
-		d.header("recover", "theme.primary", "Recover "+count(files, "file", "files"), recovery.FormatBytes(size)+" to copy"),
+		d.header("recover", "theme.primary", locales.T("recoverdialog.title", "files", count(files, "file")), locales.T("recoverdialog.to_copy", "size", recovery.FormatBytes(size))),
 	}
 	if platform.ChooseDestination {
 		dir := d.dest.Text()
 		parts = append(parts, giode.Stack(giode.Styles{Gap: theme.S2},
-			giode.Text("Save into", theme.Overline()),
+			giode.Text(locales.T("recoverdialog.save_into"), theme.Overline()),
 			giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
 				giode.Box(giode.Styles{FlexGrow: 1}, d.dest), d.choose),
 		), d.folders)
@@ -145,10 +145,10 @@ func (d *RecoverDialog) setup() giode.Element {
 		case err != nil:
 		case d.m.Source.Kind == disk.KindImage:
 			parts = append(parts, components.Banner("shield", "theme.success",
-				"Recovering from a disk image only reads it; the image is never changed.", nil))
+				locales.T("recoverdialog.recovering_from_a_disk_image_only"), nil))
 		default:
 			parts = append(parts, components.Banner("shield", "theme.success",
-				"This folder is on another drive, so recovering can't overwrite anything still on the scanned one.", nil))
+				locales.T("recoverdialog.this_folder_is_on_another_drive"), nil))
 		}
 	} else {
 		d.start.Disabled(files == 0)
@@ -168,8 +168,8 @@ func (d *RecoverDialog) running() giode.Element {
 		frac = float32(float64(p.Done) / float64(p.Total))
 	}
 	return giode.Stack(giode.Styles{Width: -1, Gap: theme.S5},
-		d.header("recover", "theme.primary", "Recovering…", fmt.Sprintf("%d of %d files · %s of %s",
-			p.Files, p.TotalFiles, recovery.FormatBytes(p.Done), recovery.FormatBytes(p.Total))),
+		d.header("recover", "theme.primary", locales.T("recoverdialog.recovering"), locales.T("recoverdialog.progress", "done", p.Files, "files", p.TotalFiles,
+			"copied", recovery.FormatBytes(p.Done), "size", recovery.FormatBytes(p.Total))),
 		giode.Progress(frac, giode.Styles{Width: -1, Height: 8, BorderRadius: 4, Color: "theme.primary",
 			Background: giode.Mix("theme.text", "theme.surface", 0.08)}),
 		giode.Text(p.Current, theme.Code().With(giode.Styles{TextOverflow: giode.TextOverflowEllipsis})),
@@ -179,25 +179,25 @@ func (d *RecoverDialog) running() giode.Element {
 
 func (d *RecoverDialog) finished() giode.Element {
 	rep := d.m.Report
-	icon, color, title := "check", "theme.success", "Recovered "+count(rep.Recovered, "file", "files")
+	icon, color, title := "check", "theme.success", locales.T("recoverdialog.recovered", "files", count(rep.Recovered, "file"))
 	if rep.Recovered == 0 {
-		icon, color, title = "alert", "theme.danger", "Nothing was recovered"
+		icon, color, title = "alert", "theme.danger", locales.T("recoverdialog.nothing_was_recovered")
 	}
 	parts := []giode.Element{
-		d.header(icon, color, title, recovery.FormatBytes(rep.Bytes)+" saved in "+friendly(rep.Duration)),
+		d.header(icon, color, title, locales.T("recoverdialog.saved_in", "size", recovery.FormatBytes(rep.Bytes), "time", friendly(rep.Duration))),
 		giode.Stack(giode.Styles{Gap: theme.S1},
-			giode.Text("Saved into", theme.Overline()),
+			giode.Text(locales.T("recoverdialog.saved_into"), theme.Overline()),
 			giode.Text(rep.Location, theme.Code().With(giode.Styles{Color: "theme.text"})).Selectable("recovered-location"),
 		),
 	}
 	if rep.Failed > 0 {
 		parts = append(parts, components.Banner("alert", "theme.warning",
-			count(rep.Failed, "file", "files")+" couldn't be read; the recovery report lists them and why.", nil))
+			locales.T("recoverdialog.failed", "files", count(rep.Failed, "file")), nil))
 	}
 	if d.m.RecoverErr != nil {
 		parts = append(parts, components.Banner("info", "theme.info", capitalize(d.m.RecoverErr.Error())+".", nil))
 	}
-	parts = append(parts, giode.Text("Files marked fair or poor may be partly overwritten. Open a few to check them before relying on them.", theme.Secondary()))
+	parts = append(parts, giode.Text(locales.T("recoverdialog.files_marked_fair_or_poor_may"), theme.Secondary()))
 	buttons := []giode.Element{}
 	if platform.CanReveal {
 		buttons = append(buttons, d.reveal)

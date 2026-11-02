@@ -1,7 +1,6 @@
 package screens
 
 import (
-	"fmt"
 	"path/filepath"
 	"strconv"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/mehran9675/giode/components/segmented"
 	"github.com/mehran9675/giode/components/toggle"
 	"github.com/xmhrnx/remanance/engine/rename"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -24,7 +24,7 @@ const renameRowHeight = 44
 
 // tokens are the fields a pattern can hold, offered as chips.
 var tokens = []struct{ label, text string }{
-	{"Name", "{name}"}, {"Number", "{n:3}"}, {"Date taken", "{date}"}, {"Folder", "{parent}"}, {"Extension", "{ext}"},
+	{locales.T("rename.name"), "{name}"}, {locales.T("rename.number"), "{n:3}"}, {locales.T("rename.date_taken"), "{date}"}, {locales.T("rename.folder"), "{parent}"}, {locales.T("rename.extension"), "{ext}"},
 }
 
 // Rename renames many files at once by rules, showing every new name
@@ -61,7 +61,7 @@ type Rename struct {
 // NewRename builds the renamer.
 func NewRename(m *model.Model) *Rename {
 	r := &Rename{m: m}
-	r.chooser = NewFolderChooser(m, "rename-place", "Open", m.OpenRenameFolder)
+	r.chooser = NewFolderChooser(m, "rename-place", locales.T("rename.open"), m.OpenRenameFolder)
 	r.intro = giode.Scroll(r.introView, giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
 	r.rules = giode.Scroll(r.rulesView, giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
 	r.list = giode.VirtualList(func() int { return len(m.Rename.Plan) }, renameRowHeight, r.row,
@@ -76,20 +76,20 @@ func NewRename(m *model.Model) *Rename {
 	r.start.SetText("1")
 	r.step = field("1").Keyboard(input.KeyboardNumeric)
 	r.step.SetText("1")
-	r.find = field("Find")
-	r.replace = field("Replace with")
+	r.find = field(locales.T("rename.find"))
+	r.replace = field(locales.T("rename.replace_with"))
 	r.ext = field("jpg")
 	sw := func(label string) *toggle.Switch {
 		return giode.Input.Switch(label, giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"}).OnChange(func(bool) { r.update() })
 	}
-	r.regexp, r.matchCase, r.withExt = sw("Regular expression"), sw("Match case"), sw("Include the extension")
-	r.recursive = giode.Input.Switch("Include subfolders", giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"}).
+	r.regexp, r.matchCase, r.withExt = sw(locales.T("rename.regular_expression")), sw(locales.T("rename.match_case")), sw(locales.T("rename.include_the_extension"))
+	r.recursive = giode.Input.Switch(locales.T("rename.include_subfolders"), giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"}).
 		OnChange(func(on bool) { m.Rename.Recursive = on; m.ListRenameFiles() })
-	r.caseSel = giode.Input.Select(giode.Styles{FontSize: 13, BorderRadius: theme.Radius}, rename.CaseLabels...).Sheet(giode.SheetCompact).
+	r.caseSel = giode.Input.Select(giode.Styles{FontSize: 13, BorderRadius: theme.Radius}, labels(rename.CaseLabels)...).Sheet(giode.SheetCompact).
 		OnChange(func(int) { r.update() })
-	r.extSel = giode.Input.Select(giode.Styles{FontSize: 13, BorderRadius: theme.Radius}, "Keep extension", "lowercase", "Change to…").Sheet(giode.SheetCompact).
+	r.extSel = giode.Input.Select(giode.Styles{FontSize: 13, BorderRadius: theme.Radius}, locales.T("rename.keep_extension"), "lowercase", locales.T("rename.change_to")).Sheet(giode.SheetCompact).
 		OnChange(func(int) { r.update() })
-	r.order = giode.Input.Segmented("By name", "By date").Styles(segmentStyles().With(giode.Styles{Width: 200, FontSize: 12.5})).
+	r.order = giode.Input.Segmented(locales.T("rename.by_name"), locales.T("rename.by_date")).Styles(segmentStyles().With(giode.Styles{Width: 200, FontSize: 12.5})).
 		OnChange(func(i int) { m.Rename.Order = model.RenameOrder(i); m.ListRenameFiles() })
 	for _, t := range tokens {
 		t := t
@@ -104,13 +104,13 @@ func NewRename(m *model.Model) *Rename {
 		}).OnClick(func(giode.ClickEvent) {
 			r.pattern.InsertText(t.text)
 			r.update()
-		}).Label("Insert "+t.label))
+		}).Label(locales.T("rename.insert_token", "token", t.label)))
 	}
-	r.back = components.IconAction("arrow-left", "Choose another folder").OnClick(m.CloseRename)
-	r.again = components.IconAction("refresh", "Read the folder again").OnClick(m.ListRenameFiles)
-	r.apply = components.PrimaryButton("Rename", "check").OnClick(m.ApplyRename)
-	r.undo = components.SecondaryButton("Undo", "history").OnClick(m.UndoRename)
-	r.reset = components.GhostButton("Reset rules", "").OnClick(func() {
+	r.back = components.IconAction("arrow-left", locales.T("rename.choose_another_folder")).OnClick(m.CloseRename)
+	r.again = components.IconAction("refresh", locales.T("rename.read_the_folder_again")).OnClick(m.ListRenameFiles)
+	r.apply = components.PrimaryButton(locales.T("rename.rename"), "check").OnClick(m.ApplyRename)
+	r.undo = components.SecondaryButton(locales.T("rename.undo"), "history").OnClick(m.UndoRename)
+	r.reset = components.GhostButton(locales.T("rename.reset_rules"), "").OnClick(func() {
 		r.pattern.SetText("{name}")
 		r.start.SetText("1")
 		r.step.SetText("1")
@@ -209,13 +209,13 @@ func (r *Rename) View() giode.Element {
 func (r *Rename) introView() giode.Element {
 	compact := giode.Compact()
 	kids := []giode.Element{
-		toolHeader("rename", "Rename many files at once",
-			"Number photos, put the date they were taken in their names, find and replace words, change case. Every new name is shown before anything changes, clashes are caught, and the last rename can be undone."),
+		toolHeader("rename", locales.T("rename.rename_many_files_at_once"),
+			locales.T("rename.number_photos_put_the_date_they")),
 	}
 	if err := r.m.Rename.Err; err != nil {
 		kids = append(kids, components.Banner("alert", "theme.danger", err.Error(), nil))
 	}
-	kids = append(kids, section("Choose the folder", r.chooser.View(compact)))
+	kids = append(kids, section(locales.T("rename.choose_the_folder"), r.chooser.View(compact)))
 	return page(compact, kids...)
 }
 
@@ -232,17 +232,17 @@ func (r *Rename) rulesView() giode.Element {
 		ext = append(ext, giode.Box(giode.Styles{Width: 110}, r.ext))
 	}
 	kids := []giode.Element{
-		section("Pattern",
+		section(locales.T("rename.pattern"),
 			r.pattern,
 			giode.Row(giode.Styles{Width: -1, Gap: 6}, chips...),
 			giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
-				label("Numbers start at"), giode.Box(giode.Styles{Width: 72}, r.start),
+				label(locales.T("rename.numbers_start_at")), giode.Box(giode.Styles{Width: 72}, r.start),
 				label("by"), giode.Box(giode.Styles{Width: 60}, r.step)),
 			giode.Text("{date} is when a photo was taken, or when the file last changed; {date:2006-01-02 15.04} sets its layout.", theme.Caption().With(giode.Styles{FontSize: 11.5})),
 		),
-		section("Find and replace", r.find, r.replace, r.regexp, r.matchCase, r.withExt),
-		section("Case and extension", r.caseSel, giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap}, ext...)),
-		section("Files", r.recursive, r.order),
+		section(locales.T("rename.find_and_replace"), r.find, r.replace, r.regexp, r.matchCase, r.withExt),
+		section(locales.T("rename.case_and_extension"), r.caseSel, giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap}, ext...)),
+		section(locales.T("rename.files"), r.recursive, r.order),
 		r.reset,
 	}
 	if err := r.m.Rename.PlanErr; err != nil {
@@ -259,7 +259,7 @@ func (r *Rename) editor() giode.Element {
 		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"},
 		r.back, icons.Icon("folder", 16, "theme.primary"),
 		giode.Box(giode.Styles{FlexGrow: 1}, giode.Text(st.Dir, theme.Body().With(giode.Styles{FontSize: 13, FontWeight: giode.FontWeightMedium, MaxLines: 1, TextOverflow: giode.TextOverflowEllipsis}))),
-		giode.Text(count(len(st.Files), "file", "files"), theme.Caption()),
+		giode.Text(count(len(st.Files), "file"), theme.Caption()),
 		r.again,
 	)
 	var notes []giode.Element
@@ -271,16 +271,16 @@ func (r *Rename) editor() giode.Element {
 	}
 	var preview giode.Element = giode.Box(giode.Styles{Width: -1, Height: -1, Padding: giode.SymmetricInset(theme.S3, theme.S2)}, r.list)
 	if len(st.Files) == 0 {
-		preview = components.EmptyState("folder", "No files here", "This folder has no files to rename.", nil)
+		preview = components.EmptyState("folder", locales.T("rename.no_files_here"), locales.T("rename.this_folder_has_no_files_to"), nil)
 	}
 	head := giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Padding: giode.Inset{Left: theme.S6 + 30, Right: theme.S4, Top: theme.S3, Bottom: theme.S1}},
-		giode.Box(giode.Styles{FlexGrow: 1}, giode.Text("Now", theme.Overline())),
+		giode.Box(giode.Styles{FlexGrow: 1}, giode.Text(locales.T("rename.now"), theme.Overline())),
 		giode.Box(giode.Styles{Width: 14}),
-		giode.Box(giode.Styles{FlexGrow: 1}, giode.Text("After", theme.Overline())),
+		giode.Box(giode.Styles{FlexGrow: 1}, giode.Text(locales.T("rename.after"), theme.Overline())),
 	)
-	summary := fmt.Sprintf("%s change", count(changes, "name", "names"))
+	summary := locales.N("rename.names_change", changes)
 	if problems > 0 {
-		summary += fmt.Sprintf(" · %s to fix", count(problems, "problem", "problems"))
+		summary = locales.T("rename.with_problems", "changes", summary, "problems", count(problems, "problem"))
 	}
 	r.apply.Disabled(changes == 0 || problems > 0 || st.PlanErr != nil)
 	foot := []giode.Element{giode.Box(giode.Styles{FlexGrow: 1}, giode.Text(summary, theme.Secondary()))}

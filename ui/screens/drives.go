@@ -17,6 +17,7 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/iosbackup"
 	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -50,13 +51,13 @@ type Drives struct {
 // NewDrives builds the drive list.
 func NewDrives(m *model.Model) *Drives {
 	d := &Drives{m: m}
-	d.mode = giode.Input.Segmented("Quick scan", "Deep scan").Styles(segmentStyles().With(giode.Styles{Width: 280}))
-	d.start = components.PrimaryButton("Start scan", "search").OnClick(d.startScan)
-	d.refresh = components.IconAction("refresh", "Refresh the drive list").OnClick(m.LoadDrives)
-	d.password = giode.Input.Text("Backup password", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
+	d.mode = giode.Input.Segmented(locales.T("drives.quick_scan"), locales.T("drives.deep_scan")).Styles(segmentStyles().With(giode.Styles{Width: 280}))
+	d.start = components.PrimaryButton(locales.T("drives.start_scan"), "search").OnClick(d.startScan)
+	d.refresh = components.IconAction("refresh", locales.T("drives.refresh_the_drive_list")).OnClick(m.LoadDrives)
+	d.password = giode.Input.Text(locales.T("drives.backup_password"), giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
 		Password(true).Submit(func(string) { d.unlockBackup() })
-	d.unlock = components.PrimaryButton("Unlock", "lock").OnClick(d.unlockBackup)
-	d.elevate = components.SecondaryButton("Restart as administrator", "shield").OnClick(func() {
+	d.unlock = components.PrimaryButton(locales.T("drives.unlock"), "lock").OnClick(d.unlockBackup)
+	d.elevate = components.SecondaryButton(locales.T("drives.restart_as_administrator"), "shield").OnClick(func() {
 		if d.elevating {
 			return
 		}
@@ -147,7 +148,7 @@ func (d *Drives) pickImage() {
 // pickBackup opens an iPhone backup from a folder the user picks: the
 // backup itself, or the Backup folder of a copy kept elsewhere.
 func (d *Drives) pickBackup() {
-	opts := giode.FolderOptions{Title: "Choose an iPhone or iPad backup"}
+	opts := giode.FolderOptions{Title: locales.T("drives.choose_an_iphone_or_ipad_backup")}
 	go func() {
 		dir, err := d.m.App.PickFolder(context.Background(), opts)
 		if err != nil || dir == "" {
@@ -200,9 +201,9 @@ func (d *Drives) View() giode.Element {
 	_, ok := d.chosen()
 	d.start.Disabled(!ok || d.m.Opening)
 	if d.m.Opening {
-		d.start.Label("Opening…")
+		d.start.Label(locales.T("drives.opening"))
 	} else {
-		d.start.Label("Start scan")
+		d.start.Label(locales.T("drives.start_scan"))
 	}
 	return giode.Stack(giode.Styles{Width: -1, Height: -1},
 		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, d.view),
@@ -220,19 +221,19 @@ func (d *Drives) content() giode.Element {
 	if d.m.NeedsAdmin && !giode.IsElevated() {
 		d.elevate.Disabled(d.elevating)
 		if d.elevating {
-			d.elevate.Label("Waiting for permission…")
+			d.elevate.Label(locales.T("drives.waiting_for_permission"))
 		} else {
-			d.elevate.Label("Restart as administrator")
+			d.elevate.Label(locales.T("drives.restart_as_administrator"))
 		}
 		notes = append(notes, components.Banner("lock", "theme.warning",
-			"Reading drives directly needs administrator rights. DataDoc only reads; it never writes to the drive you scan.", d.elevate))
+			locales.T("drives.reading_drives_directly_needs_administrator_rights"), d.elevate))
 	}
 	if needsPassword(d.m.OpenErr) {
 		d.unlock.Disabled(d.m.Opening)
 		if d.m.Opening {
-			d.unlock.Label("Unlocking…")
+			d.unlock.Label(locales.T("drives.unlocking"))
 		} else {
-			d.unlock.Label("Unlock")
+			d.unlock.Label(locales.T("drives.unlock"))
 		}
 		notes = append(notes, components.Banner("lock", "theme.warning", d.m.OpenErr.Error(),
 			giode.Row(giode.Styles{Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
@@ -246,14 +247,14 @@ func (d *Drives) content() giode.Element {
 	return giode.Box(giode.Styles{Width: -1, Justify: giode.JustifyCenter},
 		giode.Stack(giode.Styles{Width: -1, MaxWidth: 1080, Padding: giode.UniformInset(pad), Gap: theme.S6},
 			giode.Stack(giode.Styles{Gap: theme.S2},
-				giode.Text("Choose where to look", theme.Hero()),
+				giode.Text(locales.T("drives.choose_where_to_look"), theme.Hero()),
 				giode.Box(giode.Styles{MaxWidth: 620}, giode.Text(
-					"DataDoc reads the drive without changing it. Save what you recover onto a different drive, so nothing overwrites the files still waiting to be found.",
+					locales.T("drives.datadoc_reads_the_drive_without_changing"),
 					theme.Secondary().With(giode.Styles{FontSize: 14, LineHeight: 21}))),
 			),
 			giode.Stack(giode.Styles{Gap: theme.S3}, notes...),
-			d.section("Drives", d.refresh, d.driveCards(compact)),
-			d.section("Disk images", nil, d.imageCards(compact)),
+			d.section(locales.T("drives.drives"), d.refresh, d.driveCards(compact)),
+			d.section(locales.T("drives.disk_images"), nil, d.imageCards(compact)),
 			d.backupSection(compact),
 		),
 	)
@@ -296,11 +297,11 @@ func (d *Drives) driveCards(compact bool) giode.Element {
 	if d.m.DrivesLoading && len(d.m.Drives) == 0 {
 		return giode.Row(giode.Styles{Gap: theme.S3, Align: giode.AlignCenter, Height: 112},
 			giode.Spinner(giode.Styles{Width: 18, Height: 18, Color: "theme.primary"}),
-			giode.Text("Looking for drives…", theme.Secondary()))
+			giode.Text(locales.T("drives.looking_for_drives"), theme.Secondary()))
 	}
 	if len(d.m.Drives) == 0 {
-		return components.EmptyState("drive", "No drives found",
-			"Connect the drive you want to recover from, then refresh. On a phone, connect a USB drive or memory card through an OTG adapter.", nil)
+		return components.EmptyState("drive", locales.T("drives.no_drives_found"),
+			locales.T("drives.connect_the_drive_you_want_to"), nil)
 	}
 	var cards []giode.Element
 	for _, info := range d.m.Drives {
@@ -323,8 +324,8 @@ func (d *Drives) backupSection(compact bool) giode.Element {
 			cards = append(cards, d.card(info, compact))
 		}
 	}
-	cards = append(cards, d.openCard("open-backup", "phone", "Open an iPhone backup", "A backup folder made by Finder or iTunes", compact, d.pickBackup))
-	return d.section("iPhone and iPad backups", nil, giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...))
+	cards = append(cards, d.openCard("open-backup", "phone", locales.T("drives.open_an_iphone_backup"), locales.T("drives.a_backup_folder_made_by_finder"), compact, d.pickBackup))
+	return d.section(locales.T("drives.iphone_and_ipad_backups"), nil, giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...))
 }
 
 func (d *Drives) imageCards(compact bool) giode.Element {
@@ -332,7 +333,7 @@ func (d *Drives) imageCards(compact bool) giode.Element {
 	for _, info := range d.images {
 		cards = append(cards, d.card(info, compact))
 	}
-	cards = append(cards, d.openCard("open-image", "plus", "Open a disk image", "A copy of a drive: .img, .dd, .iso, .dmg", compact, d.pickImage))
+	cards = append(cards, d.openCard("open-image", "plus", locales.T("drives.open_a_disk_image"), locales.T("drives.a_copy_of_a_drive_img"), compact, d.pickImage))
 	return giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)
 }
 
@@ -363,9 +364,9 @@ func (d *Drives) openCard(key, icon, title, detail string, compact bool, open fu
 
 // bar is the strip along the bottom: the scan mode and the start button.
 func (d *Drives) bar() giode.Element {
-	hint := "Reads the file systems for deleted files. Takes seconds to minutes."
+	hint := locales.T("drives.reads_the_file_systems_for_deleted")
 	if d.mode.Selected() == 1 {
-		hint = "Also reads every sector: finds lost partitions, formatted drives and files by their signature."
+		hint = locales.T("drives.also_reads_every_sector_finds_lost")
 	}
 	compact := giode.Compact()
 	inner := []giode.Element{

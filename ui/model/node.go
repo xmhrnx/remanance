@@ -1,11 +1,10 @@
 package model
 
 import (
-	"fmt"
-
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 // Kind tells the tree's top-level nodes apart.
@@ -88,18 +87,18 @@ func roots(res *scan.Result) []*Node {
 		}
 		title := label
 		if title == "" {
-			title = fmt.Sprintf("Partition %d", p.Index)
+			title = locales.T("node.partition", "n", p.Index)
 		}
-		detail := v.Volume.FS + " · " + bytes(p.Length)
+		detail := locales.T("node.volume_detail", "fs", v.Volume.FS, "size", bytes(p.Length))
 		vol := &Node{Entry: v.Volume.Root, Kind: KindVolume, Title: title, Detail: detail, Volume: v, Lost: p.Lost}
 		out = append(out, vol)
 		if v.Volume.Lost != nil && len(v.Volume.Lost.Children) > 0 {
-			out = append(out, &Node{Entry: v.Volume.Lost, Kind: KindLost, Title: "Lost and found", Detail: title, Volume: v})
+			out = append(out, &Node{Entry: v.Volume.Lost, Kind: KindLost, Title: locales.T("node.lost_and_found"), Detail: title, Volume: v})
 		}
 	}
 	if res.Carved != nil && len(res.Carved.Root.Children) > 0 {
-		out = append(out, &Node{Entry: res.Carved.Root, Kind: KindCarved, Title: "Found by signature",
-			Detail: fmt.Sprintf("%d files", res.Carved.Stats().Files)})
+		out = append(out, &Node{Entry: res.Carved.Root, Kind: KindCarved, Title: locales.T("node.found_by_signature"),
+			Detail: locales.N("node.files", res.Carved.Stats().Files)})
 	}
 	return out
 }
@@ -108,6 +107,8 @@ func roots(res *scan.Result) []*Node {
 // from different volumes don't mix.
 func (n *Node) prefix() string {
 	top := n.Trail()[0]
+	// These folders keep their English names in every language, so a
+	// recovery lays its files out the same wherever it's run.
 	switch top.Kind {
 	case KindCarved:
 		return "Found by signature"

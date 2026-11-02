@@ -1,5 +1,7 @@
 package model
 
+import "github.com/xmhrnx/remanance/locales"
+
 // Tool is one of the app's tools.
 type Tool int
 
@@ -21,9 +23,9 @@ type ToolInfo struct {
 
 // Tools are the tools, in the order the navigation lists them.
 var Tools = []ToolInfo{
-	{ToolRecover, "Recover", "Recover", "recover"},
-	{ToolSpace, "Disk space", "Space", "chart"},
-	{ToolDupes, "Duplicates", "Duplicates", "copy"},
-	{ToolSync, "Sync", "Sync", "sync"},
-	{ToolRename, "Rename", "Rename", "rename"},
+	{ToolRecover, locales.T("tool.recover"), locales.T("tool.recover"), "recover"},
+	{ToolSpace, locales.T("tool.disk_space"), locales.T("tool.space"), "chart"},
+	{ToolDupes, locales.T("tool.duplicates"), locales.T("tool.duplicates"), "copy"},
+	{ToolSync, locales.T("tool.sync"), locales.T("tool.sync"), "sync"},
+	{ToolRename, locales.T("tool.rename"), locales.T("tool.rename"), "rename"},
 }

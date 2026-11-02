@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -9,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/xmhrnx/remanance/engine/rename"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 )
 
@@ -188,7 +188,7 @@ func (m *Model) ApplyRename() {
 		return
 	}
 	r.Undo = done
-	r.Done = fmt.Sprintf("Renamed %d %s", len(done), plural(len(done), "file", "files"))
+	r.Done = locales.N("rename.renamed", len(done))
 	m.ListRenameFiles()
 }
 
@@ -201,7 +201,7 @@ func (m *Model) UndoRename() {
 	n := len(r.Undo)
 	r.Err = rename.Undo(r.Undo)
 	if r.Err == nil {
-		r.Done = fmt.Sprintf("Put back %d %s", n, plural(n, "name", "names"))
+		r.Done = locales.N("rename.put_back", n)
 		r.Undo = nil
 	}
 	m.ListRenameFiles()

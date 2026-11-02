@@ -7,6 +7,7 @@ import (
 
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/input"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -31,7 +32,7 @@ type FolderChooser struct {
 // chosen; scope keeps its cards apart from other choosers'.
 func NewFolderChooser(m *model.Model, scope, action string, pick func(string)) *FolderChooser {
 	c := &FolderChooser{m: m, scope: scope, pick: pick}
-	c.path = giode.Input.Text("Or type a folder's path", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius}).
+	c.path = giode.Input.Text(locales.T("folderchooser.or_type_a_folder_s_path"), giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius}).
 		Submit(func(string) { c.typed() })
 	c.go_ = components.SecondaryButton(action, "arrow-right").OnClick(c.typed)
 	return c
@@ -40,7 +41,7 @@ func NewFolderChooser(m *model.Model, scope, action string, pick func(string)) *
 func (c *FolderChooser) typed() {
 	p := c.path.Text()
 	if info, err := os.Stat(p); err != nil || !info.IsDir() {
-		c.err = "There's no folder at that path"
+		c.err = locales.T("folderchooser.there_s_no_folder_at_that")
 		return
 	}
 	c.err = ""
@@ -82,8 +83,8 @@ func (c *FolderChooser) View(compact bool) giode.Element {
 			return giode.Pressable(func(giode.PressState) giode.Element { return nil })
 		})
 		p.Content(func(s giode.PressState) giode.Element {
-			return placeCard("plus", "Another folder…", "Choose any folder", s)
-		}).OnClick(func(giode.ClickEvent) { c.browse() }).Label("Choose another folder")
+			return placeCard("plus", locales.T("folderchooser.another_folder"), locales.T("folderchooser.choose_any_folder"), s)
+		}).OnClick(func(giode.ClickEvent) { c.browse() }).Label(locales.T("folderchooser.choose_another_folder"))
 		cards = append(cards, giode.Box(width, p))
 	}
 	kids := []giode.Element{giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)}

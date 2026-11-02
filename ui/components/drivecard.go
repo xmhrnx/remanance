@@ -6,6 +6,7 @@ import (
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
@@ -16,7 +17,7 @@ func DriveIcon(info disk.Info) string {
 	switch {
 	case info.Kind == disk.KindImage:
 		return "disc"
-	case info.Kind == disk.KindFiles, bus == "internal, with root":
+	case info.Kind == disk.KindFiles, bus == locales.T("drivecard.internal_with_root"):
 		return "phone"
 	case strings.Contains(bus, "sd") && info.Removable, strings.Contains(bus, "mmc"):
 		return "sdcard"
@@ -58,10 +59,10 @@ func DriveCard(info disk.Info, selected bool, s giode.PressState) giode.Element 
 		tags = append(tags, Tag(m, "theme.muted"))
 	}
 	if info.System {
-		tags = append(tags, Tag("System drive", "theme.warning"))
+		tags = append(tags, Tag(locales.T("drivecard.system_drive"), "theme.warning"))
 	}
 	if info.Removable {
-		tags = append(tags, Tag("Removable", "theme.info"))
+		tags = append(tags, Tag(locales.T("drivecard.removable"), "theme.info"))
 	}
 	check := giode.Box(giode.Styles{Width: 20, Height: 20})
 	if selected {

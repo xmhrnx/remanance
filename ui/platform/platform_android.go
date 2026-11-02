@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 const (
@@ -26,7 +27,7 @@ func DefaultDestination() string { return filepath.Join(downloads, "DataDoc") }
 
 // DestinationNote says where to find the files.
 func DestinationNote() string {
-	return "Files are saved in Downloads/DataDoc on this phone's storage, apart from the drive being recovered."
+	return locales.T("platform.files_are_saved_in_downloads_datadoc")
 }
 
 // Sink saves into Downloads/DataDoc, whatever dir says.

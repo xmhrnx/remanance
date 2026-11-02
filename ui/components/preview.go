@@ -18,6 +18,7 @@ import (
 	"github.com/mehran9675/giode/components/scroll"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
 	"github.com/xmhrnx/remanance/ui/theme"
@@ -95,7 +96,7 @@ func (p *Preview) body(e *fsys.Entry) giode.Element {
 		return giode.Stack(giode.Styles{Width: -1, Padding: giode.UniformInset(theme.S6), Gap: theme.S3, Align: giode.AlignCenter},
 			giode.Box(giode.Styles{Height: 60}),
 			icons.Icon("eye", 28, giode.Mix("theme.text", "theme.surface", 0.3)),
-			giode.Text("Select a file to preview it", theme.Secondary().With(giode.Styles{TextAlign: giode.TextAlignCenter})),
+			giode.Text(locales.T("preview.select_a_file_to_preview_it"), theme.Secondary().With(giode.Styles{TextAlign: giode.TextAlignCenter})),
 		)
 	}
 	parts := []giode.Element{p.thumbnail(e),
@@ -109,10 +110,10 @@ func (p *Preview) body(e *fsys.Entry) giode.Element {
 		parts = append(parts, Banner("info", "theme.info", e.Note, nil))
 	}
 	if !e.IsDir && len(p.head) > 0 {
-		label := "First bytes"
+		label := locales.T("preview.first_bytes")
 		var body giode.Element
 		if LooksLikeText(p.head) {
-			label = "Beginning of the text"
+			label = locales.T("preview.beginning_of_the_text")
 			body = giode.Text(strings.ToValidUTF8(string(p.head), "�"), theme.Code().With(giode.Styles{FontSize: 11.5, LineHeight: 17, Color: "theme.text", MaxLines: 40})).Selectable("previewtext")
 		} else {
 			body = HexView(p.head[:min(len(p.head), 512)])
@@ -123,7 +124,7 @@ func (p *Preview) body(e *fsys.Entry) giode.Element {
 		))
 	}
 	if p.err != nil {
-		parts = append(parts, Banner("alert", "theme.danger", "Couldn't read this file: "+p.err.Error(), nil))
+		parts = append(parts, Banner("alert", "theme.danger", locales.T("preview.couldnt_read", "error", p.err.Error()), nil))
 	}
 	return giode.Stack(giode.Styles{Width: -1, Padding: giode.UniformInset(theme.S4), Gap: theme.S4}, parts...)
 }
@@ -144,20 +145,20 @@ func (p *Preview) details(e *fsys.Entry) giode.Element {
 	type kv struct{ k, v string }
 	var rows []kv
 	if !e.IsDir {
-		rows = append(rows, kv{"Size", fmt.Sprintf("%s  (%d bytes)", recovery.FormatBytes(e.Size), e.Size)})
+		rows = append(rows, kv{locales.T("preview.size"), locales.T("preview.size_bytes", "size", recovery.FormatBytes(e.Size), "bytes", e.Size)})
 	}
 	if e.State != fsys.Existing && !e.IsDir {
-		rows = append(rows, kv{"Recovery chance", fmt.Sprintf("%s, %d%%", HealthLabel(e.Health), e.Health)})
+		rows = append(rows, kv{locales.T("preview.recovery_chance"), fmt.Sprintf("%s, %d%%", HealthLabel(e.Health), e.Health)})
 	}
-	rows = append(rows, kv{"Modified", FormatTime(e.Modified)}, kv{"Created", FormatTime(e.Created)})
+	rows = append(rows, kv{locales.T("preview.modified"), FormatTime(e.Modified)}, kv{locales.T("preview.created"), FormatTime(e.Created)})
 	if len(e.Runs) > 0 && e.Runs[0].Offset >= 0 {
 		frag := ""
 		if len(e.Runs) > 1 {
-			frag = fmt.Sprintf(", %d fragments", len(e.Runs))
+			frag = locales.T("preview.fragments", "n", len(e.Runs))
 		}
-		rows = append(rows, kv{"Location", fmt.Sprintf("sector %d%s", e.Runs[0].Offset/512, frag)})
+		rows = append(rows, kv{locales.T("preview.location"), locales.T("preview.sector", "sector", e.Runs[0].Offset/512, "fragments", frag)})
 	}
-	rows = append(rows, kv{"Path", e.Path()})
+	rows = append(rows, kv{locales.T("preview.path"), e.Path()})
 	var out []giode.Element
 	for _, r := range rows {
 		out = append(out, giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Wrap: giode.WrapNoWrap},

@@ -3,6 +3,7 @@ package screens
 import (
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/dialog"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/theme"
@@ -28,7 +29,7 @@ func NewConfirm() *Confirm {
 			c.action()
 		}
 	})
-	c.no = components.GhostButton("Cancel", "").OnClick(func() { c.open = false })
+	c.no = components.GhostButton(locales.T("confirm.cancel"), "").OnClick(func() { c.open = false })
 	return c
 }
 

@@ -10,6 +10,7 @@ import (
 	"gioui.org/app"
 
 	"github.com/xmhrnx/remanance/engine/devsync"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 )
 
@@ -40,11 +41,11 @@ func deviceName() string {
 	}
 	switch runtime.GOOS {
 	case "android":
-		return "Android phone"
+		return locales.T("sync.android_phone")
 	case "ios":
 		return "iPhone"
 	}
-	return "Computer"
+	return locales.T("sync.computer")
 }
 
 // SyncConfigured tells whether this device syncs any folders, so syncing
@@ -114,7 +115,7 @@ func (m *Model) SetSyncBackground(on bool) {
 	s := &m.Sync
 	s.Background = on
 	if on && s.release == nil {
-		s.release = keepRunning(m.App, "Syncing your folders")
+		s.release = keepRunning(m.App, locales.T("sync.syncing_your_folders"))
 	}
 	if !on && s.release != nil {
 		s.release()

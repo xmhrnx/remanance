@@ -10,6 +10,7 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/model"
 	"github.com/xmhrnx/remanance/ui/theme"
@@ -27,7 +28,7 @@ type Scanning struct {
 // NewScanning builds the scan screen.
 func NewScanning(m *model.Model) *Scanning {
 	s := &Scanning{m: m}
-	s.stop = components.SecondaryButton("Stop and show results", "stop").OnClick(m.CancelScan)
+	s.stop = components.SecondaryButton(locales.T("scanning.stop_and_show_results"), "stop").OnClick(m.CancelScan)
 	s.view = giode.Scroll(s.content, giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
 	return s
 }
@@ -45,24 +46,24 @@ func (s *Scanning) content() giode.Element {
 	pct := fmt.Sprintf("%d%%", int(p.Fraction*100))
 	center := giode.Stack(giode.Styles{Align: giode.AlignCenter, Gap: 4},
 		giode.Text(pct, theme.Figure(46).With(giode.Styles{FontWeight: giode.FontWeightBold})),
-		giode.Box(giode.Styles{MaxWidth: properties.MaxWidth(ringSize - 70)}, giode.Text(string(p.Phase), theme.Secondary().With(giode.Styles{TextAlign: giode.TextAlignCenter}))),
+		giode.Box(giode.Styles{MaxWidth: properties.MaxWidth(ringSize - 70)}, giode.Text(label(string(p.Phase)), theme.Secondary().With(giode.Styles{TextAlign: giode.TextAlignCenter}))),
 	)
 
 	name := s.m.SourceName()
-	mode := "Quick scan"
+	mode := locales.T("scanning.quick_scan")
 	if s.m.Mode == scan.Deep {
-		mode = "Deep scan"
+		mode = locales.T("scanning.deep_scan")
 	}
 	var speed string
 	if p.Phase == scan.PhaseSectors && p.Speed > 0 {
-		speed = fmt.Sprintf("%s of %s  ·  %s/s  ·  about %s left",
-			recovery.FormatBytes(p.Position), recovery.FormatBytes(p.Total), recovery.FormatBytes(int64(p.Speed)), friendly(p.Remaining))
+		speed = locales.T("scanning.speed", "read", recovery.FormatBytes(p.Position), "size", recovery.FormatBytes(p.Total),
+			"speed", recovery.FormatBytes(int64(p.Speed)), "left", friendly(p.Remaining))
 	}
 
-	files := components.Stat("file", "theme.text", fmt.Sprint(p.Files), "Files in file systems")
-	deleted := components.Stat("ghost", "theme.primary", fmt.Sprint(p.Deleted), "Deleted")
-	carved := components.Stat("sparkle", "theme.info", fmt.Sprint(p.Carved), "Found by signature")
-	vols := components.Stat("layers", "theme.accent", fmt.Sprint(p.Partitions), "Partitions")
+	files := components.Stat("file", "theme.text", fmt.Sprint(p.Files), locales.T("scanning.files_in_file_systems"))
+	deleted := components.Stat("ghost", "theme.primary", fmt.Sprint(p.Deleted), locales.T("scanning.deleted"))
+	carved := components.Stat("sparkle", "theme.info", fmt.Sprint(p.Carved), locales.T("scanning.found_by_signature"))
+	vols := components.Stat("layers", "theme.accent", fmt.Sprint(p.Partitions), locales.T("scanning.partitions"))
 	row := func(kids ...giode.Element) giode.Element {
 		return giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Wrap: giode.WrapNoWrap}, kids...)
 	}
@@ -70,14 +71,14 @@ func (s *Scanning) content() giode.Element {
 	if compact {
 		stats = giode.Stack(giode.Styles{Width: -1, Gap: theme.S3}, row(files, deleted), row(carved, vols))
 	}
-	reading := recovery.FormatBytes(s.m.Source.Size) + " · reading only, nothing is written"
+	reading := locales.T("scanning.reading_size", "size", recovery.FormatBytes(s.m.Source.Size))
 	if s.m.Source.Kind == disk.KindFiles {
 		// Files: their size is known only once they're listed.
-		reading = "Reading only, nothing is written"
+		reading = locales.T("scanning.reading_only_nothing_is_written")
 	}
 	parts := []giode.Element{
 		giode.Stack(giode.Styles{Gap: 4, Align: giode.AlignCenter},
-			giode.Text(mode+" of "+name, theme.Title().With(giode.Styles{TextAlign: giode.TextAlignCenter})),
+			giode.Text(locales.T("scanning.mode_of", "mode", mode, "name", name), theme.Title().With(giode.Styles{TextAlign: giode.TextAlignCenter})),
 			giode.Text(reading, theme.Secondary()),
 		),
 		s.ring.View(p.Fraction, ringSize, s.m.Scanning, center),
@@ -95,7 +96,7 @@ func (s *Scanning) content() giode.Element {
 		}
 		parts = append(parts, components.Card(giode.Styles{Width: -1, Gap: theme.S4},
 			giode.Row(giode.Styles{Width: -1, Align: giode.AlignCenter, Justify: giode.JustifySpaceBetween},
-				giode.Text("Sector map", theme.Heading()),
+				giode.Text(locales.T("scanning.sector_map"), theme.Heading()),
 				giode.Text(badLine(p.BadBytes), theme.Caption().With(giode.Styles{Color: "theme.danger"})),
 			),
 			components.SectorMap(p.Map, cols, current),
@@ -115,18 +116,18 @@ func badLine(n int64) string {
 	if n == 0 {
 		return ""
 	}
-	return recovery.FormatBytes(n) + " unreadable, skipped"
+	return locales.T("scanning.unreadable", "size", recovery.FormatBytes(n))
 }
 
 // friendly rounds a duration the way people say it.
 func friendly(d time.Duration) string {
 	switch {
 	case d <= 0:
-		return "a moment"
+		return locales.T("scanning.a_moment")
 	case d < time.Minute:
-		return fmt.Sprintf("%d s", int(d.Seconds()))
+		return locales.T("time.seconds", "s", int(d.Seconds()))
 	case d < time.Hour:
-		return fmt.Sprintf("%d min", int(d.Minutes()+0.5))
+		return locales.T("time.minutes", "m", int(d.Minutes()+0.5))
 	}
-	return fmt.Sprintf("%d h %d min", int(d.Hours()), int(d.Minutes())%60)
+	return locales.T("time.hours", "h", int(d.Hours()), "m", int(d.Minutes())%60)
 }

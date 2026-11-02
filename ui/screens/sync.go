@@ -1,7 +1,6 @@
 package screens
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/mehran9675/giode"
@@ -10,6 +9,7 @@ import (
 	"github.com/mehran9675/giode/components/toggle"
 	"github.com/xmhrnx/remanance/engine/devsync"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -36,17 +36,17 @@ type Sync struct {
 func NewSync(m *model.Model) *Sync {
 	s := &Sync{m: m, device: NewAddDevice(m), folder: NewSyncFolder(m), confirm: NewConfirm()}
 	s.scroll = giode.Scroll(s.content, giode.Styles{ScrollBar: giode.ScrollBar{AutoHide: true}})
-	s.name = giode.Input.Text("This device's name", giode.Styles{FontSize: 14, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius}).
+	s.name = giode.Input.Text(locales.T("sync.this_device_s_name"), giode.Styles{FontSize: 14, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius}).
 		Submit(func(v string) {
 			if m.Sync.Node != nil && v != "" {
 				m.Sync.Node.SetName(v)
 			}
 		})
-	s.background = giode.Input.Switch("Keep syncing while the app is out of sight", giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"}).
+	s.background = giode.Input.Switch(locales.T("sync.keep_syncing_while_the_app_is"), giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"}).
 		OnChange(m.SetSyncBackground)
-	s.addDevice = components.SecondaryButton("Add device", "plus").OnClick(s.device.Open)
-	s.addFolder = components.PrimaryButton("Sync a folder", "folder").OnClick(func() { s.folder.OpenNew("") })
-	s.syncNow = components.GhostButton("Sync now", "refresh").OnClick(func() {
+	s.addDevice = components.SecondaryButton(locales.T("sync.add_device"), "plus").OnClick(s.device.Open)
+	s.addFolder = components.PrimaryButton(locales.T("sync.sync_a_folder"), "folder").OnClick(func() { s.folder.OpenNew("") })
+	s.syncNow = components.GhostButton(locales.T("sync.sync_now"), "refresh").OnClick(func() {
 		if m.Sync.Node != nil {
 			m.Sync.Node.SyncNow()
 		}
@@ -70,11 +70,11 @@ func (s *Sync) content() giode.Element {
 	compact := giode.Compact()
 	st := &s.m.Sync
 	kids := []giode.Element{
-		toolHeader("sync", "Sync your devices",
-			"Keep folders the same on your computers and phones. Files go straight from one device to the other, encrypted, over your network or the internet: no cloud, no account."),
+		toolHeader("sync", locales.T("sync.sync_your_devices"),
+			locales.T("sync.keep_folders_the_same_on_your")),
 	}
 	if st.Err != nil {
-		kids = append(kids, components.Banner("alert", "theme.danger", "Syncing couldn't start: "+st.Err.Error(), nil))
+		kids = append(kids, components.Banner("alert", "theme.danger", locales.T("sync.couldnt_start", "error", st.Err.Error()), nil))
 	}
 	if st.Node == nil {
 		return page(compact, kids...)
@@ -84,8 +84,8 @@ func (s *Sync) content() giode.Element {
 		kids = append(kids, s.pending(p))
 	}
 	kids = append(kids,
-		section("Folders", append(s.folders(), giode.Row(giode.Styles{Gap: theme.S2, Align: giode.AlignCenter}, s.addFolder, s.syncNow))...),
-		section("Devices", append(s.devices(), giode.Row(giode.Styles{Gap: theme.S2}, s.addDevice))...),
+		section(locales.T("sync.folders"), append(s.folders(), giode.Row(giode.Styles{Gap: theme.S2, Align: giode.AlignCenter}, s.addFolder, s.syncNow))...),
+		section(locales.T("sync.devices"), append(s.devices(), giode.Row(giode.Styles{Gap: theme.S2}, s.addDevice))...),
 		s.background,
 	)
 	return page(compact, kids...)
@@ -98,10 +98,10 @@ func (s *Sync) thisDevice() giode.Element {
 	return components.Card(giode.Styles{Width: -1},
 		giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
 			icons.Icon("devices", 20, "theme.primary"),
-			giode.Text("This device", theme.Heading()),
+			giode.Text(locales.T("sync.this_device"), theme.Heading()),
 		),
 		s.name,
-		giode.Text("Its ID: the other devices add this one by it, or find it on the same network by themselves.", theme.Caption()),
+		giode.Text(locales.T("sync.its_id_the_other_devices_add"), theme.Caption()),
 		giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter},
 			giode.Box(giode.Styles{FlexGrow: 1, Padding: giode.SymmetricInset(theme.S3, 10), Background: theme.Raised(), BorderRadius: theme.Radius},
 				giode.Text(id, theme.Code().With(giode.Styles{FontSize: 13}))),
@@ -116,7 +116,7 @@ func (s *Sync) pending(ps []devsync.Pending) giode.Element {
 	for _, p := range ps {
 		p := p
 		key := p.Device + "/" + p.Folder
-		dismiss := giode.Keyed("sync-dismiss", key, func() *giode.ButtonElement { return components.GhostButton("Ignore", "") }).
+		dismiss := giode.Keyed("sync-dismiss", key, func() *giode.ButtonElement { return components.GhostButton(locales.T("sync.ignore"), "") }).
 			OnClick(func() {
 				if s.m.Sync.Node != nil {
 					s.m.Sync.Node.Dismiss(p)
@@ -126,12 +126,12 @@ func (s *Sync) pending(ps []devsync.Pending) giode.Element {
 		var icon, title, sub string
 		var accept *giode.ButtonElement
 		if p.Folder == "" {
-			icon, title, sub = "devices", p.Name+" wants to connect", p.Device
-			accept = giode.Keyed("sync-accept", key, func() *giode.ButtonElement { return components.PrimaryButton("Add device", "") }).
+			icon, title, sub = "devices", locales.T("sync.wants_to_connect", "name", p.Name), p.Device
+			accept = giode.Keyed("sync-accept", key, func() *giode.ButtonElement { return components.PrimaryButton(locales.T("sync.add_device"), "") }).
 				OnClick(func() { s.device.addID(p.Device, p.Name, p.Addr) })
 		} else {
-			icon, title, sub = "folder", p.Name+" shares “"+p.Label+"”", "Accept it to choose where it goes here."
-			accept = giode.Keyed("sync-accept", key, func() *giode.ButtonElement { return components.PrimaryButton("Accept…", "") }).
+			icon, title, sub = "folder", locales.T("sync.shares", "name", p.Name, "folder", p.Label), locales.T("sync.accept_it_to_choose_where_it")
+			accept = giode.Keyed("sync-accept", key, func() *giode.ButtonElement { return components.PrimaryButton(locales.T("sync.accept"), "") }).
 				OnClick(func() { s.folder.OpenOffer(p) })
 		}
 		rows = append(rows, components.Card(giode.Styles{Width: -1, FlexDirection: giode.FlexDirectionRow, Align: giode.AlignCenter, Wrap: giode.WrapWrap,
@@ -143,32 +143,32 @@ func (s *Sync) pending(ps []devsync.Pending) giode.Element {
 			dismiss, accept,
 		))
 	}
-	return section("Waiting for you", rows...)
+	return section(locales.T("sync.waiting_for_you"), rows...)
 }
 
 // devices lists the devices this one knows.
 func (s *Sync) devices() []giode.Element {
 	ds := s.m.Sync.Status.Devices
 	if len(ds) == 0 {
-		return []giode.Element{giode.Text("No devices yet. Add your other computer or phone to start.", theme.Secondary().With(giode.Styles{FontSize: 13}))}
+		return []giode.Element{giode.Text(locales.T("sync.no_devices_yet_add_your_other"), theme.Secondary().With(giode.Styles{FontSize: 13}))}
 	}
 	var rows []giode.Element
 	for _, d := range ds {
 		d := d
-		remove := giode.Keyed("sync-device-remove", d.ID, func() *giode.ButtonElement { return components.GhostButton("Remove", "") }).
+		remove := giode.Keyed("sync-device-remove", d.ID, func() *giode.ButtonElement { return components.GhostButton(locales.T("sync.remove"), "") }).
 			OnClick(func() {
-				s.confirm.Ask("Remove "+d.Name+"?", "It stops syncing with this device. Files already synced stay where they are.", "Remove", func() {
+				s.confirm.Ask(locales.T("sync.remove_device", "name", d.Name), locales.T("sync.it_stops_syncing_with_this_device"), locales.T("sync.remove"), func() {
 					if s.m.Sync.Node != nil {
 						s.m.Sync.Node.RemoveDevice(d.ID)
 						s.m.RefreshSync()
 					}
 				})
 			})
-		dot, state := "theme.muted", "Not connected"
+		dot, state := "theme.muted", locales.T("sync.not_connected")
 		if d.Connected {
-			dot, state = "theme.success", "Connected"
+			dot, state = "theme.success", locales.T("sync.connected")
 			if d.Addr != "" {
-				state += " · " + d.Addr
+				state = locales.T("sync.connected_from", "addr", d.Addr)
 			}
 		}
 		rows = append(rows, giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap,
@@ -189,7 +189,7 @@ func (s *Sync) devices() []giode.Element {
 func (s *Sync) folders() []giode.Element {
 	fs := s.m.Sync.Status.Folders
 	if len(fs) == 0 {
-		return []giode.Element{giode.Text("No folders yet. Pick one to keep the same on your devices.", theme.Secondary().With(giode.Styles{FontSize: 13}))}
+		return []giode.Element{giode.Text(locales.T("sync.no_folders_yet_pick_one_to"), theme.Secondary().With(giode.Styles{FontSize: 13}))}
 	}
 	var rows []giode.Element
 	for _, f := range fs {
@@ -203,9 +203,9 @@ func (s *Sync) folderCard(f devsync.FolderStatus) giode.Element {
 		devsync.StateIdle: "theme.success", devsync.StateScanning: "theme.primary", devsync.StateSyncing: "theme.primary",
 		devsync.StatePaused: "theme.muted", devsync.StateError: "theme.danger", devsync.StateWaiting: "theme.warning",
 	}[f.State]
-	pauseLabel, pauseIcon := "Pause", "pause"
+	pauseLabel, pauseIcon := locales.T("sync.pause"), "pause"
 	if f.Paused {
-		pauseLabel, pauseIcon = "Resume", "play"
+		pauseLabel, pauseIcon = locales.T("sync.resume"), "play"
 	}
 	pause := giode.Keyed("sync-pause", f.ID, func() *giode.ButtonElement { return components.GhostButton(pauseLabel, pauseIcon) })
 	pause.Label(pauseLabel)
@@ -217,9 +217,9 @@ func (s *Sync) folderCard(f devsync.FolderStatus) giode.Element {
 			s.m.RefreshSync()
 		}
 	})
-	remove := giode.Keyed("sync-folder-remove", f.ID, func() *giode.ButtonElement { return components.GhostButton("Stop syncing", "") }).
+	remove := giode.Keyed("sync-folder-remove", f.ID, func() *giode.ButtonElement { return components.GhostButton(locales.T("sync.stop_syncing"), "") }).
 		OnClick(func() {
-			s.confirm.Ask("Stop syncing “"+f.Label+"”?", "The folder and its files stay on this device; changes just stop going between devices.", "Stop syncing", func() {
+			s.confirm.Ask(locales.T("sync.stop_syncing_folder", "folder", f.Label), locales.T("sync.the_folder_and_its_files_stay"), locales.T("sync.stop_syncing"), func() {
 				if s.m.Sync.Node != nil {
 					s.m.Sync.Node.RemoveFolder(f.ID)
 					s.m.RefreshSync()
@@ -227,10 +227,10 @@ func (s *Sync) folderCard(f devsync.FolderStatus) giode.Element {
 			})
 		})
 
-	detail := fmt.Sprintf("%s · %s · %s", count(f.Files, "file", "files"), recovery.FormatBytes(f.Bytes), devsync.ModeLabels[f.Mode])
-	shared := count(len(f.Devices), "device", "devices")
+	detail := locales.T("sync.folder_detail", "files", count(f.Files, "file"), "size", recovery.FormatBytes(f.Bytes), "mode", label(devsync.ModeLabels[f.Mode]))
+	shared := count(len(f.Devices), "device")
 	if len(f.Devices) > 0 {
-		shared = fmt.Sprintf("%d of %s online", f.Online, shared)
+		shared = locales.T("sync.online", "online", f.Online, "devices", shared)
 	}
 	kids := []giode.Element{
 		giode.Row(giode.Styles{Width: -1, Gap: theme.S3, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap},
@@ -241,7 +241,7 @@ func (s *Sync) folderCard(f devsync.FolderStatus) giode.Element {
 			giode.Row(giode.Styles{Gap: 6, Align: giode.AlignCenter, Padding: giode.SymmetricInset(10, 4), BorderRadius: 12,
 				Background: giode.Mix(color, "theme.surface", 0.14)},
 				giode.Box(giode.Styles{Width: 7, Height: 7, BorderRadius: 4, Background: color}),
-				giode.Text(f.State.Label(), theme.Caption().With(giode.Styles{Color: "theme.text", FontWeight: giode.FontWeightSemiBold}))),
+				giode.Text(label(f.State.Label()), theme.Caption().With(giode.Styles{Color: "theme.text", FontWeight: giode.FontWeightSemiBold}))),
 		),
 	}
 	if f.State == devsync.StateSyncing && f.Need > 0 {
@@ -250,14 +250,14 @@ func (s *Sync) folderCard(f devsync.FolderStatus) giode.Element {
 			done = float32(f.Bytes) / float32(total)
 		}
 		kids = append(kids, giode.Progress(done, giode.Styles{Width: -1, Height: 6, BorderRadius: 3, Background: theme.Raised(), Color: "theme.primary"}),
-			giode.Text(fmt.Sprintf("%s to go, %s", count(f.Need, "file", "files"), recovery.FormatBytes(f.NeedBytes)), theme.Caption()))
+			giode.Text(locales.T("sync.to_go", "files", count(f.Need, "file"), "size", recovery.FormatBytes(f.NeedBytes)), theme.Caption()))
 	}
 	if f.Err != "" {
 		kids = append(kids, giode.Text(f.Err, theme.Caption().With(giode.Styles{Color: "theme.danger"})))
 	}
-	last := "Not synced yet"
+	last := locales.T("sync.not_synced_yet")
 	if !f.LastSync.IsZero() {
-		last = "Synced " + ago(f.LastSync)
+		last = locales.T("sync.synced_ago", "when", ago(f.LastSync))
 	}
 	kids = append(kids, giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapWrap},
 		giode.Stack(giode.Styles{FlexGrow: 1, Gap: 2, MinWidth: 200},
@@ -273,11 +273,11 @@ func ago(t time.Time) string {
 	d := time.Since(t)
 	switch {
 	case d < time.Minute:
-		return "just now"
+		return locales.T("sync.just_now")
 	case d < time.Hour:
-		return count(int(d/time.Minute), "minute", "minutes") + " ago"
+		return locales.T("sync.ago", "time", count(int(d/time.Minute), "minute"))
 	case d < 24*time.Hour:
-		return count(int(d/time.Hour), "hour", "hours") + " ago"
+		return locales.T("sync.ago", "time", count(int(d/time.Hour), "hour"))
 	}
 	return t.Format("2 Jan 15:04")
 }

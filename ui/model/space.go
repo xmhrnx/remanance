@@ -6,6 +6,7 @@ import (
 
 	"github.com/xmhrnx/remanance/engine/space"
 	"github.com/xmhrnx/remanance/engine/trash"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/platform/androidstore"
 )
 
@@ -35,7 +36,7 @@ func (m *Model) MeasureSpace(path string) {
 	s.Root, s.Current, s.Selected = nil, nil, nil
 	ctx, cancel := context.WithCancel(context.Background())
 	s.cancel = cancel
-	release := keepRunning(m.App, "Measuring disk space")
+	release := keepRunning(m.App, locales.T("space.measuring_disk_space"))
 	go func() {
 		defer release()
 		var progress latest[space.Progress]

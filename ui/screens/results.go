@@ -1,8 +1,6 @@
 package screens
 
 import (
-	"fmt"
-
 	"github.com/mehran9675/giode"
 	"github.com/mehran9675/giode/components/dropdown"
 	"github.com/mehran9675/giode/components/iconbutton"
@@ -13,6 +11,7 @@ import (
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -65,10 +64,10 @@ func NewResults(m *model.Model) *Results {
 		ClickFocusesRow(false)
 	r.checkAll = giode.Pressable(func(s giode.PressState) giode.Element {
 		return components.CheckMark(r.allChecked(), s.Hovered)
-	}).OnClick(func(giode.ClickEvent) { m.CheckAll() }).Label("Check every file listed")
-	r.search = giode.Input.Text("Search names", giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
+	}).OnClick(func(giode.ClickEvent) { m.CheckAll() }).Label(locales.T("results.check_every_file_listed"))
+	r.search = giode.Input.Text(locales.T("results.search_names"), giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 8), BorderRadius: theme.Radius}).
 		OnChange(func(t string) { f := m.Filter; f.Query = t; m.SetFilter(f) })
-	r.show = giode.Input.Segmented("Deleted", "All files").Styles(segmentStyles().With(giode.Styles{Width: 180, FontSize: 12.5})).
+	r.show = giode.Input.Segmented(locales.T("results.deleted"), locales.T("results.all_files")).Styles(segmentStyles().With(giode.Styles{Width: 180, FontSize: 12.5})).
 		OnChange(func(i int) { f := m.Filter; f.Show = model.Show(i); m.SetFilter(f) })
 	var sorts []string
 	for _, c := range model.SortChoices {
@@ -80,7 +79,7 @@ func NewResults(m *model.Model) *Results {
 	catIcons := []string{"picture", "video", "music", "document", "archive"}
 	for i, c := range r.catValues {
 		c, icon := c, catIcons[i]
-		r.cats = append(r.cats, components.NewFilterChip(string(c), icon, func() {
+		r.cats = append(r.cats, components.NewFilterChip(c.Label(), icon, func() {
 			f := m.Filter
 			if f.Category == c {
 				f.Category = model.CatAny
@@ -93,16 +92,16 @@ func NewResults(m *model.Model) *Results {
 	r.sheet = giode.Sheet(&r.previewOpen, func() giode.Element {
 		return giode.Box(giode.Styles{Width: -1, Height: 520}, r.preview.View(m.Dev, m.Preview))
 	}).Detents(giode.DetentMedium, giode.DetentLarge)
-	r.up = components.IconAction("arrow-left", "Up one folder").OnClick(func() {
+	r.up = components.IconAction("arrow-left", locales.T("results.up_one_folder")).OnClick(func() {
 		if m.Folder != nil && m.Folder.Parent != nil {
 			m.OpenFolder(m.Folder.Parent)
 		}
 	})
 	r.dialog = NewRecoverDialog(m)
-	r.recover = components.PrimaryButton("Recover", "recover").OnClick(r.dialog.Open)
-	r.newScan = components.GhostButton("New scan", "arrow-left").OnClick(m.NewScan)
-	r.clear = components.GhostButton("Clear", "").OnClick(m.ClearChecked)
-	r.deep = components.PrimaryButton("Run a deep scan", "radar").OnClick(func() { m.StartScan(scan.Deep) })
+	r.recover = components.PrimaryButton(locales.T("results.recover"), "recover").OnClick(r.dialog.Open)
+	r.newScan = components.GhostButton(locales.T("results.new_scan"), "arrow-left").OnClick(m.NewScan)
+	r.clear = components.GhostButton(locales.T("results.clear"), "").OnClick(m.ClearChecked)
+	r.deep = components.PrimaryButton(locales.T("results.run_a_deep_scan"), "radar").OnClick(func() { m.StartScan(scan.Deep) })
 	return r
 }
 
@@ -160,7 +159,7 @@ func (r *Results) treeRow(tn giode.TreeNode, s giode.TreeRowState) giode.Element
 		icon, color = "drive", "theme.text"
 		title.FontWeight = giode.FontWeightSemiBold
 		if n.Lost {
-			extra = append(extra, components.Tag("Lost", "theme.primary"))
+			extra = append(extra, components.Tag(locales.T("results.lost"), "theme.primary"))
 		}
 	case model.KindLost:
 		icon, color = "ghost", "theme.accent"
@@ -207,9 +206,9 @@ func (r *Results) View() giode.Element {
 	files, size := r.m.Selection()
 	r.recover.Disabled(files == 0)
 	if files > 0 {
-		r.recover.Label(fmt.Sprintf("Recover %d", files))
+		r.recover.Label(locales.T("results.recover_n", "n", files))
 	} else {
-		r.recover.Label("Recover")
+		r.recover.Label(locales.T("results.recover"))
 	}
 	compact := giode.Compact()
 	var body giode.Element
@@ -241,9 +240,9 @@ func (r *Results) summary(compact bool) giode.Element {
 	if res != nil {
 		files, deleted, carved = res.Stats()
 	}
-	facts := fmt.Sprintf("%d files · %d deleted · %d by signature", files, deleted, carved)
+	facts := locales.T("results.facts", "files", files, "deleted", deleted, "carved", carved)
 	if res != nil && res.Duration > 0 {
-		facts += " · scanned in " + friendly(res.Duration)
+		facts = locales.T("results.facts_scanned", "facts", facts, "time", friendly(res.Duration))
 	}
 	st := giode.Styles{Width: -1, Gap: theme.S4, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap,
 		Padding: giode.SymmetricInset(theme.S5, theme.S3), BorderWidth: 1, BorderColor: "theme.border", Background: "theme.background"}
@@ -253,9 +252,9 @@ func (r *Results) summary(compact bool) giode.Element {
 	)
 	kids := []giode.Element{r.newScan, left}
 	if disk.IsGone(r.m.ScanErr) {
-		kids = append(kids, components.Tag("Drive disconnected", "theme.danger"))
+		kids = append(kids, components.Tag(locales.T("results.drive_disconnected"), "theme.danger"))
 	} else if r.m.ScanErr != nil {
-		kids = append(kids, components.Tag("Stopped early", "theme.warning"))
+		kids = append(kids, components.Tag(locales.T("results.stopped_early"), "theme.warning"))
 	}
 	if compact {
 		st.Padding = giode.SymmetricInset(theme.S3, theme.S2)
@@ -266,7 +265,7 @@ func (r *Results) summary(compact bool) giode.Element {
 func (r *Results) sidebar() giode.Element {
 	return giode.Stack(giode.Styles{Width: 264, Height: -1, Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border",
 		Padding: giode.Inset{Top: theme.S3, Left: theme.S2, Right: theme.S1}, Gap: theme.S2},
-		giode.Box(giode.Styles{Padding: giode.SymmetricInset(theme.S2, theme.S1)}, giode.Text("Found", theme.Overline())),
+		giode.Box(giode.Styles{Padding: giode.SymmetricInset(theme.S2, theme.S1)}, giode.Text(locales.T("results.found"), theme.Overline())),
 		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, r.tree),
 	)
 }
@@ -317,7 +316,7 @@ func (r *Results) table(compact bool) giode.Element {
 	}
 	if r.m.Searching() && len(rows) > 0 {
 		parts = append(parts, giode.Box(giode.Styles{Padding: giode.SymmetricInset(theme.S5, 6)},
-			giode.Text(count(len(rows), "match", "matches")+" in this folder and the folders inside it", theme.Caption())))
+			giode.Text(locales.T("results.matches", "matches", count(len(rows), "match")), theme.Caption())))
 	}
 	parts = append(parts, giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, list))
 	return giode.Stack(giode.Styles{Width: -1, Height: -1}, parts...)
@@ -326,25 +325,25 @@ func (r *Results) table(compact bool) giode.Element {
 func (r *Results) empty() giode.Element {
 	switch {
 	case r.m.Folder == nil && r.m.Mode == scan.Quick:
-		return components.EmptyState("search", "No file system could be read",
-			"The drive may have been formatted or its partitions lost. A deep scan reads every sector, finds lost partitions and recognizes files by their signature.", r.deep)
+		return components.EmptyState("search", locales.T("results.no_file_system_could_be_read"),
+			locales.T("results.the_drive_may_have_been_formatted"), r.deep)
 	case r.m.Folder == nil:
-		return components.EmptyState("search", "Nothing was found",
-			"Every sector was read, but nothing recognizable is left. The drive may be encrypted (BitLocker, FileVault, LUKS), wiped, or an SSD that has trimmed its free space.", nil)
+		return components.EmptyState("search", locales.T("results.nothing_was_found"),
+			locales.T("results.every_sector_was_read_but_nothing"), nil)
 	case r.m.Searching():
-		return components.EmptyState("search", "No matches", "Nothing here matches the search and filters.", nil)
+		return components.EmptyState("search", locales.T("results.no_matches"), locales.T("results.nothing_here_matches_the_search_and"), nil)
 	case r.m.Filter.Show == model.ShowDeleted:
-		return components.EmptyState("check", "No deleted files here",
-			"This folder has no deleted files. Switch to All files to see everything in it.", nil)
+		return components.EmptyState("check", locales.T("results.no_deleted_files_here"),
+			locales.T("results.this_folder_has_no_deleted_files"), nil)
 	}
-	return components.EmptyState("folder-open", "This folder is empty", "", nil)
+	return components.EmptyState("folder-open", locales.T("results.this_folder_is_empty"), "", nil)
 }
 
 // bar is the strip along the bottom: the selection and the recover button.
 func (r *Results) bar(files int, size int64, compact bool) giode.Element {
-	msg := "Check the files and folders to recover"
+	msg := locales.T("results.check_the_files_and_folders_to")
 	if files > 0 {
-		msg = count(files, "file", "files") + " selected · " + recovery.FormatBytes(size)
+		msg = locales.T("results.selected", "files", count(files, "file"), "size", recovery.FormatBytes(size))
 	}
 	kids := []giode.Element{giode.Box(giode.Styles{FlexGrow: 1}, giode.Text(msg, theme.Secondary()))}
 	if files > 0 {

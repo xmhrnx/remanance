@@ -13,6 +13,7 @@ import (
 
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/scan"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
 
@@ -87,11 +88,11 @@ func SectorLegend() giode.Element {
 	}
 	item := func(c scan.Cell, label string) giode.Element { return swatch(CellColor(c), label) }
 	return giode.Row(giode.Styles{Gap: theme.S4, Align: giode.AlignCenter},
-		swatch("#FFD27A", "Reading now"),
-		item(scan.CellRead, "Read"),
-		item(scan.CellMetadata, "File system"),
-		item(scan.CellFound, "Found by signature"),
-		item(scan.CellBad, "Unreadable"),
-		item(scan.CellUnread, "Not yet read"),
+		swatch("#FFD27A", locales.T("sectormap.reading_now")),
+		item(scan.CellRead, locales.T("sectormap.read")),
+		item(scan.CellMetadata, locales.T("sectormap.file_system")),
+		item(scan.CellFound, locales.T("sectormap.found_by_signature")),
+		item(scan.CellBad, locales.T("sectormap.unreadable")),
+		item(scan.CellUnread, locales.T("sectormap.not_yet_read")),
 	)
 }

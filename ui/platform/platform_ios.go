@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 const (
@@ -25,7 +26,7 @@ func DefaultDestination() string {
 
 // DestinationNote says where to find the files.
 func DestinationNote() string {
-	return "Files are saved in the Files app, under On My iPhone › DataDoc › Recovered."
+	return locales.T("platform.files_are_saved_in_the_files")
 }
 
 // Sink saves into the app's Documents.

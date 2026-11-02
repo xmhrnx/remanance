@@ -11,6 +11,7 @@ import (
 	"github.com/mehran9675/giode/components/segmented"
 	"github.com/mehran9675/giode/components/toggle"
 	"github.com/xmhrnx/remanance/engine/devsync"
+	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/model"
@@ -44,9 +45,9 @@ func NewSyncFolder(m *model.Model) *SyncFolder {
 	field := func(p string) *input.Input {
 		return giode.Input.Text(p, giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius})
 	}
-	d.path = field("The folder on this device")
-	d.label = field("Its name, as the other devices see it")
-	d.browse = components.SecondaryButton("Choose…", "folder").OnClick(func() {
+	d.path = field(locales.T("syncfolder.the_folder_on_this_device"))
+	d.label = field(locales.T("syncfolder.its_name_as_the_other_devices"))
+	d.browse = components.SecondaryButton(locales.T("syncfolder.choose"), "folder").OnClick(func() {
 		go func() {
 			dir, err := m.App.PickFolder(context.Background(), giode.FolderOptions{Directory: d.path.Text()})
 			if err == nil {
@@ -59,11 +60,11 @@ func NewSyncFolder(m *model.Model) *SyncFolder {
 			}
 		}()
 	})
-	d.mode = giode.Input.Segmented(devsync.ModeLabels...).Styles(segmentStyles().With(giode.Styles{Width: -1, MaxWidth: 420, FontSize: 12.5})).
+	d.mode = giode.Input.Segmented(labels(devsync.ModeLabels)...).Styles(segmentStyles().With(giode.Styles{Width: -1, MaxWidth: 420, FontSize: 12.5})).
 		OnChange(func(i int) { d.keep.SetChecked(i == int(devsync.ReceiveOnly)) })
-	d.keep = giode.Input.Switch("Keep what changes replace, in .datadoc-versions", giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"})
-	d.ok = components.PrimaryButton("Sync this folder", "sync").OnClick(d.submit)
-	d.cancel = components.GhostButton("Cancel", "").OnClick(func() { d.open = false })
+	d.keep = giode.Input.Switch(locales.T("syncfolder.keep_what_changes_replace_in_datadoc"), giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"})
+	d.ok = components.PrimaryButton(locales.T("syncfolder.sync_this_folder"), "sync").OnClick(d.submit)
+	d.cancel = components.GhostButton(locales.T("syncfolder.cancel"), "").OnClick(func() { d.open = false })
 	return d
 }
 
@@ -79,7 +80,7 @@ func (d *SyncFolder) OpenNew(path string) {
 	d.mode.SetSelected(0)
 	d.keep.SetChecked(false)
 	d.devs = map[string]*checkbox.Checkbox{}
-	d.ok.Label("Sync this folder")
+	d.ok.Label(locales.T("syncfolder.sync_this_folder"))
 	d.open = true
 }
 
@@ -90,14 +91,14 @@ func (d *SyncFolder) OpenOffer(p devsync.Pending) {
 	d.label.SetText(p.Label)
 	d.mode.SetSelected(0)
 	d.keep.SetChecked(false)
-	d.ok.Label("Accept")
+	d.ok.Label(locales.T("syncfolder.accept"))
 	d.open = true
 }
 
 func (d *SyncFolder) submit() {
 	path := d.path.Text()
 	if path == "" {
-		d.err = "Choose where the folder goes on this device"
+		d.err = locales.T("syncfolder.choose_where_the_folder_goes_on")
 		return
 	}
 	mode := devsync.Mode(d.mode.Selected())
@@ -124,9 +125,9 @@ func (d *SyncFolder) submit() {
 func (d *SyncFolder) View() giode.Element { return d.dlg }
 
 func (d *SyncFolder) content() giode.Element {
-	title, sub := "Sync a folder", "Its files are kept the same on the devices you pick."
+	title, sub := locales.T("syncfolder.sync_a_folder"), locales.T("syncfolder.its_files_are_kept_the_same")
 	if d.offer != nil {
-		title, sub = "Accept “"+d.offer.Label+"”", d.offer.Name+" shares this folder. Choose where it goes here."
+		title, sub = locales.T("syncfolder.accept_folder", "folder", d.offer.Label), locales.T("syncfolder.offered_by", "name", d.offer.Name)
 	}
 	where := []giode.Element{giode.Box(giode.Styles{FlexGrow: 1}, d.path)}
 	if platform.PicksFolders {
@@ -137,10 +138,10 @@ func (d *SyncFolder) content() giode.Element {
 			giode.Box(giode.Styles{Width: 40, Height: 40, BorderRadius: 12, Align: giode.AlignCenter, Justify: giode.JustifyCenter,
 				Background: giode.Mix("theme.primary", "theme.surface", 0.14)}, icons.Icon("sync", 20, "theme.primary")),
 			giode.Stack(giode.Styles{FlexGrow: 1, Gap: 2}, giode.Text(title, theme.Heading()), giode.Text(sub, theme.Caption()))),
-		section("Folder", giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap}, where...)),
+		section(locales.T("syncfolder.folder"), giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter, Wrap: giode.WrapNoWrap}, where...)),
 	}
 	if d.offer == nil {
-		kids = append(kids, section("Name", d.label))
+		kids = append(kids, section(locales.T("syncfolder.name"), d.label))
 		var boxes []giode.Element
 		for _, dev := range d.m.Sync.Status.Devices {
 			cb, ok := d.devs[dev.ID]
@@ -152,16 +153,16 @@ func (d *SyncFolder) content() giode.Element {
 			boxes = append(boxes, cb)
 		}
 		if len(boxes) == 0 {
-			boxes = append(boxes, giode.Text("No devices added yet: the folder syncs once you add one and share it.", theme.Caption()))
+			boxes = append(boxes, giode.Text(locales.T("syncfolder.no_devices_added_yet_the_folder"), theme.Caption()))
 		}
-		kids = append(kids, section("Share with", boxes...))
+		kids = append(kids, section(locales.T("syncfolder.share_with"), boxes...))
 	}
 	modeNote := map[int]string{
-		0: "Changes on any device reach the others.",
-		1: "Changes here go to the others; theirs don't come back. Use it on the device whose files count.",
-		2: "Changes from the others come here; changes made here stay here. Use it for a backup.",
+		0: locales.T("syncfolder.changes_on_any_device_reach_the"),
+		1: locales.T("syncfolder.changes_here_go_to_the_others"),
+		2: locales.T("syncfolder.changes_from_the_others_come_here"),
 	}[d.mode.Selected()]
-	kids = append(kids, section("How it syncs", d.mode, giode.Text(modeNote, theme.Caption()), d.keep))
+	kids = append(kids, section(locales.T("syncfolder.how_it_syncs"), d.mode, giode.Text(modeNote, theme.Caption()), d.keep))
 	if d.err != "" {
 		kids = append(kids, giode.Text(d.err, theme.Caption().With(giode.Styles{Color: "theme.danger"})))
 	}

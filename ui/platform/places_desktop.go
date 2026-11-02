@@ -6,11 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/xmhrnx/remanance/locales"
 )
 
 func places() []Place {
 	home, _ := os.UserHomeDir()
-	out := []Place{{Label: "Home", Path: home, Icon: "folder"}}
+	out := []Place{{Label: locales.T("places.home"), Path: home, Icon: "folder"}}
 	for _, d := range []struct{ name, icon string }{
 		{"Desktop", "folder"}, {"Documents", "document"}, {"Downloads", "folder-open"},
 		{"Pictures", "picture"}, {"Videos", "video"}, {"Movies", "video"}, {"Music", "music"},
@@ -28,7 +30,7 @@ func drives() []Place {
 		for c := 'C'; c <= 'Z'; c++ {
 			root := string(c) + `:\`
 			if _, err := os.Stat(root); err == nil {
-				out = append(out, Place{Label: "Drive " + string(c) + ":", Path: root, Icon: "drive", Drive: true})
+				out = append(out, Place{Label: locales.T("places.drive", "letter", string(c)), Path: root, Icon: "drive", Drive: true})
 			}
 		}
 	case "darwin":
@@ -40,7 +42,7 @@ func drives() []Place {
 			}
 		}
 	default:
-		out = append(out, Place{Label: "This computer", Path: "/", Icon: "drive", Drive: true})
+		out = append(out, Place{Label: locales.T("places.this_computer"), Path: "/", Icon: "drive", Drive: true})
 		user := os.Getenv("USER")
 		var mounts []string
 		for _, pat := range []string{"/media/" + user + "/*", "/run/media/" + user + "/*", "/mnt/*"} {

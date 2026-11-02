@@ -6,6 +6,7 @@ import (
 	"github.com/xmhrnx/remanance/engine/carve"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/recovery"
+	"github.com/xmhrnx/remanance/locales"
 )
 
 // Show picks which files the table lists.
@@ -27,6 +28,9 @@ const (
 	CatDocuments Category = "Documents"
 	CatArchives  Category = "Archives"
 )
+
+// Label names a category in the user's language.
+func (c Category) Label() string { return locales.T("filter." + strings.ToLower(string(c))) }
 
 // Filter is what the table shows of the current folder.
 type Filter struct {
