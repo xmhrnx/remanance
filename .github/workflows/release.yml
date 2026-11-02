@@ -52,7 +52,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev nsis osslsigncode
-          go install github.com/mehran9675/giode-cli/cmd/giode@latest
+          go install github.com/xmhrnx/giode-cli/cmd/giode@latest
       - name: Project setup (giode.toml ci.setup)
         run: |
           sudo curl -fsSL -o "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/bundletool-all-1.18.3.jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - run: go install github.com/mehran9675/giode-cli/cmd/giode@latest
+      - run: go install github.com/xmhrnx/giode-cli/cmd/giode@latest
       - name: Signing certificate
         if: env.MACOS_CERT_BASE64 != ''
         env:
@@ -135,7 +135,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - run: go install github.com/mehran9675/giode-cli/cmd/giode@latest
+      - run: go install github.com/xmhrnx/giode-cli/cmd/giode@latest
       - name: Signing certificate and profile
         if: env.IOS_CERT_BASE64 != '' && env.IOS_PROFILE_BASE64 != ''
         env:

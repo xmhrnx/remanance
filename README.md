@@ -215,7 +215,7 @@ line stays in English.
 
 DataDoc is written in Go. The UI uses
 [giode](https://github.com/mehran9675/giode), and installers are built
-with [giode-cli](https://github.com/mehran9675/giode-cli).
+with [giode-cli](https://github.com/xmhrnx/giode-cli).
 
 ```bash
 go run ./cmd/datadoc
