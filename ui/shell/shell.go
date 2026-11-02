@@ -85,9 +85,12 @@ func (s *Shell) wide() giode.Element {
 		items = append(items, s.navItem(t, components.NavRailItem))
 	}
 	rail := giode.Stack(giode.Styles{Width: components.NavRailWidth, Height: -1, Gap: theme.S1, Padding: giode.SymmetricInset(theme.S2, theme.S4),
-		Background: "theme.background", BorderWidth: 1, BorderColor: "theme.border"}, items...)
+		Background: "theme.background"}, items...)
+	// A hairline between the rail and the page, rather than a border
+	// round the rail.
+	line := giode.Box(giode.Styles{Width: 1, Height: -1, Background: "theme.border"})
 	return giode.Row(giode.Styles{Width: -1, Height: -1, Wrap: giode.WrapNoWrap},
-		rail, giode.Box(giode.Styles{FlexGrow: 1, Height: -1}, s.page()))
+		rail, line, giode.Box(giode.Styles{FlexGrow: 1, Height: -1}, s.page()))
 }
 
 // compact puts the tools in a tab bar along a phone's bottom edge.
@@ -97,9 +100,10 @@ func (s *Shell) compact() giode.Element {
 		items = append(items, giode.Box(giode.Styles{FlexGrow: 1}, s.navItem(t, components.TabBarItem)))
 	}
 	bar := giode.Row(giode.Styles{Width: -1, Wrap: giode.WrapNoWrap, Padding: giode.SymmetricInset(theme.S1, theme.S1),
-		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"}, items...)
+		Background: "theme.surface"}, items...)
+	line := giode.Box(giode.Styles{Width: -1, Height: 1, Background: "theme.border"})
 	return giode.Stack(giode.Styles{Width: -1, Height: -1},
-		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, s.page()), bar)
+		giode.Box(giode.Styles{Width: -1, FlexGrow: 1}, s.page()), line, bar)
 }
 
 // navItem is a tool's button in the rail or tab bar.

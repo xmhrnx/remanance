@@ -26,6 +26,13 @@ const dupeRowHeight = 64
 // thresholds are how alike photos must be, by the strictness chosen.
 var thresholds = []int{3, 6, 10}
 
+// strictNotes say what each strictness finds.
+var strictNotes = []string{
+	"Only the same picture, resized or saved again.",
+	"Also lightly edited copies and burst shots that barely differ.",
+	"Also photos of the same scene taken moments apart. Check before removing.",
+}
+
 // Dupes finds files that are the same and photos and videos that look
 // the same, and moves the extra copies to the trash.
 type Dupes struct {
@@ -62,7 +69,7 @@ func NewDupes(m *model.Model) *Dupes {
 	d.similar = giode.Input.Switch("Also find similar photos and videos", giode.Styles{FontSize: 13.5, Color: "theme.text", Background: "theme.primary"}).
 		OnChange(func(on bool) { m.Dupes.Similar = on })
 	d.similar.SetChecked(m.Dupes.Similar)
-	d.strict = giode.Input.Segmented("Nearly identical", "Similar", "Loosely similar").Styles(segmentStyles().With(giode.Styles{Width: 400, FontSize: 12.5})).
+	d.strict = giode.Input.Segmented("Strict", "Balanced", "Loose").Styles(segmentStyles().With(giode.Styles{Width: -1, MaxWidth: 360, FontSize: 12.5})).
 		OnChange(func(i int) { m.Dupes.Threshold = thresholds[i] })
 	d.strict.SetSelected(1)
 	d.start = components.PrimaryButton("Find duplicates", "search").OnClick(func() {
@@ -273,8 +280,9 @@ func (d *Dupes) introView() giode.Element {
 	d.start.Disabled(len(st.Roots) == 0)
 	options := []giode.Element{d.similar}
 	if st.Similar {
-		options = append(options, giode.Stack(giode.Styles{Gap: theme.S2, Padding: giode.Inset{Left: 52}},
-			giode.Text("How alike photos must be", theme.Caption()), d.strict))
+		options = append(options, giode.Stack(giode.Styles{Width: -1, Gap: theme.S2},
+			giode.Text("How alike photos must be", theme.Caption()), d.strict,
+			giode.Text(strictNotes[d.strict.Selected()], theme.Caption())))
 	}
 	kids = append(kids,
 		section("Look in", giode.Row(giode.Styles{Width: -1, Gap: theme.S2}, chips...)),
