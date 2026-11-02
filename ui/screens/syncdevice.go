@@ -27,7 +27,7 @@ type AddDevice struct {
 // NewAddDevice builds the dialog, closed.
 func NewAddDevice(m *model.Model) *AddDevice {
 	d := &AddDevice{m: m}
-	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: 520, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
+	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: -1, MaxWidth: 520, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
 		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"})
 	d.id = giode.Input.Text("XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX", giode.Styles{FontSize: 13, FontFamily: theme.Mono, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius}).
 		Submit(func(string) { d.addTyped() })

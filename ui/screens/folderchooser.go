@@ -100,7 +100,7 @@ func (c *FolderChooser) View(compact bool) giode.Element {
 
 // placeCard is a folder or drive to choose.
 func placeCard(icon, title, sub string, s giode.PressState) giode.Element {
-	st := components.CardStyles().With(giode.Styles{Width: -1, Height: -1, FlexDirection: giode.FlexDirectionRow, Align: giode.AlignCenter,
+	st := components.CardStyles().With(giode.Styles{Width: -1, Height: -1, FlexDirection: giode.FlexDirectionRow, Wrap: giode.WrapNoWrap, Align: giode.AlignCenter,
 		Gap: theme.S3, Padding: giode.SymmetricInset(theme.S4, theme.S3), BoxShadow: giode.BoxShadow{}, BorderRadius: theme.Radius})
 	if s.Hovered {
 		st.Background = theme.Raised()

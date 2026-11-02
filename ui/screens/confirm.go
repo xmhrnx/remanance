@@ -21,7 +21,7 @@ type Confirm struct {
 // NewConfirm builds the dialog, closed.
 func NewConfirm() *Confirm {
 	c := &Confirm{}
-	c.dlg = giode.Dialog(&c.open, c.content, giode.Styles{Width: 440, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
+	c.dlg = giode.Dialog(&c.open, c.content, giode.Styles{Width: -1, MaxWidth: 440, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
 		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"})
 	c.yes = components.PrimaryButton("", "trash").OnClick(func() {
 		c.open = false

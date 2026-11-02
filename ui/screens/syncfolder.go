@@ -40,7 +40,7 @@ type SyncFolder struct {
 // NewSyncFolder builds the dialog, closed.
 func NewSyncFolder(m *model.Model) *SyncFolder {
 	d := &SyncFolder{m: m, devs: map[string]*checkbox.Checkbox{}}
-	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: 560, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
+	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: -1, MaxWidth: 560, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
 		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"})
 	field := func(p string) *input.Input {
 		return giode.Input.Text(p, giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius})

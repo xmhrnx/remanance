@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/mehran9675/giode"
+	"github.com/mehran9675/giode/components/copybutton"
 	"github.com/mehran9675/giode/components/input"
 	"github.com/mehran9675/giode/components/scroll"
 	"github.com/mehran9675/giode/components/toggle"
@@ -27,6 +28,7 @@ type Sync struct {
 	addDevice  *giode.ButtonElement
 	addFolder  *giode.ButtonElement
 	syncNow    *giode.ButtonElement
+	copyID     *copybutton.CopyButton
 	device     *AddDevice
 	folder     *SyncFolder
 	confirm    *Confirm
@@ -51,6 +53,12 @@ func NewSync(m *model.Model) *Sync {
 			m.Sync.Node.SyncNow()
 		}
 	})
+	s.copyID = giode.CopyButton(func() string {
+		if m.Sync.Node == nil {
+			return ""
+		}
+		return m.Sync.Node.ID()
+	}).Labels(locales.T("sync.copy"), locales.T("sync.copied"))
 	return s
 }
 
@@ -105,7 +113,7 @@ func (s *Sync) thisDevice() giode.Element {
 		giode.Row(giode.Styles{Width: -1, Gap: theme.S2, Align: giode.AlignCenter},
 			giode.Box(giode.Styles{FlexGrow: 1, Padding: giode.SymmetricInset(theme.S3, 10), Background: theme.Raised(), BorderRadius: theme.Radius},
 				giode.Text(id, theme.Code().With(giode.Styles{FontSize: 13}))),
-			giode.CopyButton(func() string { return id }),
+			s.copyID,
 		),
 	)
 }

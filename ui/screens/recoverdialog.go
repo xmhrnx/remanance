@@ -40,7 +40,7 @@ type RecoverDialog struct {
 // NewRecoverDialog builds the dialog, closed.
 func NewRecoverDialog(m *model.Model) *RecoverDialog {
 	d := &RecoverDialog{m: m}
-	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: 520, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
+	d.dlg = giode.Dialog(&d.open, d.content, giode.Styles{Width: -1, MaxWidth: 520, BorderRadius: theme.RadiusLarge, Padding: giode.UniformInset(theme.S6),
 		Background: "theme.surface", BorderWidth: 1, BorderColor: "theme.border"})
 	d.dest = giode.Input.Text(locales.T("recoverdialog.folder_to_save_into"), giode.Styles{FontSize: 13, Padding: giode.SymmetricInset(10, 9), BorderRadius: theme.Radius})
 	d.dest.SetText(platform.DefaultDestination())

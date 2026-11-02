@@ -388,6 +388,8 @@
 	"sync.computer": "Computer",
 	"sync.connected": "Connected",
 	"sync.connected_from": "Connected · {addr}",
+	"sync.copied": "Copied",
+	"sync.copy": "Copy",
 	"sync.couldnt_start": "Syncing couldn't start: {error}",
 	"sync.devices": "Devices",
 	"sync.folder_detail": "{files} · {size} · {mode}",

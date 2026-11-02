@@ -38,6 +38,17 @@ type Space struct {
 	open    *giode.ButtonElement
 	reveal  *giode.ButtonElement
 	remove  *giode.ButtonElement
+	kinds   kindsOf
+}
+
+// kindsOf keeps a folder's totals by kind: summing them walks every
+// file below it, too slow to do each frame on a whole drive. Size and
+// files tell when something in it was deleted.
+type kindsOf struct {
+	n     *space.Node
+	size  int64
+	files int
+	kinds []space.KindTotal
 }
 
 // NewSpace builds the disk space screen.
@@ -236,8 +247,12 @@ func (s *Space) results() giode.Element {
 
 // legend sums the folder's files by kind, largest first.
 func (s *Space) legend(n *space.Node) giode.Element {
+	c := &s.kinds
+	if c.n != n || c.size != n.Size || c.files != n.Files {
+		*c = kindsOf{n: n, size: n.Size, files: n.Files, kinds: n.Kinds()}
+	}
 	var items []giode.Element
-	for i, k := range n.Kinds() {
+	for i, k := range c.kinds {
 		if i == 6 || k.Size == 0 {
 			break
 		}
