@@ -13,7 +13,7 @@ import (
 // an iPhone backup's folder.
 func openSource(arg string) (disk.Device, error) {
 	// An encrypted backup's password, kept out of the shell's history.
-	password := os.Getenv("REMANENCE_BACKUP_PASSWORD")
+	password := os.Getenv("DATADOC_BACKUP_PASSWORD")
 	infos, _ := disk.List()
 	for _, i := range infos {
 		if i.Path == arg || i.ID == arg {
@@ -35,7 +35,7 @@ func openSource(arg string) (disk.Device, error) {
 		}
 		d, err := iosbackup.Open(b)
 		if errors.Is(err, iosbackup.ErrPassword) {
-			return nil, fmt.Errorf("%w; set REMANENCE_BACKUP_PASSWORD to it", err)
+			return nil, fmt.Errorf("%w; set DATADOC_BACKUP_PASSWORD to it", err)
 		}
 		return d, err
 	}

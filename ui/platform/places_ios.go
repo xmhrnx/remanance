@@ -11,5 +11,5 @@ import (
 // other folders by path. Files put there in the Files app show up here.
 func places() []Place {
 	home, _ := os.UserHomeDir()
-	return []Place{{Label: "Remanence in Files", Path: filepath.Join(home, "Documents"), Icon: "folder", Drive: true}}
+	return []Place{{Label: "DataDoc in Files", Path: filepath.Join(home, "Documents"), Icon: "folder", Drive: true}}
 }

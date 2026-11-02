@@ -98,12 +98,12 @@ func loadIndex(p string) *index {
 	return ix
 }
 
-// ignored tells whether a name is Remanence's own, or a system's file
+// ignored tells whether a name is DataDoc's own, or a system's file
 // that shouldn't travel.
 func ignored(name string) bool {
 	base := path.Base(name)
-	return strings.HasPrefix(base, ".remanence-") || base == ".DS_Store" || base == "Thumbs.db" ||
-		base == "desktop.ini" || strings.HasPrefix(base, "~$") || strings.HasPrefix(name, ".remanence-")
+	return strings.HasPrefix(base, ".datadoc-") || base == ".DS_Store" || base == "Thumbs.db" ||
+		base == "desktop.ini" || strings.HasPrefix(base, "~$") || strings.HasPrefix(name, ".datadoc-")
 }
 
 // validName tells whether a name from another device stays inside the

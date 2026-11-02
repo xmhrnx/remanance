@@ -17,7 +17,7 @@
 //
 // A folder can also back up: "Send only" on the device whose files
 // count, "Receive only" on the backup, which can keep the versions a
-// change replaced in .remanence-versions.
+// change replaced in .datadoc-versions.
 package devsync
 
 import (
@@ -58,7 +58,7 @@ type Folder struct {
 	Devices []string `json:"devices"`
 	Mode    Mode     `json:"mode"`
 	// Versions keeps what a change from another device replaced or
-	// deleted, in .remanence-versions in the folder.
+	// deleted, in .datadoc-versions in the folder.
 	Versions bool `json:"versions"`
 	Paused   bool `json:"paused"`
 }

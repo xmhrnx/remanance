@@ -2,12 +2,12 @@
 # Reference: https://github.com/mehran9675/giode-cli#giodetoml
 
 [app]
-name = "Remanence"
-id = "io.github.mehran9675.remanence"
+name = "DataDoc"
+id = "io.github.mehran9675.datadoc"
 version = "0.1.0"
 build = 1
 icon = "assets/icon.png"
-package = "./cmd/remanence"
+package = "./cmd/datadoc"
 platforms = ["windows", "macos", "linux", "android", "ios"]
 publisher = "xmhrnx"
 description = "Free, open-source data recovery: deleted files, formatted drives and lost partitions"
@@ -16,11 +16,11 @@ website = "https://github.com/xmhrnx/remanance"
 [android]
 min_sdk = 21
 # The adaptive icon's layers, drawn by assets/icon/make_icon.py with the
-# platter inside the middle that every launcher's mask leaves visible.
+# page inside the middle that every launcher's mask leaves visible.
 icon_foreground = "assets/icon/android-foreground.png"
 icon_background = "assets/icon/android-background.png"
 icon_monochrome = "assets/icon/android-monochrome.png"
-# Recovered files go to Download/Remanence; Android 10 needs the legacy
+# Recovered files go to Download/DataDoc; Android 10 needs the legacy
 # storage flag to write there by path.
 permissions = ["storage"]
 # Scans and recoveries keep going when the app leaves the screen, in
@@ -31,7 +31,7 @@ application_attributes = { requestLegacyExternalStorage = "true" }
 java = ["ui/platform/androidusb", "ui/platform/androidstore"]
 # USB drives on an OTG adapter, read through the USB host API. Not
 # required, so phones without USB host can still install the app to
-# recover from disk images. "All files access" lets Remanence look
+# recover from disk images. "All files access" lets DataDoc look
 # through the phone's storage for the trash and the copies apps hide;
 # the user turns it on in Android's settings when they first scan it.
 manifest = '''
@@ -88,4 +88,4 @@ trigger = "release"
 # The Android SDK on GitHub's runners has no bundletool, which the .aab
 # build needs; giode looks for it in the newest build-tools.
 setup.linux = 'sudo curl -fsSL -o "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/bundletool-all-1.18.3.jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar'
-test = 'docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/remanence-cli/... && go test ./engine/... ./ui/platform/...'
+test = 'docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/datadoc-cli/... && go test ./engine/... ./ui/platform/...'

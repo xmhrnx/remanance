@@ -16,7 +16,7 @@ import (
 const prefix = "usb:"
 
 // bridgeClass is UsbBridge.java's class, as JNI names it.
-const bridgeClass = "io/github/mehran9675/remanence/UsbBridge"
+const bridgeClass = "io/github/mehran9675/datadoc/UsbBridge"
 
 // parse reads UsbBridge.list's lines into drives.
 func parse(list string) []disk.Info {

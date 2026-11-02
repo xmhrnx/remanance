@@ -17,7 +17,7 @@ const (
 )
 
 // DefaultDestination is the app's Documents folder, which the Files app
-// shows under On My iPhone › Remanence.
+// shows under On My iPhone › DataDoc.
 func DefaultDestination() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, "Documents", "Recovered")
@@ -25,7 +25,7 @@ func DefaultDestination() string {
 
 // DestinationNote says where to find the files.
 func DestinationNote() string {
-	return "Files are saved in the Files app, under On My iPhone › Remanence › Recovered."
+	return "Files are saved in the Files app, under On My iPhone › DataDoc › Recovered."
 }
 
 // Sink saves into the app's Documents.

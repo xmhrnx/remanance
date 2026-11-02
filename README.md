@@ -1,10 +1,10 @@
-<p align="center"><img src="assets/icon.png" width="112" alt="Remanence"></p>
+<p align="center"><img src="assets/icon.png" width="112" alt="DataDoc"></p>
 
-<h1 align="center">Remanence</h1>
+<h1 align="center">DataDoc</h1>
 
 <p align="center">Free, open-source data recovery for Windows, macOS, Linux and Android.</p>
 
-Remanence gets back files that were deleted, recovers drives that were
+DataDoc gets back files that were deleted, recovers drives that were
 formatted, and finds partitions that were lost. It reads the drive
 directly, through its own parsers for each file system, and never
 writes to it.
@@ -39,7 +39,7 @@ writes to it.
   the image as often as you like.
 - **Deleted messages and records**: apps keep texts, call logs,
   contacts, notes and chats in SQLite databases, which leave a deleted
-  row in place until they need the space. Remanence finds those rows in
+  row in place until they need the space. DataDoc finds those rows in
   every database on a phone or backup (and in the known ones on any
   drive), in free pages, in the free space inside pages and in the
   write-ahead log, and saves them as spreadsheets (CSV): messages with
@@ -47,7 +47,7 @@ writes to it.
   Safari, calls and contacts, and any other table as it is.
 - **Phones**: see [Phones](#phones) below.
 
-Every file gets a health estimate: Remanence checks whether its
+Every file gets a health estimate: DataDoc checks whether its
 clusters were reused since it was deleted. You can also preview photos,
 text and raw bytes before you recover anything.
 
@@ -82,17 +82,17 @@ tab bar on a phone):
 | **Windows** | Internal, USB, SD cards, iPhones and Android phones by USB | Asks for administrator rights when you open a drive. |
 | **macOS** | Internal, USB, SD cards, iPhones and Android phones by USB | Asks for your password to read raw disks. |
 | **Linux** | Internal, USB, SD cards, iPhones and Android phones by USB | Relaunches through `pkexec` for raw access. |
-| **Android** | The phone's own storage, USB drives and SD card readers on an OTG adapter, and with root the phone's partitions, memory card and apps' databases | See [Phones](#phones). Recovered files go to `Download/Remanence`. |
+| **Android** | The phone's own storage, USB drives and SD card readers on an OTG adapter, and with root the phone's partitions, memory card and apps' databases | See [Phones](#phones). Recovered files go to `Download/DataDoc`. |
 | **iOS / iPadOS** | Disk images | iOS gives no app raw access to storage. Connect the iPhone to a computer and recover from there instead. Recovered files appear in the Files app. |
 
 ## Phones
 
 A phone encrypts its storage file by file and throws away a deleted
 file's key, so its sectors can't give the file back, with or without
-root. What Remanence can still find:
+root. What DataDoc can still find:
 
 - **The Android trash.** Since Android 11, many apps delete photos and
-  videos by moving them to a system trash for 30 days. Remanence lists
+  videos by moving them to a system trash for 30 days. DataDoc lists
   everything in it, from every app.
 - **Copies apps hide.** Thumbnails, and media that messaging and other
   apps keep in hidden folders or behind a `.nomedia` file, often
@@ -102,7 +102,7 @@ root. What Remanence can still find:
   Reading other apps' files needs Android's "All files access": the
   first scan of "This phone" opens the setting.
 - **USB drives and memory cards** on an OTG adapter, **no root
-  needed**. Remanence uses Android's USB host API and its own USB mass
+  needed**. DataDoc uses Android's USB host API and its own USB mass
   storage driver (SCSI over Bulk-Only Transport). Android asks once
   per drive.
 - **Deleted texts and chats on rooted phones.** With root, "This
@@ -117,14 +117,14 @@ root. What Remanence can still find:
   that didn't encrypt it. Recovered files are saved to the phone's own
   storage, so recover the files that matter most first.
 - **Android phones, from a computer.** Connect the phone by USB with
-  USB debugging turned on (in Developer options), and Remanence on
+  USB debugging turned on (in Developer options), and DataDoc on
   Windows, macOS and Linux lists it through ADB, Android's debug bridge:
   its storage, searched as above along with the apps' own caches in
   `Android/data`, where gallery and chat apps keep thumbnails and copies
   of photos, and on a rooted phone its apps' databases. It needs Android's platform tools (`adb`) installed; it
   starts the adb server itself.
 - **iPhones, from a computer.** Connect the iPhone by USB, unlock it
-  and tap Trust when it asks, and Remanence on Windows, macOS and Linux
+  and tap Trust when it asks, and DataDoc on Windows, macOS and Linux
   lists it with the drives and reads its photo storage directly. A scan
   finds:
   - photos and videos in Recently Deleted, which iOS keeps for 30 days;
@@ -138,7 +138,7 @@ root. What Remanence can still find:
   USB driver; on Linux, `usbmuxd`. An iPhone encrypts each file with
   its own key and erases the key when the file is deleted, so a deleted
   photo past Recently Deleted comes back only as its preview, from no
-  tool. Remanence also scans backups Finder or iTunes already made,
+  tool. DataDoc also scans backups Finder or iTunes already made,
   which hold the photos and app data the phone had then (encrypted ones
   open with their password).
 
@@ -153,43 +153,43 @@ Download the installer for your system from
 - Android: `.apk`
 - iOS: `.ipa`, on releases built with a provisioning profile
 
-**Don't install Remanence on the drive you're recovering from.** Every
+**Don't install DataDoc on the drive you're recovering from.** Every
 file written there can overwrite what you want back.
 
 ## Command line
 
-`remanence-cli` does everything the app does, for scripts and servers:
+`datadoc-cli` does everything the app does, for scripts and servers:
 
 ```bash
-remanence-cli list
+datadoc-cli list
 ```
 
 ```bash
-remanence-cli scan -deep /dev/sdb
+datadoc-cli scan -deep /dev/sdb
 ```
 
 ```bash
-remanence-cli recover -to ~/Recovered -type jpg,mp4 /dev/sdb
+datadoc-cli recover -to ~/Recovered -type jpg,mp4 /dev/sdb
 ```
 
 ```bash
-remanence-cli image /dev/sdb sdb.img
+datadoc-cli image /dev/sdb sdb.img
 ```
 
 ```bash
-remanence-cli space ~/Downloads
+datadoc-cli space ~/Downloads
 ```
 
 ```bash
-remanence-cli dupes -similar ~/Pictures
+datadoc-cli dupes -similar ~/Pictures
 ```
 
 ```bash
-remanence-cli rename -pattern "Trip {date} {n:3}" ~/Pictures/trip/*.jpg
+datadoc-cli rename -pattern "Trip {date} {n:3}" ~/Pictures/trip/*.jpg
 ```
 
 ```bash
-remanence-cli sync run
+datadoc-cli sync run
 ```
 
 `rename` only shows the new names until you add `-yes`, and `dupes`
@@ -199,16 +199,16 @@ moves copies to the trash only with `-remove`. `sync id`, `sync add` and
 `list` also shows the iPhones and Android phones connected by USB and
 the iPhone backups on the computer; `scan` and `recover` take any of
 them as the source. For an encrypted backup, set
-`REMANENCE_BACKUP_PASSWORD` to its password.
+`DATADOC_BACKUP_PASSWORD` to its password.
 
 ## Building
 
-Remanence is written in Go. The UI uses
+DataDoc is written in Go. The UI uses
 [giode](https://github.com/mehran9675/giode), and installers are built
 with [giode-cli](https://github.com/mehran9675/giode-cli).
 
 ```bash
-go run ./cmd/remanence
+go run ./cmd/datadoc
 ```
 
 ```bash
@@ -249,7 +249,7 @@ repository has the `IOS_CERT_BASE64`, `IOS_CERT_PASS` and
 
 ## License
 
-Remanence is licensed under the Apache License, version 2.0 (see
+DataDoc is licensed under the Apache License, version 2.0 (see
 [LICENSE](LICENSE)). The bundled fonts, Inter and JetBrains Mono, are
 under the SIL Open Font License; their licenses are in
 `ui/theme/fonts/`.

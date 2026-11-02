@@ -1,11 +1,11 @@
-// Package theme holds Remanence's look: its palettes, type and the
+// Package theme holds DataDoc's look: its palettes, type and the
 // spacing every screen shares.
 package theme
 
 import "github.com/mehran9675/giode"
 
 // Dark is the default palette: near-black ink with a warm amber accent,
-// the color of the trace in the icon.
+// the color of the pulse in the icon.
 var Dark = giode.Palette{
 	Primary:    "#F4B860",
 	Secondary:  "#E8894A",

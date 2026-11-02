@@ -34,7 +34,7 @@ func identity(dir string) (tls.Certificate, error) {
 	serial, _ := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 62))
 	tmpl := &x509.Certificate{
 		SerialNumber: serial,
-		Subject:      pkix.Name{CommonName: "remanence"},
+		Subject:      pkix.Name{CommonName: "datadoc"},
 		NotBefore:    time.Now().Add(-24 * time.Hour),
 		NotAfter:     time.Now().AddDate(30, 0, 0),
 		KeyUsage:     x509.KeyUsageDigitalSignature,

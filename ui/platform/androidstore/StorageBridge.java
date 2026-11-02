@@ -1,4 +1,4 @@
-package io.github.mehran9675.remanence;
+package io.github.mehran9675.datadoc;
 
 import android.Manifest;
 import android.content.Context;

@@ -1,4 +1,4 @@
-// Package icons is Remanence's own stroke icon set, drawn on a 24dp grid
+// Package icons is DataDoc's own stroke icon set, drawn on a 24dp grid
 // with 1.75 strokes and round joins.
 package icons
 

@@ -72,8 +72,8 @@ func (m *mux) Close() error { return m.conn.Close() }
 func (m *mux) request(kind string, fields map[string]any) (map[string]any, error) {
 	msg := map[string]any{
 		"MessageType":         kind,
-		"ClientVersionString": "remanence",
-		"ProgName":            "Remanence",
+		"ClientVersionString": "datadoc",
+		"ProgName":            "DataDoc",
 		"kLibUSBMuxVersion":   int64(3),
 	}
 	for k, v := range fields {

@@ -26,7 +26,7 @@ func runSpace(args []string) error {
 	top := fs.Int("top", 20, "how many to list")
 	fs.Parse(args)
 	if fs.NArg() != 1 {
-		return errors.New("usage: remanence-cli space [-top N] FOLDER")
+		return errors.New("usage: datadoc-cli space [-top N] FOLDER")
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
@@ -84,7 +84,7 @@ func runDupes(args []string) error {
 	remove := fs.Bool("remove", false, "move all but one exact copy of each file to the trash")
 	fs.Parse(args)
 	if fs.NArg() == 0 {
-		return errors.New("usage: remanence-cli dupes [-similar] [-remove] FOLDER...")
+		return errors.New("usage: datadoc-cli dupes [-similar] [-remove] FOLDER...")
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
@@ -143,7 +143,7 @@ func runRename(args []string) error {
 	yes := fs.Bool("yes", false, "rename, rather than only show the new names")
 	fs.Parse(args)
 	if fs.NArg() == 0 {
-		return errors.New("usage: remanence-cli rename -pattern P [-find X -replace Y] [-yes] FILE...")
+		return errors.New("usage: datadoc-cli rename -pattern P [-find X -replace Y] [-yes] FILE...")
 	}
 	switch strings.ToLower(*cs) {
 	case "lower":
@@ -183,11 +183,11 @@ func runRename(args []string) error {
 // runSync runs or sets up syncing with the user's other devices.
 func runSync(args []string) error {
 	const syncUsage = `usage:
-  remanence-cli sync id                     this device's ID
-  remanence-cli sync add DEVICE-ID [ADDR]   add one of your devices
-  remanence-cli sync share FOLDER [-mode two-way|send|receive]
+  datadoc-cli sync id                     this device's ID
+  datadoc-cli sync add DEVICE-ID [ADDR]   add one of your devices
+  datadoc-cli sync share FOLDER [-mode two-way|send|receive]
                                             sync a folder with every device added
-  remanence-cli sync run                    sync until stopped`
+  datadoc-cli sync run                    sync until stopped`
 	if len(args) == 0 {
 		return errors.New(syncUsage)
 	}
@@ -196,7 +196,7 @@ func runSync(args []string) error {
 		return err
 	}
 	host, _ := os.Hostname()
-	n, err := devsync.Open(filepath.Join(cfg, "Remanence", "sync"), host)
+	n, err := devsync.Open(filepath.Join(cfg, "DataDoc", "sync"), host)
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func runSync(args []string) error {
 		if _, err := n.AddFolder(f); err != nil {
 			return err
 		}
-		fmt.Printf("Sharing %s with %d devices. Run \"remanence-cli sync run\" to sync.\n", dir, len(f.Devices))
+		fmt.Printf("Sharing %s with %d devices. Run \"datadoc-cli sync run\" to sync.\n", dir, len(f.Devices))
 	case "run":
 		return syncRun(n)
 	default:
@@ -270,7 +270,7 @@ func syncRun(n *devsync.Node) error {
 		}
 		for _, p := range st.Pending {
 			if p.Folder == "" {
-				fmt.Fprintf(&b, "request %s wants to connect: remanence-cli sync add %s\n", p.Name, p.Device)
+				fmt.Fprintf(&b, "request %s wants to connect: datadoc-cli sync add %s\n", p.Name, p.Device)
 			} else {
 				fmt.Fprintf(&b, "offer   %s shares %q: accept it in the app\n", p.Name, p.Label)
 			}

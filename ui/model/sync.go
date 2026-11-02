@@ -30,7 +30,7 @@ func syncDir() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "Remanence", "sync"), nil
+	return filepath.Join(dir, "DataDoc", "sync"), nil
 }
 
 // deviceName is what other devices call this one at first.

@@ -60,7 +60,7 @@ func (s *session) run(command string, timeout time.Duration) (string, error) {
 	if s.dead != nil {
 		return "", s.dead
 	}
-	const end = "--remanence-end--"
+	const end = "--datadoc-end--"
 	stop := s.watch(timeout)
 	defer stop()
 	if _, err := fmt.Fprintf(s.in, "%s\necho %s\n", command, end); err != nil {

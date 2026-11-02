@@ -22,14 +22,14 @@ const (
 const downloads = "/storage/emulated/0/Download"
 
 // DefaultDestination is a folder in Downloads.
-func DefaultDestination() string { return filepath.Join(downloads, "Remanence") }
+func DefaultDestination() string { return filepath.Join(downloads, "DataDoc") }
 
 // DestinationNote says where to find the files.
 func DestinationNote() string {
-	return "Files are saved in Downloads/Remanence on this phone's storage, apart from the drive being recovered."
+	return "Files are saved in Downloads/DataDoc on this phone's storage, apart from the drive being recovered."
 }
 
-// Sink saves into Downloads/Remanence, whatever dir says.
+// Sink saves into Downloads/DataDoc, whatever dir says.
 func Sink(string) (recovery.Sink, error) {
 	dir := DefaultDestination()
 	if err := os.MkdirAll(dir, 0o755); err != nil {

@@ -1,5 +1,5 @@
 // Package assets embeds the app icon: the full icon for windows and
-// installers, and the platter mark alone for the app's own header.
+// installers, and the page mark alone for the app's own header.
 package assets
 
 import (
@@ -15,7 +15,7 @@ var Icon []byte
 //go:embed icon/mark.png
 var markPNG []byte
 
-// Mark is the platter mark decoded, on transparency.
+// Mark is the page mark decoded, on transparency.
 var Mark = func() image.Image {
 	img, err := png.Decode(bytes.NewReader(markPNG))
 	if err != nil {

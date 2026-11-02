@@ -32,7 +32,7 @@ jobs:
           sudo curl -fsSL -o "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/bundletool-all-1.18.3.jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
       - name: Test (giode.toml ci.test)
         run: |
-          docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/remanence-cli/... && go test ./engine/... ./ui/platform/...
+          docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/datadoc-cli/... && go test ./engine/... ./ui/platform/...
 
   linux:
     needs: test

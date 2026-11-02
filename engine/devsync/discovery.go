@@ -10,13 +10,13 @@ import (
 // announcement is what a device broadcasts on the local network, to the
 // same port it listens on, over UDP.
 type announcement struct {
-	App  string `json:"app"` // "remanence-sync"
+	App  string `json:"app"` // "datadoc-sync"
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	Port int    `json:"port"`
 }
 
-const appTag = "remanence-sync"
+const appTag = "datadoc-sync"
 
 // discover announces this device every half minute and records the
 // devices that announce themselves.

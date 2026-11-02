@@ -1,4 +1,4 @@
-// Package components holds the pieces Remanence's screens are built
+// Package components holds the pieces DataDoc's screens are built
 // from, one per file.
 package components
 

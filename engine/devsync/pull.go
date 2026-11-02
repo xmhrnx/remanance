@@ -299,7 +299,7 @@ func (n *Node) download(f Folder, j job, dst string) error {
 	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 		return err
 	}
-	tmp := filepath.Join(filepath.Dir(dst), ".remanence-tmp-"+filepath.Base(dst))
+	tmp := filepath.Join(filepath.Dir(dst), ".datadoc-tmp-"+filepath.Base(dst))
 	out, err := os.Create(tmp)
 	if err != nil {
 		return err
@@ -367,7 +367,7 @@ func (n *Node) retire(f Folder, p, name string) error {
 }
 
 // versionsDir is where a folder keeps replaced and deleted files.
-const versionsDir = ".remanence-versions"
+const versionsDir = ".datadoc-versions"
 
 func (n *Node) keepVersion(f Folder, p, name string) error {
 	ext := path.Ext(name)

@@ -61,7 +61,7 @@ func NewSyncFolder(m *model.Model) *SyncFolder {
 	})
 	d.mode = giode.Input.Segmented(devsync.ModeLabels...).Styles(segmentStyles().With(giode.Styles{Width: 420, FontSize: 12.5})).
 		OnChange(func(i int) { d.keep.SetChecked(i == int(devsync.ReceiveOnly)) })
-	d.keep = giode.Input.Switch("Keep what changes replace, in .remanence-versions", giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"})
+	d.keep = giode.Input.Switch("Keep what changes replace, in .datadoc-versions", giode.Styles{FontSize: 13, Color: "theme.text", Background: "theme.primary"})
 	d.ok = components.PrimaryButton("Sync this folder", "sync").OnClick(d.submit)
 	d.cancel = components.GhostButton("Cancel", "").OnClick(func() { d.open = false })
 	return d

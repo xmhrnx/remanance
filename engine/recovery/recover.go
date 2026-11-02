@@ -210,7 +210,7 @@ func writeReport(sink Sink, rep *Report) {
 		return
 	}
 	defer w.Close()
-	fmt.Fprintf(w, "Remanence recovery report\r\n%s\r\n\r\n", time.Now().Format("2 January 2006 15:04"))
+	fmt.Fprintf(w, "DataDoc recovery report\r\n%s\r\n\r\n", time.Now().Format("2 January 2006 15:04"))
 	fmt.Fprintf(w, "Recovered %d files (%s), %d failed, in %s.\r\n\r\n", rep.Recovered, FormatBytes(rep.Bytes), rep.Failed, rep.Duration.Round(time.Second))
 	for _, o := range rep.Outcomes {
 		status := "OK"

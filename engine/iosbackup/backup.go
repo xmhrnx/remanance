@@ -45,7 +45,7 @@ func SetPassword(dir, password string) {
 
 // ErrOld means the backup is from before iOS 10, listed in a
 // Manifest.mbdb rather than a Manifest.db.
-var ErrOld = errors.New("this backup is from iOS 9 or earlier, which Remanence can't read")
+var ErrOld = errors.New("this backup is from iOS 9 or earlier, which DataDoc can't read")
 
 // Backup describes one backup.
 type Backup struct {

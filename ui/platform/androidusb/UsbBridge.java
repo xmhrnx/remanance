@@ -1,4 +1,4 @@
-package io.github.mehran9675.remanence;
+package io.github.mehran9675.datadoc;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 // descriptor once the user allows it, with no root. Everything after
 // that, the SCSI commands, is Go.
 public final class UsbBridge {
-	private static final String ACTION = "io.github.mehran9675.remanence.USB_PERMISSION";
+	private static final String ACTION = "io.github.mehran9675.datadoc.USB_PERMISSION";
 	private static final int CLASS_MASS_STORAGE = 8;
 	private static final int SUBCLASS_SCSI = 6;
 	private static final int PROTOCOL_BULK_ONLY = 0x50;

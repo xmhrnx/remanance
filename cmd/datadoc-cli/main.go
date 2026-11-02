@@ -1,14 +1,14 @@
-// Command remanence-cli is the recovery engine without the interface: for
+// Command datadoc-cli is the recovery engine without the interface: for
 // scripts, servers and machines without a display.
 //
-//	remanence-cli list
-//	remanence-cli scan [-deep] DEVICE|IMAGE
-//	remanence-cli recover [-deep] [-all] [-flat] [-type jpg,png] -to DIR DEVICE|IMAGE
-//	remanence-cli image DEVICE OUTPUT.img
-//	remanence-cli space FOLDER
-//	remanence-cli dupes [-similar] [-remove] FOLDER...
-//	remanence-cli rename -pattern P [-yes] FILE...
-//	remanence-cli sync id|add|share|run
+//	datadoc-cli list
+//	datadoc-cli scan [-deep] DEVICE|IMAGE
+//	datadoc-cli recover [-deep] [-all] [-flat] [-type jpg,png] -to DIR DEVICE|IMAGE
+//	datadoc-cli image DEVICE OUTPUT.img
+//	datadoc-cli space FOLDER
+//	datadoc-cli dupes [-similar] [-remove] FOLDER...
+//	datadoc-cli rename -pattern P [-yes] FILE...
+//	datadoc-cli sync id|add|share|run
 package main
 
 import (
@@ -20,27 +20,27 @@ import (
 	"github.com/xmhrnx/remanance/ui/platform/iphones"
 )
 
-const usage = `Remanence recovers deleted and lost files.
+const usage = `DataDoc recovers deleted and lost files.
 
 Usage:
-  remanence-cli list                         drives this computer can see
-  remanence-cli scan [-deep] SOURCE          what can be recovered
-  remanence-cli recover -to DIR [-deep] [-all] [-flat] [-type jpg,pdf] SOURCE
+  datadoc-cli list                         drives this computer can see
+  datadoc-cli scan [-deep] SOURCE          what can be recovered
+  datadoc-cli recover -to DIR [-deep] [-all] [-flat] [-type jpg,pdf] SOURCE
                                              copy deleted files out (-all: every file)
-  remanence-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
+  datadoc-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
 
 Tools:
-  remanence-cli space [-top N] FOLDER        what fills a drive or folder
-  remanence-cli dupes [-similar] [-remove] FOLDER...
+  datadoc-cli space [-top N] FOLDER        what fills a drive or folder
+  datadoc-cli dupes [-similar] [-remove] FOLDER...
                                              duplicate files and similar photos
-  remanence-cli rename -pattern "{date} {n:3}" [-find X -replace Y] [-case lower] [-yes] FILE...
+  datadoc-cli rename -pattern "{date} {n:3}" [-find X -replace Y] [-case lower] [-yes] FILE...
                                              rename many files at once
-  remanence-cli sync id|add|share|run        sync folders with your own devices
+  datadoc-cli sync id|add|share|run        sync folders with your own devices
 
 SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
 a disk image file, an iPhone or Android phone connected by USB, or an
 iPhone backup's folder ("list" shows them all). Reading drives needs administrator rights. For
-an encrypted backup, set REMANENCE_BACKUP_PASSWORD to its password.
+an encrypted backup, set DATADOC_BACKUP_PASSWORD to its password.
 `
 
 func main() {

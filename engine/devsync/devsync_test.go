@@ -151,7 +151,7 @@ func TestVersion(t *testing.T) {
 
 func TestValidName(t *testing.T) {
 	for name, ok := range map[string]bool{"a/b.txt": true, "../x": false, "/etc/passwd": false, "a\\b": false,
-		"a//b": false, ".remanence-tmp-x": false, "x/.remanence-versions/y": true, "ok": true} {
+		"a//b": false, ".datadoc-tmp-x": false, "x/.datadoc-versions/y": true, "ok": true} {
 		if validName(name) != ok {
 			t.Errorf("validName(%q) = %v", name, !ok)
 		}

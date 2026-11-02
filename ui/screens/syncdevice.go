@@ -70,7 +70,7 @@ func (d *AddDevice) content() giode.Element {
 				Background: giode.Mix("theme.primary", "theme.surface", 0.14)}, icons.Icon("devices", 20, "theme.primary")),
 			giode.Stack(giode.Styles{FlexGrow: 1, Gap: 2},
 				giode.Text("Add a device", theme.Heading()),
-				giode.Text("Open Remanence's Sync on the other device; it lists this one, or shows its ID to type here.", theme.Caption())),
+				giode.Text("Open DataDoc's Sync on the other device; it lists this one, or shows its ID to type here.", theme.Caption())),
 		),
 	}
 	if near := d.m.Sync.Nearby; len(near) > 0 {

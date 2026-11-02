@@ -1,4 +1,4 @@
-// Command remanence is the Remanence app: free data recovery for
+// Command datadoc is the DataDoc app: free data recovery for
 // Windows, macOS, Linux, Android and iOS.
 package main
 
@@ -35,7 +35,7 @@ func main() {
 
 	var m *model.Model
 	app := giode.New(giode.Config{
-		Title:      "Remanence",
+		Title:      "DataDoc",
 		Size:       image.Pt(1280, 820),
 		MinSize:    image.Pt(420, 560),
 		Resizable:  true,

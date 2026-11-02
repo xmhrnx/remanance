@@ -86,7 +86,7 @@ func openLockdown(dev device) (*lockdown, error) {
 // request sends a request and reads its reply, which says Error if it
 // failed.
 func (l *lockdown) request(name string, fields map[string]any) (map[string]any, error) {
-	msg := map[string]any{"Label": "Remanence", "Request": name}
+	msg := map[string]any{"Label": "DataDoc", "Request": name}
 	for k, v := range fields {
 		msg[k] = v
 	}

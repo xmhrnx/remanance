@@ -36,7 +36,7 @@ func (provider) Open(disk.Info) (disk.Device, error) {
 	return phonestore.Open(phonestore.Root)
 }
 
-// EnsureAccess checks Remanence may read every app's files, which the
+// EnsureAccess checks DataDoc may read every app's files, which the
 // file tools need, and opens the settings to allow it if not.
 func EnsureAccess() error {
 	ok, err := android.CallString(bridgeClass, "access", "(Landroid/content/Context;)Ljava/lang/String;", android.Context())

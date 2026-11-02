@@ -1,4 +1,4 @@
-// Package screens holds Remanence's pages: the drive list, the scan in
+// Package screens holds DataDoc's pages: the drive list, the scan in
 // progress and its results. Each is created once and laid out every
 // frame.
 package screens
@@ -225,7 +225,7 @@ func (d *Drives) content() giode.Element {
 			d.elevate.Label("Restart as administrator")
 		}
 		notes = append(notes, components.Banner("lock", "theme.warning",
-			"Reading drives directly needs administrator rights. Remanence only reads; it never writes to the drive you scan.", d.elevate))
+			"Reading drives directly needs administrator rights. DataDoc only reads; it never writes to the drive you scan.", d.elevate))
 	}
 	if needsPassword(d.m.OpenErr) {
 		d.unlock.Disabled(d.m.Opening)
@@ -248,7 +248,7 @@ func (d *Drives) content() giode.Element {
 			giode.Stack(giode.Styles{Gap: theme.S2},
 				giode.Text("Choose where to look", theme.Hero()),
 				giode.Box(giode.Styles{MaxWidth: 620}, giode.Text(
-					"Remanence reads the drive without changing it. Save what you recover onto a different drive, so nothing overwrites the files still waiting to be found.",
+					"DataDoc reads the drive without changing it. Save what you recover onto a different drive, so nothing overwrites the files still waiting to be found.",
 					theme.Secondary().With(giode.Styles{FontSize: 14, LineHeight: 21}))),
 			),
 			giode.Stack(giode.Styles{Gap: theme.S3}, notes...),
