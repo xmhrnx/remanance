@@ -30,7 +30,6 @@ type Shell struct {
 	space   *screens.Space
 	clean   *screens.Cleanup
 	dupes   *screens.Dupes
-	sync    *screens.Sync
 	rename  *screens.Rename
 }
 
@@ -43,7 +42,6 @@ func New(app *giode.App, m *model.Model) *Shell {
 	s.space = screens.NewSpace(m)
 	s.clean = screens.NewCleanup(m)
 	s.dupes = screens.NewDupes(m)
-	s.sync = screens.NewSync(m)
 	s.rename = screens.NewRename(m)
 	s.mode = components.IconAction("sun", locales.T("shell.switch_between_light_and_dark")).OnClick(func() {
 		giode.ToggleMode()
@@ -127,8 +125,6 @@ func (s *Shell) page() giode.Element {
 		return s.clean.View()
 	case model.ToolDupes:
 		return s.dupes.View()
-	case model.ToolSync:
-		return s.sync.View()
 	case model.ToolRename:
 		return s.rename.View()
 	}

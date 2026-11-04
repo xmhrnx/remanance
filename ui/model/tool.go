@@ -10,7 +10,6 @@ const (
 	ToolSpace
 	ToolClean
 	ToolDupes
-	ToolSync
 	ToolRename
 )
 
@@ -28,6 +27,5 @@ var Tools = []ToolInfo{
 	{ToolSpace, locales.T("tool.disk_space"), locales.T("tool.space"), "chart"},
 	{ToolClean, locales.T("tool.clean_up"), locales.T("tool.clean"), "broom"},
 	{ToolDupes, locales.T("tool.duplicates"), locales.T("tool.duplicates"), "copy"},
-	{ToolSync, locales.T("tool.sync"), locales.T("tool.sync"), "sync"},
 	{ToolRename, locales.T("tool.rename"), locales.T("tool.rename"), "rename"},
 }

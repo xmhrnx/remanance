@@ -53,7 +53,7 @@ text and raw bytes before you recover anything.
 
 ## Tools
 
-Beside recovery, the app has five tools, in the rail on the left (the
+Beside recovery, the app has four tools, in the rail on the left (the
 tab bar on a phone):
 
 - **Disk space.** Measures a drive or folder and draws it as a treemap:
@@ -72,13 +72,6 @@ tab bar on a phone):
   with "Similar" on, photos that look the same (resized, recompressed or
   slightly edited) and videos of the same clip. It suggests which copy
   to keep: the largest picture, then the oldest file.
-- **Sync.** Keeps folders the same on your own computers and phones,
-  straight from one to the other over mutually authenticated TLS, on
-  your network or across the internet. No cloud and no account: devices
-  find each other on the same network, or you add one by its ID. Each
-  folder syncs both ways, only sends or only receives (for a backup),
-  and can keep what a change replaced. Conflicting edits are kept side
-  by side as `.sync-conflict` copies.
 - **Rename.** Renames many files at once from a pattern
   (`{name}`, `{n:3}`, `{date:2006-01-02}`, `{parent}`, `{ext}`), with find
   and replace (plain or regular expression) and case changes. It shows
@@ -201,14 +194,9 @@ datadoc-cli dupes -similar ~/Pictures
 datadoc-cli rename -pattern "Trip {date} {n:3}" ~/Pictures/trip/*.jpg
 ```
 
-```bash
-datadoc-cli sync run
-```
-
 `rename` only shows the new names until you add `-yes`, and `dupes`
 moves copies to the trash only with `-remove`. `clean` lists what it
-finds and cleans the safe kinds with `-yes` (every kind with `-all`). `sync id`, `sync add` and
-`sync share` set up syncing without the app.
+finds and cleans the safe kinds with `-yes` (every kind with `-all`).
 
 `list` also shows the iPhones and Android phones connected by USB and
 the iPhone backups on the computer; `scan` and `recover` take any of

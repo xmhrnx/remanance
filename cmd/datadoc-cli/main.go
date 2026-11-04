@@ -9,7 +9,6 @@
 //	datadoc-cli clean [-all] [-yes]
 //	datadoc-cli dupes [-similar] [-remove] FOLDER...
 //	datadoc-cli rename -pattern P [-yes] FILE...
-//	datadoc-cli sync id|add|share|run
 package main
 
 import (
@@ -38,7 +37,6 @@ Tools:
                                              duplicate files and similar photos
   datadoc-cli rename -pattern "{date} {n:3}" [-find X -replace Y] [-case lower] [-yes] FILE...
                                              rename many files at once
-  datadoc-cli sync id|add|share|run        sync folders with your own devices
 
 SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
 a disk image file, an iPhone or Android phone connected by USB, or an
@@ -72,8 +70,6 @@ func main() {
 		err = runDupes(os.Args[2:])
 	case "rename":
 		err = runRename(os.Args[2:])
-	case "sync":
-		err = runSync(os.Args[2:])
 	case "help", "-h", "--help":
 		fmt.Print(usage)
 		return

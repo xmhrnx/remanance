@@ -34,7 +34,6 @@ type Model struct {
 	Clean  CleanState
 	Dupes  DupesState
 	Rename RenameState
-	Sync   SyncState
 
 	// Drives
 	Drives        []disk.Info
@@ -98,7 +97,7 @@ func (m *Model) Close() {
 	m.CancelRecover()
 	m.CancelSpace()
 	m.CancelDupes()
-	m.StopSync()
+	m.CancelCleanup()
 	if m.Dev != nil {
 		m.Dev.Close()
 		m.Dev = nil

@@ -10,10 +10,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/xmhrnx/remanance/engine/cleanup"
-	"github.com/xmhrnx/remanance/engine/devsync"
 	"github.com/xmhrnx/remanance/engine/dupes"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/rename"
@@ -236,111 +234,4 @@ func runRename(args []string) error {
 	done, err := rename.Apply(plan)
 	fmt.Printf("%d files renamed\n", len(done))
 	return err
-}
-
-// runSync runs or sets up syncing with the user's other devices.
-func runSync(args []string) error {
-	const syncUsage = `usage:
-  datadoc-cli sync id                     this device's ID
-  datadoc-cli sync add DEVICE-ID [ADDR]   add one of your devices
-  datadoc-cli sync share FOLDER [-mode two-way|send|receive]
-                                            sync a folder with every device added
-  datadoc-cli sync run                    sync until stopped`
-	if len(args) == 0 {
-		return errors.New(syncUsage)
-	}
-	cfg, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-	host, _ := os.Hostname()
-	n, err := devsync.Open(filepath.Join(cfg, "DataDoc", "sync"), host)
-	if err != nil {
-		return err
-	}
-	defer n.Close()
-	switch args[0] {
-	case "id":
-		fmt.Println(n.ID())
-	case "add":
-		if len(args) < 2 {
-			return errors.New(syncUsage)
-		}
-		addr := ""
-		if len(args) > 2 {
-			addr = args[2]
-		}
-		if err := n.AddDevice(args[1], "", addr); err != nil {
-			return err
-		}
-		fmt.Println("Added. Accept this device on the other one too:", n.ID())
-	case "share":
-		fs := flag.NewFlagSet("share", flag.ExitOnError)
-		mode := fs.String("mode", "two-way", "two-way, send or receive")
-		fs.Parse(args[1:])
-		if fs.NArg() != 1 {
-			return errors.New(syncUsage)
-		}
-		dir, err := filepath.Abs(fs.Arg(0))
-		if err != nil {
-			return err
-		}
-		f := devsync.Folder{Label: filepath.Base(dir), Path: dir, Mode: map[string]devsync.Mode{"send": devsync.SendOnly, "receive": devsync.ReceiveOnly}[*mode]}
-		for _, d := range n.Config().Devices {
-			f.Devices = append(f.Devices, d.ID)
-		}
-		if _, err := n.AddFolder(f); err != nil {
-			return err
-		}
-		fmt.Printf("Sharing %s with %d devices. Run \"datadoc-cli sync run\" to sync.\n", dir, len(f.Devices))
-	case "run":
-		return syncRun(n)
-	default:
-		return errors.New(syncUsage)
-	}
-	return nil
-}
-
-// syncRun syncs until interrupted, printing what changes and accepting
-// nothing on its own: requests are shown for "sync add" to answer.
-func syncRun(n *devsync.Node) error {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-	if err := n.Start(ctx, devsync.Options{Discovery: true}); err != nil {
-		return err
-	}
-	fmt.Printf("This device: %s\nListening on %s. Stop with Ctrl+C.\n", n.ID(), n.Addr())
-	last := ""
-	tick := time.NewTicker(2 * time.Second)
-	defer tick.Stop()
-	for {
-		st := n.Status()
-		var b strings.Builder
-		for _, d := range st.Devices {
-			state := "not connected"
-			if d.Connected {
-				state = "connected " + d.Addr
-			}
-			fmt.Fprintf(&b, "device  %s (%s): %s\n", d.Name, d.ID[:9], state)
-		}
-		for _, f := range st.Folders {
-			fmt.Fprintf(&b, "folder  %s: %s, %d files, %d to get\n", f.Label, f.State.Label(), f.Files, f.Need)
-		}
-		for _, p := range st.Pending {
-			if p.Folder == "" {
-				fmt.Fprintf(&b, "request %s wants to connect: datadoc-cli sync add %s\n", p.Name, p.Device)
-			} else {
-				fmt.Fprintf(&b, "offer   %s shares %q: accept it in the app\n", p.Name, p.Label)
-			}
-		}
-		if s := b.String(); s != last {
-			fmt.Printf("\n%s", s)
-			last = s
-		}
-		select {
-		case <-ctx.Done():
-			return nil
-		case <-tick.C:
-		}
-	}
 }

@@ -61,7 +61,7 @@ func TestMessages(t *testing.T) {
 	if got := N("count.file", 4); got != "4 files" {
 		t.Errorf("N(4) = %q", got)
 	}
-	if got := Label("Two-way"); got != "Two-way" {
+	if got := Label("Exact copies"); got != "Exact copies" {
 		t.Errorf("Label = %q", got)
 	}
 	if got := Label("Not a label"); got != "Not a label" {
