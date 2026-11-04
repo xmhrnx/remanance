@@ -8,6 +8,7 @@ type Tool int
 const (
 	ToolRecover Tool = iota
 	ToolSpace
+	ToolClean
 	ToolDupes
 	ToolSync
 	ToolRename
@@ -25,6 +26,7 @@ type ToolInfo struct {
 var Tools = []ToolInfo{
 	{ToolRecover, locales.T("tool.recover"), locales.T("tool.recover"), "recover"},
 	{ToolSpace, locales.T("tool.disk_space"), locales.T("tool.space"), "chart"},
+	{ToolClean, locales.T("tool.clean_up"), locales.T("tool.clean"), "broom"},
 	{ToolDupes, locales.T("tool.duplicates"), locales.T("tool.duplicates"), "copy"},
 	{ToolSync, locales.T("tool.sync"), locales.T("tool.sync"), "sync"},
 	{ToolRename, locales.T("tool.rename"), locales.T("tool.rename"), "rename"},

@@ -23,15 +23,10 @@ func move(path string) error {
 	if err != nil {
 		return err
 	}
-	data := os.Getenv("XDG_DATA_HOME")
-	if data == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		data = filepath.Join(home, ".local", "share")
+	trash, err := userTrash()
+	if err != nil {
+		return err
 	}
-	trash := filepath.Join(data, "Trash")
 	files, info := filepath.Join(trash, "files"), filepath.Join(trash, "info")
 	if err := os.MkdirAll(files, 0o700); err != nil {
 		return err
@@ -68,4 +63,39 @@ func move(path string) error {
 		return err
 	}
 	return nil
+}
+
+// userTrash is the trash in the user's data folder.
+func userTrash() (string, error) {
+	data := os.Getenv("XDG_DATA_HOME")
+	if data == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		data = filepath.Join(home, ".local", "share")
+	}
+	return filepath.Join(data, "Trash"), nil
+}
+
+func usage() (Usage, error) {
+	dir, err := userTrash()
+	if err != nil {
+		return Usage{}, err
+	}
+	return dirUsage(filepath.Join(dir, "files"))
+}
+
+// empty deletes the trashed files and the notes saying where they came
+// from.
+func empty() error {
+	dir, err := userTrash()
+	if err != nil {
+		return err
+	}
+	if err := clearDir(filepath.Join(dir, "files")); err != nil {
+		return err
+	}
+	os.Remove(filepath.Join(dir, "directorysizes"))
+	return clearDir(filepath.Join(dir, "info"))
 }

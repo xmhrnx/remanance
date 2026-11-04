@@ -28,6 +28,7 @@ type Shell struct {
 	scan    *screens.Scanning
 	results *screens.Results
 	space   *screens.Space
+	clean   *screens.Cleanup
 	dupes   *screens.Dupes
 	sync    *screens.Sync
 	rename  *screens.Rename
@@ -40,6 +41,7 @@ func New(app *giode.App, m *model.Model) *Shell {
 	s.scan = screens.NewScanning(m)
 	s.results = screens.NewResults(m)
 	s.space = screens.NewSpace(m)
+	s.clean = screens.NewCleanup(m)
 	s.dupes = screens.NewDupes(m)
 	s.sync = screens.NewSync(m)
 	s.rename = screens.NewRename(m)
@@ -121,6 +123,8 @@ func (s *Shell) page() giode.Element {
 	switch s.m.Tool {
 	case model.ToolSpace:
 		return s.space.View()
+	case model.ToolClean:
+		return s.clean.View()
 	case model.ToolDupes:
 		return s.dupes.View()
 	case model.ToolSync:

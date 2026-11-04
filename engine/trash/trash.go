@@ -5,7 +5,9 @@ package trash
 
 import (
 	"errors"
+	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 // ErrNoTrash means the file can't go to the trash: the system has none,
@@ -29,4 +31,58 @@ func Remove(path string, toTrash bool) error {
 		return Move(path)
 	}
 	return os.RemoveAll(path)
+}
+
+// Usage is what the trash holds.
+type Usage struct {
+	Bytes int64
+	Files int
+}
+
+// Size is what the user's trash holds; zero where there's no trash.
+func Size() (Usage, error) { return usage() }
+
+// Empty deletes everything in the user's trash for good.
+func Empty() error { return empty() }
+
+// dirUsage adds up the files under dir.
+func dirUsage(dir string) (Usage, error) {
+	var u Usage
+	err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			if p == dir {
+				return err
+			}
+			return nil
+		}
+		if d.Type().IsRegular() {
+			if info, err := d.Info(); err == nil {
+				u.Bytes += info.Size()
+				u.Files++
+			}
+		}
+		return nil
+	})
+	if errors.Is(err, fs.ErrNotExist) {
+		err = nil
+	}
+	return u, err
+}
+
+// clearDir deletes what's in dir, keeping dir.
+func clearDir(dir string) error {
+	es, err := os.ReadDir(dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var first error
+	for _, e := range es {
+		if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil && first == nil {
+			first = err
+		}
+	}
+	return first
 }

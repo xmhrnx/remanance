@@ -53,12 +53,21 @@ text and raw bytes before you recover anything.
 
 ## Tools
 
-Beside recovery, the app has four tools, in the rail on the left (the
+Beside recovery, the app has five tools, in the rail on the left (the
 tab bar on a phone):
 
 - **Disk space.** Measures a drive or folder and draws it as a treemap:
   the bigger the tile, the more room it takes, colored by kind of file.
   Open folders to look deeper, and move what you don't need to the trash.
+- **Clean up.** Shows how full the drive is and finds files it can do
+  without: temporary files (leaving those changed in the last day, which
+  may be in use), caches apps rebuild such as browsers' and graphics
+  drivers', crash reports and logs, and the trash. These are checked to
+  go. Developer tools' caches, installers left in Downloads and downloads
+  untouched for three months are listed too, unchecked, to look through
+  first. Caches and temporary files are deleted for good, since apps make
+  them again; downloads go to the trash. On a phone it finds old
+  downloads and photo thumbnails, as other apps' caches are out of reach.
 - **Duplicates.** Finds exact copies of files by their contents, and
   with "Similar" on, photos that look the same (resized, recompressed or
   slightly edited) and videos of the same clip. It suggests which copy
@@ -181,6 +190,10 @@ datadoc-cli space ~/Downloads
 ```
 
 ```bash
+datadoc-cli clean
+```
+
+```bash
 datadoc-cli dupes -similar ~/Pictures
 ```
 
@@ -193,7 +206,8 @@ datadoc-cli sync run
 ```
 
 `rename` only shows the new names until you add `-yes`, and `dupes`
-moves copies to the trash only with `-remove`. `sync id`, `sync add` and
+moves copies to the trash only with `-remove`. `clean` lists what it
+finds and cleans the safe kinds with `-yes` (every kind with `-all`). `sync id`, `sync add` and
 `sync share` set up syncing without the app.
 
 `list` also shows the iPhones and Android phones connected by USB and

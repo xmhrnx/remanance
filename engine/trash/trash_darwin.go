@@ -55,3 +55,26 @@ func free(dir, base string) string {
 	ext := filepath.Ext(base)
 	return filepath.Join(dir, strings.TrimSuffix(base, ext)+" "+time.Now().Format("15.04.05.000")+ext)
 }
+
+// userTrash is the Trash in the user's home.
+func userTrash() (string, error) {
+	home, err := os.UserHomeDir()
+	return filepath.Join(home, ".Trash"), err
+}
+
+// usage adds up the user's Trash. Reading it needs Full Disk Access.
+func usage() (Usage, error) {
+	dir, err := userTrash()
+	if err != nil {
+		return Usage{}, err
+	}
+	return dirUsage(dir)
+}
+
+func empty() error {
+	dir, err := userTrash()
+	if err != nil {
+		return err
+	}
+	return clearDir(dir)
+}

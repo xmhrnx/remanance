@@ -31,6 +31,7 @@ type Model struct {
 
 	// The other tools
 	Space  SpaceState
+	Clean  CleanState
 	Dupes  DupesState
 	Rename RenameState
 	Sync   SyncState

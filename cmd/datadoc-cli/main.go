@@ -6,6 +6,7 @@
 //	datadoc-cli recover [-deep] [-all] [-flat] [-type jpg,png] -to DIR DEVICE|IMAGE
 //	datadoc-cli image DEVICE OUTPUT.img
 //	datadoc-cli space FOLDER
+//	datadoc-cli clean [-all] [-yes]
 //	datadoc-cli dupes [-similar] [-remove] FOLDER...
 //	datadoc-cli rename -pattern P [-yes] FILE...
 //	datadoc-cli sync id|add|share|run
@@ -31,6 +32,8 @@ Usage:
 
 Tools:
   datadoc-cli space [-top N] FOLDER        what fills a drive or folder
+  datadoc-cli clean [-all] [-yes]          temporary files, caches and old downloads
+                                             to clean (-yes cleans the safe ones)
   datadoc-cli dupes [-similar] [-remove] FOLDER...
                                              duplicate files and similar photos
   datadoc-cli rename -pattern "{date} {n:3}" [-find X -replace Y] [-case lower] [-yes] FILE...
@@ -63,6 +66,8 @@ func main() {
 		err = runImage(os.Args[2:])
 	case "space":
 		err = runSpace(os.Args[2:])
+	case "clean":
+		err = runClean(os.Args[2:])
 	case "dupes":
 		err = runDupes(os.Args[2:])
 	case "rename":
