@@ -21,7 +21,7 @@ func sysRead(path string) string {
 }
 
 // linuxMounts maps a block device name (sda, nvme0n1) to the mount points
-// of it and its partitions.
+// of it and its partitions, and a partition's name (sda1) to its own.
 func linuxMounts() map[string][]string {
 	out := map[string][]string{}
 	f, err := os.Open("/proc/mounts")
@@ -44,6 +44,54 @@ func linuxMounts() map[string][]string {
 			}
 		}
 		out[disk] = append(out[disk], fields[1])
+		if disk != part {
+			out[part] = append(out[part], fields[1])
+		}
+	}
+	return out
+}
+
+// labels maps partition names to their file systems' labels, which udev
+// links in /dev/disk/by-label.
+func labels() map[string]string {
+	out := map[string]string{}
+	es, _ := os.ReadDir("/dev/disk/by-label")
+	for _, e := range es {
+		if dev, err := filepath.EvalSymlinks("/dev/disk/by-label/" + e.Name()); err == nil {
+			out[filepath.Base(dev)] = strings.ReplaceAll(e.Name(), `\x20`, " ")
+		}
+	}
+	return out
+}
+
+// partitions lists a disk's partitions, so one can be scanned on its
+// own.
+func partitions(disk string, of Info, mounts map[string][]string, names map[string]string) []Info {
+	es, _ := os.ReadDir("/sys/block/" + disk)
+	var out []Info
+	for _, e := range es {
+		base := "/sys/block/" + disk + "/" + e.Name()
+		if _, err := os.Stat(base + "/partition"); err != nil {
+			continue
+		}
+		sectors, _ := strconv.ParseInt(sysRead(base+"/size"), 10, 64)
+		if sectors < 2048 {
+			continue // an extended partition's stub
+		}
+		p := Info{
+			ID: "/dev/" + e.Name(), Path: "/dev/" + e.Name(), Kind: KindVolume,
+			Name: names[e.Name()], Model: of.Model, Serial: of.Serial, Bus: of.Bus, Removable: of.Removable,
+			Size: sectors * 512, SectorSize: of.SectorSize, Mounts: mounts[e.Name()],
+		}
+		if p.Name == "" {
+			p.Name = e.Name()
+		}
+		for _, m := range p.Mounts {
+			if m == "/" {
+				p.System = true
+			}
+		}
+		out = append(out, p)
 	}
 	return out
 }
@@ -53,7 +101,7 @@ func listPhysical() ([]Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	mounts := linuxMounts()
+	mounts, names := linuxMounts(), labels()
 	var out []Info
 	for _, e := range entries {
 		name := e.Name()
@@ -107,6 +155,7 @@ func listPhysical() ([]Info, error) {
 			info.Name = name
 		}
 		out = append(out, info)
+		out = append(out, partitions(name, info, mounts, names)...)
 	}
 	return out, nil
 }

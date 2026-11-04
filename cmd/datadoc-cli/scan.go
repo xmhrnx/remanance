@@ -13,9 +13,17 @@ import (
 	"github.com/xmhrnx/remanance/engine/scan"
 )
 
-// scanSource opens and scans a source, printing progress on one line.
-func scanSource(arg string, deep bool) (*scan.Result, disk.Device, error) {
-	dev, err := openSource(arg)
+// scanSource opens and scans a source, or with folder set the drive it's
+// on for what was in it, printing progress on one line.
+func scanSource(arg, folder string, deep bool) (*scan.Result, disk.Device, error) {
+	var dev disk.Device
+	var within string
+	var err error
+	if folder != "" {
+		dev, within, err = openFolder(folder)
+	} else {
+		dev, err = openSource(arg)
+	}
 	if err != nil {
 		return nil, nil, err
 	}
@@ -25,7 +33,7 @@ func scanSource(arg string, deep bool) (*scan.Result, disk.Device, error) {
 	if deep {
 		mode = scan.Deep
 	}
-	res, err := scan.Run(ctx, dev, scan.Options{Mode: mode}, func(p scan.Progress) {
+	res, err := scan.Run(ctx, dev, scan.Options{Mode: mode, Folder: within}, func(p scan.Progress) {
 		line := fmt.Sprintf("\r%-30s %5.1f%%  files %d, deleted %d", p.Phase, p.Fraction*100, p.Files, p.Deleted)
 		if p.Phase == scan.PhaseSectors {
 			line += fmt.Sprintf(", by signature %d  %s/s, %s left", p.Carved, recovery.FormatBytes(int64(p.Speed)), p.Remaining.Round(time.Second))
@@ -43,11 +51,12 @@ func scanSource(arg string, deep bool) (*scan.Result, disk.Device, error) {
 func runScan(args []string) error {
 	fs := flag.NewFlagSet("scan", flag.ExitOnError)
 	deep := fs.Bool("deep", false, "read every sector: lost partitions and files found by signature")
+	in := fs.String("in", "", "only what was deleted from this folder, instead of a SOURCE")
 	fs.Parse(args)
-	if fs.NArg() != 1 {
-		return fmt.Errorf("scan needs one SOURCE")
+	if fs.NArg() != 1 && !(*in != "" && fs.NArg() == 0) {
+		return fmt.Errorf("scan needs one SOURCE, or -in FOLDER")
 	}
-	res, dev, err := scanSource(fs.Arg(0), *deep)
+	res, dev, err := scanSource(fs.Arg(0), *in, *deep)
 	if dev != nil {
 		defer dev.Close()
 	}

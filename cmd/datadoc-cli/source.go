@@ -4,10 +4,27 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/iosbackup"
 )
+
+// openFolder opens the drive a folder is on, and says where on it the
+// folder is.
+func openFolder(dir string) (disk.Device, string, error) {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, "", err
+	}
+	infos, _ := disk.List()
+	info, within, ok := disk.VolumeFor(infos, abs)
+	if !ok {
+		return nil, "", fmt.Errorf("%s isn't on a drive that can be read directly", dir)
+	}
+	dev, err := disk.Open(info)
+	return dev, within, err
+}
 
 // openSource opens a drive by the path "list" shows, an image file, or
 // an iPhone backup's folder.

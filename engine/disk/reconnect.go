@@ -85,7 +85,7 @@ func (r *reconnecting) reopen(gen int) bool {
 func (r *reconnecting) find() (Info, bool) {
 	infos, _ := r.list()
 	for _, i := range infos {
-		if i.Size != r.info.Size {
+		if i.Size != r.info.Size || i.Kind != r.info.Kind {
 			continue
 		}
 		if r.info.Serial != "" && i.Serial == r.info.Serial ||

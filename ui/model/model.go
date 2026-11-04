@@ -46,9 +46,12 @@ type Model struct {
 	OpenErr    error
 
 	// The scan
-	Source   disk.Info
-	Dev      disk.Device
-	Mode     scan.Mode
+	Source disk.Info
+	Dev    disk.Device
+	Mode   scan.Mode
+	// Within is the folder the scan is limited to, slash-separated from
+	// the top of the drive; "" scans all of it.
+	Within   string
 	Progress scan.Progress
 	Scanning bool
 	ScanErr  error

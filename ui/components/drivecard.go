@@ -42,7 +42,8 @@ func DriveCard(info disk.Info, selected bool, s giode.PressState) giode.Element 
 		well, iconColor = giode.Mix("theme.primary", "theme.surface", 0.22), "theme.primary"
 	}
 	name := info.Model
-	if name == "" {
+	if name == "" || info.Kind == disk.KindVolume {
+		// A partition by its own name, such as Local Disk (C:).
 		name = info.Name
 	}
 	detail := []string{recovery.FormatBytes(info.Size)}

@@ -2,14 +2,30 @@ package model
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/locales"
 )
 
-// StartScan scans the open device in mode.
+// ScanFolder scans the drive a folder is on for what was deleted from
+// that folder.
+func (m *Model) ScanFolder(path string, mode scan.Mode) {
+	info, within, ok := disk.VolumeFor(m.Drives, path)
+	if !ok {
+		m.OpenErr = errors.New(locales.T("scan.folder_not_on_a_drive"))
+		return
+	}
+	m.Open(info, func() {
+		m.Within = within
+		m.StartScan(mode)
+	})
+}
+
+// StartScan scans the open device in mode, within the folder set.
 func (m *Model) StartScan(mode scan.Mode) {
 	if m.Dev == nil || m.Scanning {
 		return
@@ -29,7 +45,7 @@ func (m *Model) StartScan(mode scan.Mode) {
 	go func() {
 		defer release()
 		var progress latest[scan.Progress]
-		res, err := scan.Run(ctx, dev, scan.Options{Mode: mode}, func(p scan.Progress) {
+		res, err := scan.Run(ctx, dev, scan.Options{Mode: mode, Folder: m.Within}, func(p scan.Progress) {
 			progress.post(m.App, p, func(p scan.Progress) {
 				if m.Scanning {
 					m.Progress = p

@@ -11,6 +11,12 @@ writes to it.
 
 ## What it recovers
 
+Scan a whole drive, one partition on it (a drive letter such as D: on
+Windows), or only one folder. A partition or a folder is quicker, since
+only its file system is read; a folder scan shows only what was deleted
+from that folder and the folders in it. Files found by signature, which
+have no folder, need the whole drive scanned.
+
 - **Deleted files** with their names, folders and dates, from the file
   system's own records:
   - **NTFS**: MFT records, including fragmented files from their
@@ -168,6 +174,10 @@ datadoc-cli list
 
 ```bash
 datadoc-cli scan -deep /dev/sdb
+```
+
+```bash
+datadoc-cli scan -in ~/Documents
 ```
 
 ```bash

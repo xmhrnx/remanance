@@ -149,7 +149,55 @@ func listPhysical() ([]Info, error) {
 		}
 		out = append(out, info)
 	}
-	return out, nil
+	return append(out, listVolumes(system)...), nil
+}
+
+// listVolumes lists the drive letters on local drives, so one can be
+// scanned on its own. Their size and drive come from the extents, which
+// asking for needs no rights.
+func listVolumes(system string) []Info {
+	var out []Info
+	mask, _ := windows.GetLogicalDrives()
+	for i := 0; i < 26; i++ {
+		if mask&(1<<i) == 0 {
+			continue
+		}
+		letter := string(rune('A'+i)) + ":"
+		root, _ := windows.UTF16PtrFromString(letter + `\`)
+		if t := windows.GetDriveType(root); t != windows.DRIVE_FIXED && t != windows.DRIVE_REMOVABLE {
+			continue
+		}
+		path := `\\.\` + letter
+		h, err := openHandle(path, 0)
+		if err != nil {
+			continue
+		}
+		info := Info{ID: path, Path: path, Kind: KindVolume, Mounts: []string{letter}}
+		buf := make([]byte, 8+24*16)
+		if n, err := ioctl(h, ioctlVolumeGetVolumeDiskExtents, nil, buf); err == nil && n >= 8 {
+			count := int(binary.LittleEndian.Uint32(buf))
+			for e := 0; e < count && 8+24*e+24 <= n; e++ {
+				info.Size += int64(binary.LittleEndian.Uint64(buf[8+24*e+16:]))
+			}
+		}
+		_, info.SectorSize, _ = driveGeometry(h)
+		storageDescriptor(h, &info)
+		windows.CloseHandle(h)
+		if info.Size == 0 {
+			continue
+		}
+		label := make([]uint16, windows.MAX_PATH+1)
+		if windows.GetVolumeInformation(root, &label[0], uint32(len(label)), nil, nil, nil, nil, 0) == nil {
+			info.Name = windows.UTF16ToString(label)
+		}
+		if info.Name == "" {
+			info.Name = "Local Disk"
+		}
+		info.Name += " (" + letter + ")"
+		info.System = strings.EqualFold(letter, system)
+		out = append(out, info)
+	}
+	return out
 }
 
 type windowsDevice struct {

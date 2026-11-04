@@ -27,4 +27,8 @@ type Options struct {
 	// Start and End limit the deep scan's sector search to part of the
 	// device (End 0 means the end).
 	Start, End int64
+	// Folder, slash-separated from the top of the volume, limits the
+	// scan to what was in that folder. Only file systems know where a
+	// file was, so such a scan doesn't search the sectors.
+	Folder string
 }

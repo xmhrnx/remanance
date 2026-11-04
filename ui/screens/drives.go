@@ -100,7 +100,10 @@ func (d *Drives) startScan() {
 	if d.mode.Selected() == 1 {
 		mode = scan.Deep
 	}
-	d.m.Open(info, func() { d.m.StartScan(mode) })
+	d.m.Open(info, func() {
+		d.m.Within = ""
+		d.m.StartScan(mode)
+	})
 }
 
 // unlockBackup scans the chosen encrypted backup with the password
@@ -192,7 +195,7 @@ func (d *Drives) View() giode.Element {
 		d.selected = ""
 		// Preselect the first drive that isn't the system's.
 		for _, i := range d.m.Drives {
-			if !i.System {
+			if !i.System && i.Kind != disk.KindVolume {
 				d.selected = i.ID
 				break
 			}
@@ -254,6 +257,7 @@ func (d *Drives) content() giode.Element {
 			),
 			giode.Stack(giode.Styles{Gap: theme.S3}, notes...),
 			d.section(locales.T("drives.drives"), d.refresh, d.driveCards(compact)),
+			d.partSection(compact),
 			d.section(locales.T("drives.disk_images"), nil, d.imageCards(compact)),
 			d.backupSection(compact),
 		),
@@ -305,11 +309,49 @@ func (d *Drives) driveCards(compact bool) giode.Element {
 	}
 	var cards []giode.Element
 	for _, info := range d.m.Drives {
-		if !isBackup(info) {
+		if !isBackup(info) && info.Kind != disk.KindVolume {
 			cards = append(cards, d.card(info, compact))
 		}
 	}
 	return giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)
+}
+
+// partSection lists the drives' partitions, such as C: and D:, to scan
+// one on its own, and offers to scan only a folder on one. Both read
+// only a file system, which is quicker than a whole drive.
+func (d *Drives) partSection(compact bool) giode.Element {
+	var cards []giode.Element
+	for _, info := range d.m.Drives {
+		if info.Kind == disk.KindVolume {
+			cards = append(cards, d.card(info, compact))
+		}
+	}
+	if len(cards) == 0 {
+		return giode.Box(giode.Styles{})
+	}
+	if platform.PicksFolders {
+		cards = append(cards, d.openCard("scan-folder", "folder", locales.T("drives.scan_a_folder"), locales.T("drives.only_what_was_deleted_from_it"), compact, d.pickFolder))
+	}
+	return d.section(locales.T("drives.partitions_and_folders"), nil, giode.Stack(giode.Styles{Width: -1, Gap: theme.S3},
+		giode.Box(giode.Styles{MaxWidth: 620}, giode.Text(locales.T("drives.partitions_note"), theme.Secondary())),
+		giode.Row(giode.Styles{Width: -1, Gap: theme.S3}, cards...)))
+}
+
+// pickFolder asks for a folder and scans what was deleted from it.
+func (d *Drives) pickFolder() {
+	go func() {
+		dir, err := d.m.App.PickFolder(context.Background(), giode.FolderOptions{Title: locales.T("drives.choose_a_folder_to_scan")})
+		if err != nil || dir == "" {
+			return
+		}
+		d.m.App.Post(func() {
+			mode := scan.Quick
+			if d.mode.Selected() == 1 {
+				mode = scan.Deep
+			}
+			d.m.ScanFolder(dir, mode)
+		})
+	}()
 }
 
 // backupSection lists the iPhone and iPad backups on this computer, on

@@ -3,6 +3,7 @@
 //
 //	datadoc-cli list
 //	datadoc-cli scan [-deep] DEVICE|IMAGE
+//	datadoc-cli scan -in FOLDER
 //	datadoc-cli recover [-deep] [-all] [-flat] [-type jpg,png] -to DIR DEVICE|IMAGE
 //	datadoc-cli image DEVICE OUTPUT.img
 //	datadoc-cli space FOLDER
@@ -28,6 +29,8 @@ Usage:
   datadoc-cli recover -to DIR [-deep] [-all] [-flat] [-type jpg,pdf] SOURCE
                                              copy deleted files out (-all: every file)
   datadoc-cli image SOURCE OUTPUT.img      copy a whole drive to an image first
+  datadoc-cli scan -in FOLDER              only what was deleted from one folder
+                                             (recover takes -in FOLDER too)
 
 Tools:
   datadoc-cli space [-top N] FOLDER        what fills a drive or folder
@@ -38,7 +41,7 @@ Tools:
   datadoc-cli rename -pattern "{date} {n:3}" [-find X -replace Y] [-case lower] [-yes] FILE...
                                              rename many files at once
 
-SOURCE is a drive from "list" (\\.\PhysicalDrive1, /dev/sdb, /dev/rdisk2),
+SOURCE is a drive or partition from "list" (\\.\PhysicalDrive1, \\.\D:, /dev/sdb1),
 a disk image file, an iPhone or Android phone connected by USB, or an
 iPhone backup's folder ("list" shows them all). Reading drives needs administrator rights. For
 an encrypted backup, set DATADOC_BACKUP_PASSWORD to its password.

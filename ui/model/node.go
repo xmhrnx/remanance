@@ -1,6 +1,8 @@
 package model
 
 import (
+	"path"
+
 	"github.com/mehran9675/giode"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/scan"
@@ -90,6 +92,9 @@ func roots(res *scan.Result) []*Node {
 			title = locales.T("node.partition", "n", p.Index)
 		}
 		detail := locales.T("node.volume_detail", "fs", v.Volume.FS, "size", bytes(p.Length))
+		if res.Folder != "" {
+			title, detail = path.Base(res.Folder), locales.T("node.folder_on", "folder", res.Folder, "drive", res.Device.Name)
+		}
 		vol := &Node{Entry: v.Volume.Root, Kind: KindVolume, Title: title, Detail: detail, Volume: v, Lost: p.Lost}
 		out = append(out, vol)
 		if v.Volume.Lost != nil && len(v.Volume.Lost.Children) > 0 {

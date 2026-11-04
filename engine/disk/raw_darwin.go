@@ -103,7 +103,56 @@ func listPhysical() ([]Info, error) {
 		}
 		out = append(out, info)
 	}
-	return out, nil
+	return append(out, listVolumes(names)...), nil
+}
+
+var slice = regexp.MustCompile(`^disk[0-9]+s[0-9]+$`)
+
+// readable are the file systems, as diskutil names them, whose
+// partitions are listed to scan on their own; APFS and HFS+ aren't read,
+// so their disks are scanned whole, by signature.
+var readable = map[string]bool{"msdos": true, "exfat": true, "ntfs": true}
+
+// listVolumes lists the partitions of the disks named, so one can be
+// scanned on its own.
+func listVolumes(names []string) []Info {
+	var out []Info
+	for _, p := range names {
+		name := filepath.Base(p)
+		if !slice.MatchString(name) {
+			continue
+		}
+		raw, err := exec.Command("diskutil", "info", "-plist", name).Output()
+		if err != nil {
+			continue
+		}
+		d := plistDict(raw)
+		if !readable[d["FilesystemType"]] {
+			continue
+		}
+		size, _ := strconv.ParseInt(d["Size"], 10, 64)
+		if size == 0 {
+			size, _ = strconv.ParseInt(d["TotalSize"], 10, 64)
+		}
+		sector, _ := strconv.Atoi(d["DeviceBlockSize"])
+		if sector == 0 {
+			sector = 512
+		}
+		info := Info{
+			ID: "/dev/r" + name, Path: "/dev/r" + name, Kind: KindVolume,
+			Name: d["VolumeName"], Model: d["MediaName"], Bus: d["BusProtocol"],
+			Removable: d["Removable"] == "true" || d["RemovableMedia"] == "true" || d["Ejectable"] == "true",
+			Size:      size, SectorSize: sector,
+		}
+		if mp := d["MountPoint"]; mp != "" {
+			info.Mounts = []string{mp}
+		}
+		if info.Name == "" {
+			info.Name = name
+		}
+		out = append(out, info)
+	}
+	return out
 }
 
 type fileDevice struct {

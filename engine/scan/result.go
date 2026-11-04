@@ -22,7 +22,9 @@ type Result struct {
 	Table  partition.Table
 	// Files is set for a Tree: the volumes are groups of files, such as
 	// a backup's, not partitions.
-	Files   bool
+	Files bool
+	// Folder is the folder the scan was limited to, if it was.
+	Folder  string
 	Volumes []*VolumeResult
 	// Carved holds the files found by signature, in folders by category
 	// and type. nil after a quick scan.

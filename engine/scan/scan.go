@@ -50,7 +50,7 @@ func Run(ctx context.Context, dev disk.Device, opts Options, onProgress func(Pro
 	s.safe = disk.NewSafeReader(dev, dev.Size(), dev.SectorSize())
 	s.cached = disk.NewCache(s.safe, dev.Size(), 64<<10, 2048)
 	s.sm.size = dev.Size()
-	s.res = &Result{Device: dev.Info(), Mode: opts.Mode, Started: s.started}
+	s.res = &Result{Device: dev.Info(), Mode: opts.Mode, Folder: opts.Folder, Started: s.started}
 	var err error
 	t, tree := dev.(Tree)
 	if tree {
@@ -98,7 +98,7 @@ func (s *scanner) run(ctx context.Context) error {
 		to := 0.02 + fsShare*float64(i+1)/float64(len(table.Partitions))
 		s.res.Volumes = append(s.res.Volumes, s.parse(ctx, p, from, to))
 	}
-	if err := s.stopped(ctx); err != nil || s.opts.Mode != Deep {
+	if err := s.stopped(ctx); err != nil || s.opts.Mode != Deep || s.opts.Folder != "" {
 		return err
 	}
 
@@ -175,6 +175,12 @@ func (s *scanner) parse(ctx context.Context, p partition.Partition, from, to flo
 	if err != nil {
 		vr.Err = err
 		return vr
+	}
+	if s.opts.Folder != "" {
+		if err := keepFolder(vol, s.opts.Folder); err != nil {
+			vr.Err = err
+			return vr
+		}
 	}
 	vr.Volume = vol
 	st := vol.Stats()

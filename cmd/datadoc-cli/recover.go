@@ -19,11 +19,12 @@ func runRecover(args []string) error {
 	all := fs.Bool("all", false, "recover existing files too, not only deleted ones")
 	flat := fs.Bool("flat", false, "put every file straight into the folder")
 	types := fs.String("type", "", "only these extensions, comma separated (jpg,png,pdf)")
+	in := fs.String("in", "", "only what was deleted from this folder, instead of a SOURCE")
 	fs.Parse(args)
-	if fs.NArg() != 1 || *to == "" {
-		return fmt.Errorf("recover needs -to DIR and one SOURCE")
+	if *to == "" || fs.NArg() != 1 && !(*in != "" && fs.NArg() == 0) {
+		return fmt.Errorf("recover needs -to DIR and one SOURCE, or -in FOLDER")
 	}
-	res, dev, err := scanSource(fs.Arg(0), *deep)
+	res, dev, err := scanSource(fs.Arg(0), *in, *deep)
 	if dev != nil {
 		defer dev.Close()
 	}
