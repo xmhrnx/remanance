@@ -11,10 +11,10 @@ import (
 	"github.com/xmhrnx/remanance/engine/phonestore"
 )
 
+type provider struct{}
+
 // Register adds the phone's storage to disk.List.
 func Register() { disk.Register(provider{}) }
-
-type provider struct{}
 
 func (provider) List() ([]disk.Info, error) {
 	return []disk.Info{phonestore.Info(phonestore.Root)}, nil

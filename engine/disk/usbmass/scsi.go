@@ -24,6 +24,12 @@ type Sense struct {
 	Key, ASC, ASCQ byte
 }
 
+// SenseError is a failed command with its sense data.
+type SenseError struct{ Sense Sense }
+
+// scsi issues commands to one logical unit.
+type scsi struct{ bot bot }
+
 func (s Sense) String() string {
 	switch {
 	case s.Key == 0x02 && s.ASC == 0x3a:
@@ -40,17 +46,11 @@ func (s Sense) String() string {
 	return fmt.Sprintf("sense %02x/%02x/%02x", s.Key, s.ASC, s.ASCQ)
 }
 
-// SenseError is a failed command with its sense data.
-type SenseError struct{ Sense Sense }
-
 func (e *SenseError) Error() string { return "usb: " + e.Sense.String() }
 
 // Medium reports a read error from the disk itself: a bad sector, worth
 // skipping, unlike a lost connection.
 func (e *SenseError) Medium() bool { return e.Sense.Key == 0x03 || e.Sense.Key == 0x04 }
-
-// scsi issues commands to one logical unit.
-type scsi struct{ bot bot }
 
 func (s *scsi) run(cdb []byte, data []byte) (int, error) {
 	n, err := s.bot.command(cdb, data, true)

@@ -12,27 +12,6 @@ import (
 // State tells how an entry was found.
 type State uint8
 
-const (
-	Existing State = iota // listed by the file system
-	Deleted               // marked deleted, metadata still present
-	Orphan                // its folder is gone; found without a parent
-	Carved                // found by its content, without any metadata
-)
-
-func (s State) String() string {
-	switch s {
-	case Existing:
-		return "Existing"
-	case Deleted:
-		return "Deleted"
-	case Orphan:
-		return "Orphaned"
-	case Carved:
-		return "Found by signature"
-	}
-	return ""
-}
-
 // Run is a contiguous stretch of an entry's data on the device. Offset is
 // absolute on the device; -1 marks a sparse run that reads as zeros.
 type Run struct {
@@ -65,6 +44,27 @@ type Entry struct {
 
 	Parent   *Entry
 	Children []*Entry
+}
+
+const (
+	Existing State = iota // listed by the file system
+	Deleted               // marked deleted, metadata still present
+	Orphan                // its folder is gone; found without a parent
+	Carved                // found by its content, without any metadata
+)
+
+func (s State) String() string {
+	switch s {
+	case Existing:
+		return "Existing"
+	case Deleted:
+		return "Deleted"
+	case Orphan:
+		return "Orphaned"
+	case Carved:
+		return "Found by signature"
+	}
+	return ""
 }
 
 // Ext is the lower-case extension without the dot.

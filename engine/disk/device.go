@@ -11,6 +11,31 @@ import (
 // Kind tells where a device's bytes come from.
 type Kind int
 
+// Info describes a device before it is opened.
+type Info struct {
+	ID         string // stable key, also what Open takes
+	Path       string // OS path (\\.\PhysicalDrive1, /dev/sdb, a file)
+	Name       string // what the user sees
+	Model      string
+	Serial     string
+	Bus        string // "USB", "SATA", "NVMe", "SD", ...
+	Kind       Kind
+	Removable  bool
+	System     bool // holds the running OS
+	Size       int64
+	SectorSize int
+	Mounts     []string // drive letters or mount points on it
+}
+
+// Device is an open, read-only source of sectors.
+type Device interface {
+	io.ReaderAt
+	Info() Info
+	Size() int64
+	SectorSize() int
+	Close() error
+}
+
 const (
 	KindPhysical Kind = iota // a whole drive
 	KindVolume               // a mounted volume or partition
@@ -35,31 +60,6 @@ func (k Kind) String() string {
 		return "Files"
 	}
 	return "Unknown"
-}
-
-// Info describes a device before it is opened.
-type Info struct {
-	ID         string // stable key, also what Open takes
-	Path       string // OS path (\\.\PhysicalDrive1, /dev/sdb, a file)
-	Name       string // what the user sees
-	Model      string
-	Serial     string
-	Bus        string // "USB", "SATA", "NVMe", "SD", ...
-	Kind       Kind
-	Removable  bool
-	System     bool // holds the running OS
-	Size       int64
-	SectorSize int
-	Mounts     []string // drive letters or mount points on it
-}
-
-// Device is an open, read-only source of sectors.
-type Device interface {
-	io.ReaderAt
-	Info() Info
-	Size() int64
-	SectorSize() int
-	Close() error
 }
 
 var (

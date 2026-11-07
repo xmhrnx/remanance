@@ -12,13 +12,13 @@ import (
 	"github.com/xmhrnx/remanance/engine/iphone"
 )
 
+type provider struct{}
+
 // prefix starts every phone's ID.
 const prefix = "iphone:"
 
 // Register adds the phones to disk.List.
 func Register() { disk.Register(provider{}) }
-
-type provider struct{}
 
 // List lists the phones; without Apple's USB service, none.
 func (provider) List() ([]disk.Info, error) {

@@ -18,6 +18,13 @@ import (
 // memDrive is a drive in memory.
 type memDrive struct{ data []byte }
 
+// vanishing is a drive that drops off the bus after reading budget
+// bytes, as a failing USB stick does: every read after that fails.
+type vanishing struct {
+	disk.Device
+	budget atomic.Int64
+}
+
 func (m *memDrive) ReadAt(p []byte, off int64) (int, error) {
 	return bytes.NewReader(m.data).ReadAt(p, off)
 }
@@ -25,13 +32,6 @@ func (m *memDrive) Info() disk.Info { return disk.Info{Name: "test"} }
 func (m *memDrive) Size() int64     { return int64(len(m.data)) }
 func (m *memDrive) SectorSize() int { return 512 }
 func (m *memDrive) Close() error    { return nil }
-
-// vanishing is a drive that drops off the bus after reading budget
-// bytes, as a failing USB stick does: every read after that fails.
-type vanishing struct {
-	disk.Device
-	budget atomic.Int64
-}
 
 func (v *vanishing) ReadAt(p []byte, off int64) (int, error) {
 	if v.budget.Add(-int64(len(p))) < 0 {

@@ -9,6 +9,13 @@ import (
 	"unicode/utf16"
 )
 
+type gptHeader struct {
+	entriesLBA int64
+	count      int
+	entrySize  int
+	entriesCRC uint32
+}
+
 var gptTypes = map[string]string{
 	"C12A7328-F81F-11D2-BA4B-00A0C93EC93B": "EFI System",
 	"E3C9E316-0B5C-4DB8-817D-F92DF00215AE": "Microsoft reserved",
@@ -36,13 +43,6 @@ func guidString(b []byte) string {
 	return fmt.Sprintf("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
 		binary.LittleEndian.Uint32(b[0:]), binary.LittleEndian.Uint16(b[4:]), binary.LittleEndian.Uint16(b[6:]),
 		b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15])
-}
-
-type gptHeader struct {
-	entriesLBA int64
-	count      int
-	entrySize  int
-	entriesCRC uint32
 }
 
 func readGPTHeader(r io.ReaderAt, lba, ss int64) (gptHeader, bool) {

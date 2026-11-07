@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"path"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/xmhrnx/remanance/engine/disk"
@@ -148,87 +146,6 @@ func Recover(ctx context.Context, dev io.ReaderAt, items []Item, sink Sink, opts
 		writeReport(sink, rep)
 	}
 	return rep, nil
-}
-
-// relPath keeps the entry's folders below the item's base.
-func relPath(e *fsys.Entry, it Item) string {
-	p := e.Path()
-	if it.Base != "" && it.Base != "/" {
-		p = strings.TrimPrefix(p, it.Base)
-	}
-	var parts []string
-	for _, s := range strings.Split(strings.Trim(p, "/"), "/") {
-		if s != "" {
-			parts = append(parts, SafeName(s))
-		}
-	}
-	if len(parts) == 0 {
-		return SafeName(e.Name)
-	}
-	return path.Join(parts...)
-}
-
-func copyEntry(ctx context.Context, dev io.ReaderAt, e *fsys.Entry, sink Sink, rel string, buf []byte, step func(int64)) (int64, error) {
-	r, err := fsys.Open(dev, e)
-	if err != nil {
-		return 0, err
-	}
-	w, err := sink.Create(rel)
-	if err != nil {
-		return 0, err
-	}
-	var done int64
-	for done < e.Size {
-		if ctx.Err() != nil {
-			w.Close()
-			return done, ctx.Err()
-		}
-		n := min(int64(len(buf)), e.Size-done)
-		m, rerr := r.ReadAt(buf[:n], done)
-		if m > 0 {
-			if _, werr := w.Write(buf[:m]); werr != nil {
-				w.Close()
-				return done, werr
-			}
-			done += int64(m)
-			step(int64(m))
-		}
-		if rerr != nil && rerr != io.EOF {
-			w.Close()
-			return done, rerr
-		}
-		if m == 0 {
-			break
-		}
-	}
-	return done, w.Close()
-}
-
-func writeReport(sink Sink, rep *Report) {
-	w, err := sink.Create(unique(sink, "Recovery report.txt"))
-	if err != nil {
-		return
-	}
-	defer w.Close()
-	fmt.Fprintf(w, "DataDoc recovery report\r\n%s\r\n\r\n", time.Now().Format("2 January 2006 15:04"))
-	fmt.Fprintf(w, "Recovered %d files (%s), %d failed, in %s.\r\n\r\n", rep.Recovered, FormatBytes(rep.Bytes), rep.Failed, rep.Duration.Round(time.Second))
-	for _, o := range rep.Outcomes {
-		status := "OK"
-		switch {
-		case o.Err != nil:
-			status = "FAILED: " + o.Err.Error()
-		case o.Health < 100:
-			status = fmt.Sprintf("recovered, %d%% intact", o.Health)
-		}
-		if o.Dest == "" {
-			fmt.Fprintf(w, "%s (%s) %s\r\n", o.Source, FormatBytes(o.Size), status)
-		} else {
-			fmt.Fprintf(w, "%s\r\n    -> %s (%s) %s\r\n", o.Source, o.Dest, FormatBytes(o.Size), status)
-		}
-		if o.Note != "" {
-			fmt.Fprintf(w, "    %s\r\n", o.Note)
-		}
-	}
 }
 
 // FormatBytes renders a size the way people read it.

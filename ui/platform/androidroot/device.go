@@ -12,6 +12,29 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk"
 )
 
+type device struct {
+	info disk.Info
+	r    io.ReaderAt
+}
+
+// provider lists and opens devices through one root shell, started the
+// first time the drives are listed.
+type provider struct {
+	mu    sync.Mutex
+	shell *session
+	start func() (*session, error)
+}
+
+// rootShell lets engine/appdata read files through the root shell.
+type rootShell struct{ s *session }
+
+// blocks reads whole blocks through the shell.
+type blocks struct {
+	s   *session
+	dev string
+	bs  int
+}
+
 // suPaths are where root solutions put su.
 var suPaths = []string{"/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su", "/debug_ramdisk/su", "/system_ext/bin/su"}
 
@@ -25,14 +48,6 @@ func hasSU() bool {
 	}
 	_, err := exec.LookPath("su")
 	return err == nil
-}
-
-// provider lists and opens devices through one root shell, started the
-// first time the drives are listed.
-type provider struct {
-	mu    sync.Mutex
-	shell *session
-	start func() (*session, error)
 }
 
 func (p *provider) session() (*session, error) {
@@ -65,9 +80,6 @@ func (p *provider) List() ([]disk.Info, error) {
 // appdataID is the ID of the apps' databases.
 const appdataID = prefix + "appdata"
 
-// rootShell lets engine/appdata read files through the root shell.
-type rootShell struct{ s *session }
-
 func (r rootShell) Run(command string) (string, error) { return r.s.run(command, 5*time.Minute) }
 
 func (r rootShell) Read(path string, p []byte, off int64) error { return r.s.read(path, 512, p, off) }
@@ -96,13 +108,6 @@ func (p *provider) Open(info disk.Info) (disk.Device, error) {
 	return d, nil
 }
 
-// blocks reads whole blocks through the shell.
-type blocks struct {
-	s   *session
-	dev string
-	bs  int
-}
-
 func (b blocks) ReadAt(p []byte, off int64) (int, error) {
 	// Long reads go in pieces, so one dd never holds the shell long.
 	const most = 4 << 20
@@ -113,11 +118,6 @@ func (b blocks) ReadAt(p []byte, off int64) (int, error) {
 		}
 	}
 	return len(p), nil
-}
-
-type device struct {
-	info disk.Info
-	r    io.ReaderAt
 }
 
 func (d *device) ReadAt(p []byte, off int64) (int, error) { return d.r.ReadAt(p, off) }

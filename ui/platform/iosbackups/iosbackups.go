@@ -11,13 +11,13 @@ import (
 	"github.com/xmhrnx/remanance/engine/iosbackup"
 )
 
+type provider struct{}
+
 // prefix starts every backup's ID.
 const prefix = "iosbackup:"
 
 // Register adds the backups to disk.List.
 func Register() { disk.Register(provider{}) }
-
-type provider struct{}
 
 func (provider) List() ([]disk.Info, error) {
 	var out []disk.Info

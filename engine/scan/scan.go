@@ -4,20 +4,19 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/xmhrnx/remanance/engine/carve"
 	"github.com/xmhrnx/remanance/engine/disk"
-	"github.com/xmhrnx/remanance/engine/fsys"
 	_ "github.com/xmhrnx/remanance/engine/fsys/all"
 	"github.com/xmhrnx/remanance/engine/partition"
 	"github.com/xmhrnx/remanance/engine/records"
 )
 
-const blockSize = 4 << 20 // bytes per read in the sector search
+// blockSize is the bytes per read in the sector search.
+const blockSize = 4 << 20
 
 // scanner holds a running scan's state.
 type scanner struct {
@@ -143,133 +142,4 @@ func (s *scanner) stopped(ctx context.Context) error {
 		return err
 	}
 	return s.safe.Gone()
-}
-
-// parse reads the file system of one partition.
-func (s *scanner) parse(ctx context.Context, p partition.Partition, from, to float64) *VolumeResult {
-	vr := &VolumeResult{Partition: p}
-	parser := fsys.ParserFor(p.FS)
-	if parser == nil {
-		if p.FS != "" {
-			vr.Err = fmt.Errorf("%s volumes aren't supported yet; a deep scan finds their files by signature", p.FS)
-		}
-		return vr
-	}
-	pctx := ctx
-	if s.opts.Mode == Deep {
-		pctx = fsys.WithDeep(ctx)
-	}
-	sec := disk.NewSection(s.cached, p.Offset, p.Length)
-	vol, err := func() (v *fsys.Volume, err error) {
-		// A parser must never take the whole scan down with it: damaged
-		// metadata can be arbitrarily odd.
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("the %s metadata is too damaged to read (%v)", p.FS, r)
-			}
-		}()
-		return parser(pctx, sec, p.Offset, p.Length, func(f float64) {
-			s.setPhase(PhaseFileSystem, from+(to-from)*f)
-		})
-	}()
-	if err != nil {
-		vr.Err = err
-		return vr
-	}
-	if s.opts.Folder != "" {
-		if err := keepFolder(vol, s.opts.Folder); err != nil {
-			vr.Err = err
-			return vr
-		}
-	}
-	vr.Volume = vol
-	st := vol.Stats()
-	s.files.Add(int64(st.Files))
-	s.deleted.Add(int64(st.Deleted))
-	s.sm.mark(p.Offset, min(p.Length, 1<<20), CellMetadata)
-	s.send(false)
-	return vr
-}
-
-// knownStarts maps the device offset where each file's data starts to
-// where it ends, for every file found through a file system: the carver
-// skips them instead of listing them a second time.
-func (s *scanner) knownStarts() map[int64]int64 {
-	out := map[int64]int64{}
-	add := func(e *fsys.Entry) bool {
-		if !e.IsDir && len(e.Runs) > 0 && e.Runs[0].Offset >= 0 && e.Health > 0 {
-			end := e.Runs[0].Offset + e.Runs[0].Length
-			if len(e.Runs) == 1 {
-				end = e.Runs[0].Offset + e.Size
-			}
-			out[e.Runs[0].Offset] = end
-		}
-		return true
-	}
-	for _, v := range s.res.Volumes {
-		if v.Volume != nil {
-			v.Volume.Root.Walk(add)
-			v.Volume.Lost.Walk(add)
-		}
-	}
-	return out
-}
-
-func (s *scanner) setPhase(p Phase, f float64) {
-	s.mu.Lock()
-	s.phase, s.fraction = p, f
-	s.mu.Unlock()
-	s.send(false)
-}
-
-func (s *scanner) send(force bool) {
-	if s.report == nil {
-		return
-	}
-	s.mu.Lock()
-	if !force && time.Since(s.lastSent) < 100*time.Millisecond {
-		s.mu.Unlock()
-		return
-	}
-	s.lastSent = time.Now()
-	p := Progress{
-		Phase:    s.phase,
-		Fraction: s.fraction,
-		Position: s.position.Load(),
-		Total:    s.searchEnd() - s.opts.Start,
-		Files:    int(s.files.Load()),
-		Deleted:  int(s.deleted.Load()),
-		BadBytes: s.safe.BadBytes(),
-		Map:      s.sm.snapshot(),
-		Current:  -1,
-	}
-	if s.phase == PhaseSectors {
-		p.Current = s.sm.cell(s.opts.Start + p.Position)
-	}
-	t0 := s.searchT0
-	s.mu.Unlock()
-	if s.carver != nil {
-		p.Carved = s.carver.Count()
-	}
-	p.Partitions = len(s.res.Volumes)
-	if !t0.IsZero() && p.Position > 0 {
-		el := time.Since(t0).Seconds()
-		p.Speed = float64(p.Position) / el
-		if p.Speed > 0 && p.Total > p.Position {
-			p.Remaining = time.Duration(float64(p.Total-p.Position) / p.Speed * float64(time.Second))
-		}
-	}
-	s.report(p)
-}
-
-func (s *scanner) searchEnd() int64 {
-	if s.opts.End > 0 && s.opts.End < s.dev.Size() {
-		return s.opts.End
-	}
-	return s.dev.Size()
-}
-
-// sortVolumes keeps volumes in device order, found ones among them.
-func sortVolumes(v []*VolumeResult) {
-	sort.SliceStable(v, func(i, j int) bool { return v[i].Partition.Offset < v[j].Partition.Offset })
 }

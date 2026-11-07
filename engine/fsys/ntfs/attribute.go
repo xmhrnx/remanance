@@ -37,6 +37,24 @@ type attribute struct {
 	compUnitLog uint16
 }
 
+// fileName is a $FILE_NAME attribute's value.
+type fileName struct {
+	parent    int64
+	parentSeq uint16
+	created   time.Time
+	modified  time.Time
+	accessed  time.Time
+	size      int64
+	namespace byte
+	name      string
+}
+
+// standardInfo holds the times of $STANDARD_INFORMATION, which, unlike
+// $FILE_NAME's, follow every change to the file.
+type standardInfo struct {
+	created, modified, accessed time.Time
+}
+
 func parseAttribute(b []byte) (attribute, int, bool) {
 	typ := binary.LittleEndian.Uint32(b)
 	if typ == attrEnd || len(b) < 16 {
@@ -101,56 +119,4 @@ func filetime(v uint64) time.Time {
 		return time.Time{}
 	}
 	return time.Unix(0, int64(v-epochDelta)*100).UTC()
-}
-
-// fileName is a $FILE_NAME attribute's value.
-type fileName struct {
-	parent    int64
-	parentSeq uint16
-	created   time.Time
-	modified  time.Time
-	accessed  time.Time
-	size      int64
-	namespace byte
-	name      string
-}
-
-const namespaceDOS = 2
-
-func parseFileName(v []byte) (fileName, bool) {
-	if len(v) < 66 {
-		return fileName{}, false
-	}
-	ref := binary.LittleEndian.Uint64(v)
-	n := int(v[64])
-	if 66+2*n > len(v) {
-		return fileName{}, false
-	}
-	return fileName{
-		parent:    int64(ref & 0xFFFFFFFFFFFF),
-		parentSeq: uint16(ref >> 48),
-		created:   filetime(binary.LittleEndian.Uint64(v[8:])),
-		modified:  filetime(binary.LittleEndian.Uint64(v[16:])),
-		accessed:  filetime(binary.LittleEndian.Uint64(v[32:])),
-		size:      int64(binary.LittleEndian.Uint64(v[48:])),
-		namespace: v[65],
-		name:      utf16String(v[66 : 66+2*n]),
-	}, true
-}
-
-// standardInfo holds the times of $STANDARD_INFORMATION, which, unlike
-// $FILE_NAME's, follow every change to the file.
-type standardInfo struct {
-	created, modified, accessed time.Time
-}
-
-func parseStandardInfo(v []byte) (standardInfo, bool) {
-	if len(v) < 32 {
-		return standardInfo{}, false
-	}
-	return standardInfo{
-		created:  filetime(binary.LittleEndian.Uint64(v[0:])),
-		modified: filetime(binary.LittleEndian.Uint64(v[8:])),
-		accessed: filetime(binary.LittleEndian.Uint64(v[24:])),
-	}, true
 }

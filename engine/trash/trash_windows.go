@@ -29,6 +29,13 @@ type shFileOp struct {
 	title    *uint16
 }
 
+// shQueryInfo is SHQUERYRBINFO.
+type shQueryInfo struct {
+	size  uint32
+	bytes int64
+	items int64
+}
+
 const (
 	foDelete          = 3
 	fofSilent         = 0x0004
@@ -57,13 +64,6 @@ func move(path string) error {
 		return ErrNoTrash
 	}
 	return nil
-}
-
-// shQueryInfo is SHQUERYRBINFO.
-type shQueryInfo struct {
-	size  uint32
-	bytes int64
-	items int64
 }
 
 // usage asks the shell what the Recycle Bins of all drives hold.

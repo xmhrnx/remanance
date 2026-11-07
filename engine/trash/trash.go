@@ -10,6 +10,12 @@ import (
 	"path/filepath"
 )
 
+// Usage is what the trash holds.
+type Usage struct {
+	Bytes int64
+	Files int
+}
+
 // ErrNoTrash means the file can't go to the trash: the system has none,
 // or the file is on a drive the trash doesn't cover.
 var ErrNoTrash = errors.New("this file can't go to the trash")
@@ -31,12 +37,6 @@ func Remove(path string, toTrash bool) error {
 		return Move(path)
 	}
 	return os.RemoveAll(path)
-}
-
-// Usage is what the trash holds.
-type Usage struct {
-	Bytes int64
-	Files int
 }
 
 // Size is what the user's trash holds; zero where there's no trash.

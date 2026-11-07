@@ -6,6 +6,13 @@ import (
 	"io"
 )
 
+type mbrEntry struct {
+	boot   bool
+	typ    byte
+	start  uint32
+	length uint32
+}
+
 var mbrTypes = map[byte]string{
 	0x01: "FAT12", 0x04: "FAT16", 0x05: "Extended", 0x06: "FAT16", 0x07: "NTFS/exFAT",
 	0x0B: "FAT32", 0x0C: "FAT32 (LBA)", 0x0E: "FAT16 (LBA)", 0x0F: "Extended (LBA)",
@@ -16,13 +23,6 @@ var mbrTypes = map[byte]string{
 }
 
 func isExtended(t byte) bool { return t == 0x05 || t == 0x0F || t == 0x85 }
-
-type mbrEntry struct {
-	boot   bool
-	typ    byte
-	start  uint32
-	length uint32
-}
 
 func parseMBREntries(sector []byte) ([4]mbrEntry, bool) {
 	var out [4]mbrEntry

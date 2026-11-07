@@ -25,6 +25,10 @@ type Device struct {
 	closer    io.Closer
 }
 
+// blockReader reads whole blocks; Aligned turns it into a ReaderAt for
+// any offset.
+type blockReader struct{ d *Device }
+
 // Open starts talking to the drive on t: it waits for it to be ready,
 // names it and reads its size. info supplies what the USB descriptors
 // already said; closer is closed with the device.
@@ -58,10 +62,6 @@ func Open(t Transport, info disk.Info, closer io.Closer) (*Device, error) {
 	d.reader = disk.Aligned(blockReader{d}, d.blockSize, info.Size)
 	return d, nil
 }
-
-// blockReader reads whole blocks; Aligned turns it into a ReaderAt for
-// any offset.
-type blockReader struct{ d *Device }
 
 func (b blockReader) ReadAt(p []byte, off int64) (int, error) {
 	d := b.d

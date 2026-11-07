@@ -9,10 +9,10 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk/usbmass"
 )
 
+type provider struct{}
+
 // Register adds the USB drives to disk.List.
 func Register() { disk.Register(provider{}) }
-
-type provider struct{}
 
 func (provider) List() ([]disk.Info, error) {
 	list, err := android.CallString(bridgeClass, "list", "(Landroid/content/Context;)Ljava/lang/String;", android.Context())

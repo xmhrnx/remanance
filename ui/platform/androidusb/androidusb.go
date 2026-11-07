@@ -12,6 +12,8 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk"
 )
 
+type openError struct{ msg string }
+
 // prefix starts the ID of every drive found here.
 const prefix = "usb:"
 
@@ -62,7 +64,5 @@ func parseOpen(s string) (fd, iface, in, out int, err error) {
 	}
 	return v[0], v[1], v[2], v[3], nil
 }
-
-type openError struct{ msg string }
 
 func (e *openError) Error() string { return e.msg }

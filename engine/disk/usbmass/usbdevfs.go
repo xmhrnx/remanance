@@ -28,14 +28,6 @@ type ctrlTransfer struct {
 	data                 unsafe.Pointer
 }
 
-func ioc(dir, nr, size uintptr) uintptr { return dir<<30 | size<<16 | 'U'<<8 | nr }
-
-var (
-	ioctlControl   = ioc(3, 0, unsafe.Sizeof(ctrlTransfer{}))
-	ioctlBulk      = ioc(3, 2, unsafe.Sizeof(bulkTransfer{}))
-	ioctlClearHalt = ioc(2, 21, 4)
-)
-
 // DevFS is a Transport over a usbdevfs file descriptor: a device node
 // under /dev/bus/usb, or the descriptor Android's UsbDeviceConnection
 // gives an app the user let use the drive. The interface must already be
@@ -47,6 +39,14 @@ type DevFS struct {
 	epOut     uint32
 	maxPacket int
 }
+
+func ioc(dir, nr, size uintptr) uintptr { return dir<<30 | size<<16 | 'U'<<8 | nr }
+
+var (
+	ioctlControl   = ioc(3, 0, unsafe.Sizeof(ctrlTransfer{}))
+	ioctlBulk      = ioc(3, 2, unsafe.Sizeof(bulkTransfer{}))
+	ioctlClearHalt = ioc(2, 21, 4)
+)
 
 // NewDevFS wraps fd. epIn and epOut are the bulk endpoint addresses
 // (epIn has bit 7 set).

@@ -6,6 +6,13 @@ import (
 	"path/filepath"
 )
 
+type readerDevice struct {
+	r interface {
+		ReadAt(p []byte, off int64) (int, error)
+	}
+	info Info
+}
+
 // imageDevice is a raw disk image (.img, .dd, .bin, .iso, .raw) or any
 // other file treated as a sequence of sectors.
 type imageDevice struct {
@@ -51,13 +58,6 @@ func (d *imageDevice) Info() Info                              { return d.info }
 func (d *imageDevice) Size() int64                             { return d.info.Size }
 func (d *imageDevice) SectorSize() int                         { return d.info.SectorSize }
 func (d *imageDevice) Close() error                            { return d.f.Close() }
-
-type readerDevice struct {
-	r interface {
-		ReadAt(p []byte, off int64) (int, error)
-	}
-	info Info
-}
 
 func (d *readerDevice) ReadAt(p []byte, off int64) (int, error) { return d.r.ReadAt(p, off) }
 func (d *readerDevice) Info() Info                              { return d.info }

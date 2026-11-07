@@ -14,13 +14,13 @@ import (
 	"github.com/xmhrnx/remanance/engine/disk"
 )
 
+type provider struct{}
+
 // prefix starts every phone's ID.
 const prefix = "adb:"
 
 // Register adds the phones to disk.List.
 func Register() { disk.Register(provider{}) }
-
-type provider struct{}
 
 // List lists the phones; without adb installed, none.
 func (provider) List() ([]disk.Info, error) {

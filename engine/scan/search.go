@@ -10,12 +10,6 @@ import (
 	"github.com/xmhrnx/remanance/engine/partition"
 )
 
-type block struct {
-	pos  int64
-	data []byte
-	bad  bool
-}
-
 // search reads the device from start to end once, feeding every block to
 // the lost-partition finder and the carver. Reading runs ahead in its own
 // goroutine so the device never waits on the parsing.
