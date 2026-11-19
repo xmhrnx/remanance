@@ -3,8 +3,8 @@ package components
 import (
 	"strconv"
 
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/styles/properties"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/styles/properties"
 	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/theme"
 )

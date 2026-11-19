@@ -3,7 +3,7 @@ package screens
 import (
 	"path/filepath"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 	"github.com/xmhrnx/remanance/engine/rename"
 	"github.com/xmhrnx/remanance/ui/components"
 	"github.com/xmhrnx/remanance/ui/icons"

@@ -1,11 +1,11 @@
 package screens
 
 import (
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/components/iconbutton"
-	"github.com/mehran9675/giode/components/scroll"
-	"github.com/mehran9675/giode/components/segmented"
-	"github.com/mehran9675/giode/components/toggle"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/components/iconbutton"
+	"github.com/xmhrnx/giode/components/scroll"
+	"github.com/xmhrnx/giode/components/segmented"
+	"github.com/xmhrnx/giode/components/toggle"
 	"github.com/xmhrnx/remanance/engine/dupes"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/trash"

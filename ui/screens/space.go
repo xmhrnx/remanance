@@ -3,9 +3,9 @@ package screens
 import (
 	"context"
 
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/components/iconbutton"
-	"github.com/mehran9675/giode/components/scroll"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/components/iconbutton"
+	"github.com/xmhrnx/giode/components/scroll"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/space"
 	"github.com/xmhrnx/remanance/engine/trash"

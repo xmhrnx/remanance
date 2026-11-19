@@ -11,7 +11,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/theme"

@@ -3,7 +3,7 @@ package model
 import (
 	"sync"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 )
 
 // keepRunning keeps a long job going while the app is out of sight: on

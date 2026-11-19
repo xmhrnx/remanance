@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 	"github.com/xmhrnx/remanance/ui/theme"
 )
 

@@ -2,7 +2,7 @@
 // spacing every screen shares.
 package theme
 
-import "github.com/mehran9675/giode"
+import "github.com/xmhrnx/giode"
 
 // Dark is the default palette: near-black ink with a warm amber accent,
 // the color of the pulse in the icon.

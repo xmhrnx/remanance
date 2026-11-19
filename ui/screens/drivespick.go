@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/iosbackup"
 	"github.com/xmhrnx/remanance/engine/scan"

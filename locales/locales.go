@@ -12,7 +12,7 @@ package locales
 import (
 	"embed"
 
-	"github.com/mehran9675/giode/i18n"
+	"github.com/xmhrnx/giode/i18n"
 )
 
 //go:embed *.json

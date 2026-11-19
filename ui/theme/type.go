@@ -3,7 +3,7 @@ package theme
 import (
 	"gioui.org/unit"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 )
 
 // The type scale. Each returns a fresh Styles so callers can extend it

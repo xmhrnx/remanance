@@ -1,8 +1,8 @@
 package components
 
 import (
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/components/iconbutton"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/components/iconbutton"
 	"github.com/xmhrnx/remanance/ui/icons"
 	"github.com/xmhrnx/remanance/ui/theme"
 )

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/components/scroll"
-	"github.com/mehran9675/giode/styles/properties"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/components/scroll"
+	"github.com/xmhrnx/giode/styles/properties"
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/recovery"
 	"github.com/xmhrnx/remanance/engine/scan"

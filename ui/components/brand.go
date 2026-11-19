@@ -1,7 +1,7 @@
 package components
 
 import (
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 	"github.com/xmhrnx/remanance/assets"
 	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/theme"

@@ -3,7 +3,7 @@ package model
 import (
 	"path"
 
-	"github.com/mehran9675/giode"
+	"github.com/xmhrnx/giode"
 	"github.com/xmhrnx/remanance/engine/fsys"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/locales"

@@ -6,8 +6,8 @@ import (
 	"embed"
 	"log"
 
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/styles/properties"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/styles/properties"
 )
 
 //go:embed svg/*.svg

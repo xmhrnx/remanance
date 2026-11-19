@@ -5,7 +5,7 @@ package androidstore
 import (
 	"strings"
 
-	"github.com/mehran9675/giode/android"
+	"github.com/xmhrnx/giode/android"
 
 	"github.com/xmhrnx/remanance/engine/disk"
 	"github.com/xmhrnx/remanance/engine/phonestore"

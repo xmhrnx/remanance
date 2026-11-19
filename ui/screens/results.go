@@ -1,12 +1,12 @@
 package screens
 
 import (
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/components/dropdown"
-	"github.com/mehran9675/giode/components/iconbutton"
-	"github.com/mehran9675/giode/components/input"
-	"github.com/mehran9675/giode/components/segmented"
-	"github.com/mehran9675/giode/components/sheet"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/components/dropdown"
+	"github.com/xmhrnx/giode/components/iconbutton"
+	"github.com/xmhrnx/giode/components/input"
+	"github.com/xmhrnx/giode/components/segmented"
+	"github.com/xmhrnx/giode/components/sheet"
 	"github.com/xmhrnx/remanance/engine/scan"
 	"github.com/xmhrnx/remanance/locales"
 	"github.com/xmhrnx/remanance/ui/components"

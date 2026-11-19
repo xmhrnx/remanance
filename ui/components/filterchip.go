@@ -1,8 +1,8 @@
 package components
 
 import (
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/components/chip"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/components/chip"
 	"github.com/xmhrnx/remanance/ui/icons"
 )
 

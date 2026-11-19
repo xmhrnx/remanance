@@ -12,8 +12,8 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 
-	"github.com/mehran9675/giode"
-	"github.com/mehran9675/giode/styles/properties"
+	"github.com/xmhrnx/giode"
+	"github.com/xmhrnx/giode/styles/properties"
 )
 
 // ProgressRing is the large ring on the scan screen: a faint track and an
