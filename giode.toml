@@ -85,7 +85,6 @@ role = "viewer"
 # tools.
 [ci]
 trigger = "release"
-# The Android SDK on GitHub's runners has no bundletool, which the .aab
-# build needs; giode looks for it in the newest build-tools.
-setup.linux = 'sudo curl -fsSL -o "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/bundletool-all-1.18.3.jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar'
+# Keeps the Actions tab's "Run workflow" button.
+dispatch = true
 test = 'docker run --rm --privileged -v "$PWD/testdata:/t" debian:bookworm sh /t/mkimages.sh && go vet ./engine/... ./cmd/datadoc-cli/... && go test ./engine/... ./ui/platform/...'
