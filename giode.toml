@@ -14,7 +14,7 @@ package = "./cmd/datadoc"
 platforms = ["windows", "macos", "linux", "android", "ios"]
 publisher = "xmhrnx"
 description = "Free, open-source data recovery: deleted files, formatted drives and lost partitions"
-website = "https://github.com/xmhrnx/remanance"
+website = "https://xmhrnx.github.io/remanance/"
 
 [android]
 min_sdk = 21
