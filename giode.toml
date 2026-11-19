@@ -7,6 +7,9 @@ id = "io.github.mehran9675.datadoc"
 version = "0.1.0"
 build = 1
 icon = "assets/icon.png"
+# The launch screen in the dark palette's background, which the app
+# always starts in, so it opens without a white flash.
+splash_color = "#0A0B0F"
 package = "./cmd/datadoc"
 platforms = ["windows", "macos", "linux", "android", "ios"]
 publisher = "xmhrnx"
@@ -42,6 +45,9 @@ manifest = '''
 
 [ios]
 min_os = 15
+# The icon on its background to the edges: iOS rounds the corners itself
+# and would show app.icon's transparent ones white.
+icon = "assets/icon/ios.png"
 # CI signs device builds with the IOS_CERT_BASE64, IOS_CERT_PASS and
 # IOS_PROFILE_BASE64 secrets.
 

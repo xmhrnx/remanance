@@ -10,3 +10,4 @@
 *.mobileprovision
 *.p12
 *.syso
+__pycache__/

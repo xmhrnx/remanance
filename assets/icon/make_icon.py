@@ -4,7 +4,8 @@ amber heartbeat glowing across it - files checked over and brought back.
     python assets/icon/make_icon.py
 
 writes assets/icon.png (1024x1024), assets/icon/mark.png (the page alone
-on transparency, for the app's own header) and the Android layers.
+on transparency, for the app's own header), the iOS icon and the Android
+layers.
 """
 import math
 import os
@@ -188,6 +189,16 @@ def icon():
     return clipped.resize((OUT, OUT), Image.LANCZOS)
 
 
+def ios_icon():
+    """iOS rounds the corners itself and shows transparency as white, so
+    its icon is the same page on the background running to the edges."""
+    base = radial(S, (S * 0.5, S * 0.12), S * 1.0, (46, 34, 28, 255), (8, 9, 12, 255))
+    p = doc(S)
+    base = Image.alpha_composite(base, shadow(p, S * 0.018, S * 0.02))
+    base = Image.alpha_composite(base, p)
+    return base.convert("RGB").resize((OUT, OUT), Image.LANCZOS)
+
+
 def shadow(layer, drop, blur):
     """A soft shadow under a layer's shape."""
     sh = Image.new("RGBA", layer.size, (0, 0, 0, 0))
@@ -252,8 +263,9 @@ def android_layers():
 if __name__ == "__main__":
     icon().save(os.path.join(HERE, "..", "icon.png"))
     mark().save(os.path.join(HERE, "mark.png"))
+    ios_icon().save(os.path.join(HERE, "ios.png"))
     fg, bg = android_layers()
     fg.save(os.path.join(HERE, "android-foreground.png"))
     bg.save(os.path.join(HERE, "android-background.png"))
     android_monochrome().save(os.path.join(HERE, "android-monochrome.png"))
-    print("wrote assets/icon.png, assets/icon/mark.png and the Android layers")
+    print("wrote assets/icon.png, assets/icon/mark.png, the iOS icon and the Android layers")
