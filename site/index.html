@@ -172,6 +172,7 @@ h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; letter-spacing: -.025e
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
   position: relative; overflow: hidden;
 }
+#privacy .card h3 { margin-top: 0; }
 .card h3 { margin: 14px 0 8px; font-size: 18px; letter-spacing: -.01em; }
 .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
 .card ul { margin: 10px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 15px; }
@@ -503,6 +504,37 @@ footer a:hover { color: var(--text); }
     </div>
   </div>
 </section>
+<section id="privacy">
+  <div class="wrap">
+    <p class="eyebrow">Privacy</p>
+    <h2>Your files stay on your devices.</h2>
+    <p class="intro">This is DataDoc's privacy policy, for the app on every system and in every store. Last updated November 19, 2026.</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Nothing is collected</h3>
+        <ul>
+          <li>No account, no analytics, no ads, no crash reports, no tracking.</li>
+          <li>DataDoc never connects to the internet. It sends nothing to its developer or anyone else.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>What it reads</h3>
+        <ul>
+          <li>Only the drives, disk images, folders, backups and phones you choose to scan, measure or clean up.</li>
+          <li>Deleted messages, contacts and other records it finds are shown on your screen and saved only where you recover them.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>What it writes</h3>
+        <ul>
+          <li>Recovered files, spreadsheets and disk images go to the folder you pick: on Android <code>Download/DataDoc</code>, on iOS the app's folder in Files.</li>
+          <li>It keeps no settings or history. A backup password lives in memory until you quit.</li>
+        </ul>
+      </article>
+    </div>
+    <p class="note"><b>Phones and permissions.</b> A phone connected to a computer talks to DataDoc over the USB cable, through Apple's own service for iPhones or Android's debug bridge (ADB) on this computer. When an iPhone is paired, the pairing record is kept by that service, as for Finder or iTunes. On Android, "All files access" lets DataDoc look through the phone's storage, and the USB permission lets it read a drive on an OTG adapter; the notification only shows a scan running in the background. Deleting files in Clean up, Disk space or Duplicates, and renaming in Rename, happen only when you confirm them. Questions: <a href="https://github.com/xmhrnx/remanance/issues">open an issue on GitHub</a>.</p>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -511,6 +543,7 @@ footer a:hover { color: var(--text); }
     <nav>
       <a href="https://github.com/xmhrnx/remanance">Source on GitHub</a>
       <a href="https://github.com/xmhrnx/remanance/releases/latest">Releases</a>
+      <a href="#privacy">Privacy</a>
       <a href="https://github.com/xmhrnx/remanance/blob/main/LICENSE">Apache License 2.0</a>
     </nav>
   </div>
