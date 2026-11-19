@@ -85,6 +85,12 @@ without the setting. `*.keystore` is in `.gitignore`; never commit it.
    and updates since 31 Aug 2026, so `[android]` sets `target_sdk = 36` (the
    CLI's default is 35, which Play rejects). Raise it when Play's next
    deadline comes; Play Console warns ahead of it.
+   Targeting API 36 turns on predictive back, and Android 16 then no longer
+   calls `onBackPressed()`, where Gio's activity handles Back. `[android]`
+   opts out with `enableOnBackInvokedCallback = "false"` in
+   `application_attributes`. Before each upload, test on an Android 16
+   device that the back gesture and the Back button go back a screen (from
+   results to the drive list, out of a dialog) instead of closing the app.
 6. **Permissions declarations** (Policy → App content). Play reviews these by
    hand, and they decide whether DataDoc is approved:
    - **All files access** (`MANAGE_EXTERNAL_STORAGE`). Core use: file

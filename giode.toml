@@ -32,7 +32,10 @@ permissions = ["storage"]
 # Scans and recoveries keep going when the app leaves the screen, in
 # giode's foreground service, with a notification that brings it back.
 keep_alive = true
-application_attributes = { requestLegacyExternalStorage = "true" }
+# enableOnBackInvokedCallback = false: Gio's activity handles Back in
+# onBackPressed(), which Android 16 stops calling for apps targeting
+# API 36 (predictive back), so the back gesture would close the app.
+application_attributes = { requestLegacyExternalStorage = "true", enableOnBackInvokedCallback = "false" }
 # The USB and storage bridges, compiled into the APK.
 java = ["ui/platform/androidusb", "ui/platform/androidstore"]
 # USB drives on an OTG adapter, read through the USB host API. Not
