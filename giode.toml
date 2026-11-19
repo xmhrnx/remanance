@@ -18,6 +18,9 @@ website = "https://xmhrnx.github.io/remanance/"
 
 [android]
 min_sdk = 21
+# Google Play requires Android 16 (API 36) for new apps and updates since
+# 31 Aug 2026; the CLI's default is 35.
+target_sdk = 36
 # The adaptive icon's layers, drawn by assets/icon/make_icon.py with the
 # page inside the middle that every launcher's mask leaves visible.
 icon_foreground = "assets/icon/android-foreground.png"
@@ -41,7 +44,10 @@ manifest = '''
 <uses-feature android:name="android.hardware.usb.host" android:required="false"/>
 <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 '''
-# keystore = "release.keystore"   # created by giode keystore; signs giode build -release
+# Signs giode build -release (the Play upload key). Kept out of git: the
+# release workflow writes it from the ANDROID_KEYSTORE_BASE64 secret, with
+# its password in GIODE_KEYSTORE_PASS. giode keystore creates one.
+keystore = "release.keystore"
 
 [ios]
 min_os = 15
@@ -56,12 +62,31 @@ icon = "assets/icon/ios.png"
 [ios.plist]
 UIFileSharingEnabled = true
 LSSupportsOpeningDocumentsInPlace = true
+# Only standard algorithms (AES and PBKDF2 to open the user's own
+# encrypted iPhone backups, SHA-256 to compare files), no proprietary
+# ones: no export documentation per upload. See RELEASING.md.
+ITSAppUsesNonExemptEncryption = false
 
 [macos]
 min_os = 11
 # identity = "Developer ID Application: Your Name (TEAMID)"  # signs giode build -release
 # notary_id = "you@example.com"
 # notary_team_id = "TEAMID"
+# There is no Mac App Store build ([macos.store]): the App Sandbox can't
+# open /dev/rdisk*, run the administrator prompt, reach usbmuxd for
+# iPhones or run adb, so DataDoc couldn't read a single drive or phone
+# there. The notarized .dmg is the Mac release. See RELEASING.md.
+
+[macos.plist]
+LSApplicationCategoryType = "public.app-category.utilities"
+# As on iOS: standard algorithms only (also TLS to a connected iPhone).
+ITSAppUsesNonExemptEncryption = false
+# What macOS shows when Disk space, Clean up, Duplicates, Rename or a
+# folder scan first reads one of these places.
+NSDesktopFolderUsageDescription = "DataDoc reads the folders you choose to scan, measure, clean up or rename."
+NSDocumentsFolderUsageDescription = "DataDoc reads the folders you choose to scan, measure, clean up or rename."
+NSDownloadsFolderUsageDescription = "DataDoc looks through Downloads for old installers and downloads you may not need."
+NSRemovableVolumesUsageDescription = "DataDoc reads the USB drives and memory cards you choose to scan or measure."
 
 [windows]
 arch = "amd64"
@@ -72,13 +97,29 @@ arch = "amd64"
 desktop_shortcut = true
 license = "LICENSE"
 
+# The Microsoft Store package (giode build msix). The Store signs it.
+# identity_name must match Partner Center -> DataDoc -> Product identity
+# (Package/Identity/Name) once the name is reserved; publisher and
+# publisher_display_name are the account's, as for EasySend and AnyFile.
+# Raw drives need administrator rights: test "Restart as administrator"
+# from the installed MSIX before submitting (RELEASING.md).
 [windows.msix]
-# Must match the subject of the certificate that signs the package.
-publisher = "CN=xmhrnx"
+identity_name = "MehranZahir.DataDoc"
+publisher = "CN=B40E8F57-A7E0-40BB-8E74-5D051D0B578B"
+publisher_display_name = "Mehran Zahiroddini"
 
 [linux]
 categories = ["Utility", "System"]
 license = "Apache-2.0"
+
+# The privacy manifest (PrivacyInfo.xcprivacy) for Apple's stores.
+# DataDoc sends nothing anywhere: no account, analytics, ads or crash
+# reports, so no [[privacy.collected]].
+[privacy]
+tracking = false
+[privacy.api]
+# Clean up shows how full the drive is (statfs).
+disk_space = ["85F4.1"]
 
 # Disk images open with the app.
 [[file_types]]
@@ -89,6 +130,10 @@ role = "viewer"
 # Release builds run when a GitHub release is published, after the
 # engine's tests pass on disk images made with each file system's own
 # tools.
+# giode ci -f writes .github/workflows/release.yml from this. After
+# regenerating, redo two edits by hand: pin the CLI with
+# `go install github.com/xmhrnx/giode-cli/cmd/giode@v0.1.35-alpha.1`
+# (not @latest) and use `go-version-file: go.mod` (not go-version: stable).
 [ci]
 trigger = "release"
 # Keeps the Actions tab's "Run workflow" button.
